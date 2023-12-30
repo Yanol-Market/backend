@@ -18,6 +18,8 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String ERROR_MESSAGE_DELIMITER = "," + System.lineSeparator();
+
     @ExceptionHandler(value = CustomException.class)
     public ResponseEntity<CommonResponse<Void>> handleCustomException(CustomException e) {
         log.error("[CustomException] Message = {}", e.getMessage());
@@ -38,7 +40,7 @@ public class GlobalExceptionHandler {
         }
 
         return ResponseEntity.badRequest().body(CommonResponse.fail(String.join(
-                "," + System.lineSeparator(),
+                ERROR_MESSAGE_DELIMITER,
                 errorMessage)
         ));
     }
