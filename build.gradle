@@ -115,3 +115,7 @@ bootJar {
 build {
     dependsOn copyDocument
 }
+
+jar {
+    enabled = false
+}
