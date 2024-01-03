@@ -2,8 +2,9 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-#    branches:
-#      - develop
+    branches:
+      # - develop
+      - disable
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/pull_request_template.md'
