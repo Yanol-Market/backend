@@ -38,3 +38,6 @@ out/
 
 src/main/generated
 src/main/resources/static/docs
+
+### GCS KEY JSON ###
+src/main/resources/goldenticket-410302-6208c0969fe5.json

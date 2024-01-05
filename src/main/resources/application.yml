@@ -17,3 +17,11 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:goldenticket-410302-6208c0969fe5.json
+        project-id: goldenticket-410302
+        bucket: golden-ticket-bucket
