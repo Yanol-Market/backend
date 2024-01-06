@@ -1,7 +1,6 @@
 package site.goldenticket.common.response;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static site.goldenticket.common.response.ErrorCode.COMMON_RESOURCE_NOT_FOUND;
 
 @Slf4j
 @RestControllerAdvice
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = NoResourceFoundException.class)
     public ResponseEntity<CommonResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
         log.error("[NoResourceFoundException] URL = {}, Message = {}", e.getResourcePath(), e.getMessage());
-        return new ResponseEntity<>(CommonResponse.error(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.badRequest().body(CommonResponse.error(COMMON_RESOURCE_NOT_FOUND.getMessage()));
     }
 
     @ExceptionHandler(value = Exception.class)
