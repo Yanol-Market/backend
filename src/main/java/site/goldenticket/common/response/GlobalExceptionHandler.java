@@ -1,12 +1,14 @@
 package site.goldenticket.common.response;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import site.goldenticket.common.exception.CustomException;
 
 import java.util.ArrayList;
@@ -43,6 +45,12 @@ public class GlobalExceptionHandler {
                 ERROR_MESSAGE_DELIMITER,
                 errorMessage)
         ));
+    }
+
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    public ResponseEntity<CommonResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.error("[NoResourceFoundException] URL = {}, Message = {}", e.getResourcePath(), e.getMessage());
+        return new ResponseEntity<>(CommonResponse.error(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = Exception.class)
