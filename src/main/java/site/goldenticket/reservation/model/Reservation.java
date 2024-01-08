@@ -13,7 +13,6 @@ import java.time.LocalTime;
 
 @Entity
 @Getter
-@NoArgsConstructor
 public class Reservation {
     @Id
     @Column(name = "reservation_id")
@@ -43,7 +42,7 @@ public class Reservation {
     private Long yaMemberId;
 
     @Builder
-    public Reservation(
+    private Reservation(
             AreaCode areaCode,
             String accommodationImage,
             String accommodationName,
