@@ -30,10 +30,9 @@ public class NegoServiceImpl implements NegoService{
 
     @Override
     public PricePurposeResponse proposePrice(PricePurposeRequest request) {
-        request.increaseCount();
 
         Nego nego = request.toEntity();
-
+        updateCountForNewNego(nego);
         nego.setStatus(NegotiationStatus.NEGOTIATING);
 
         // 네고 엔티티 저장
@@ -41,6 +40,12 @@ public class NegoServiceImpl implements NegoService{
 
         // 저장된 네고 엔티티를 응답 DTO로 변환
         return PricePurposeResponse.fromEntity(nego);
+    }
+    private void updateCountForNewNego(Nego nego) {
+        // Increment count
+        nego.setCount((nego.getCount() != null ? nego.getCount() : 0) + 1);
+        // Save the updated entity
+        negoRepository.save(nego);
     }
 
 

@@ -43,13 +43,16 @@ public class Nego {
         this.status = status;
     }
 
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
     @Builder
     public Nego(Long id, Integer price, Integer count, NegotiationStatus status, Boolean consent,
                 LocalDateTime expirationTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.price = price;
-        this.count = count;
-
+        this.count = (count != null) ? count : 0;
         this.status = status;
         this.consent = consent;
         this.expirationTime = expirationTime;
