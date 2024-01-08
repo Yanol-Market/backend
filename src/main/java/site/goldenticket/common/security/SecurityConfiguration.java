@@ -5,15 +5,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import site.goldenticket.common.security.authentication.AuthenticationConfigurer;
 import site.goldenticket.common.security.authentication.SecurityAuthenticationFilter;
+import site.goldenticket.common.security.authentication.SecurityAuthenticationSuccessHandler;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -41,10 +43,19 @@ public class SecurityConfiguration {
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
                 ).with(
-                        new AuthenticationConfigurer<>(new SecurityAuthenticationFilter(objectMapper)),
-                        Customizer.withDefaults()
+                        new AuthenticationConfigurer<>(createAuthenticationFilter()),
+                        SecurityAuthenticationFilter -> SecurityAuthenticationFilter
+                                .successHandler(createAuthenticationSuccessHandler())
                 );
 
         return http.getOrBuild();
+    }
+
+    private AbstractAuthenticationProcessingFilter createAuthenticationFilter() {
+        return new SecurityAuthenticationFilter(objectMapper);
+    }
+
+    private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
+        return new SecurityAuthenticationSuccessHandler(objectMapper);
     }
 }
