@@ -19,6 +19,8 @@ public enum ErrorCode {
     // Auth
     EMPTY_EMAIL(BAD_REQUEST, "이메일은 필수 값 입니다."),
     EMPTY_PASSWORD(BAD_REQUEST, "비밀번호는 필수 값 입니다."),
+    EMPTY_SUCCESS_HANDLER(INTERNAL_SERVER_ERROR, "SuccessHandler 필수 값 입니다."),
+    EMPTY_FAILURE_HANDLER(INTERNAL_SERVER_ERROR, "FailureHandler 필수 값 입니다."),
     LOGIN_FAIL(BAD_REQUEST, "이메일, 비밀번호를 확인해주세요."),
     ;
 

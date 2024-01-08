@@ -1,25 +1,33 @@
 package site.goldenticket.common.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import site.goldenticket.common.security.authentication.AuthenticationConfigurer;
+import site.goldenticket.common.security.authentication.SecurityAuthenticationFilter;
 
 import static org.springframework.http.HttpMethod.GET;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
             "/favicon.ico",
             "/docs/**"
     };
+
+    private final ObjectMapper objectMapper;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,6 +40,9 @@ public class SecurityConfiguration {
                         .requestMatchers(GET, PERMIT_ALL_GET_URLS).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
+                ).with(
+                        new AuthenticationConfigurer<>(new SecurityAuthenticationFilter(objectMapper)),
+                        Customizer.withDefaults()
                 );
 
         return http.getOrBuild();
