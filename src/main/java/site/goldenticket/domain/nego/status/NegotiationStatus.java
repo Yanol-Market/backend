@@ -11,6 +11,7 @@ public enum NegotiationStatus {
 
     private final String statusDescription;
 
+
     public String getStatusDescription() {
         return statusDescription;
     }

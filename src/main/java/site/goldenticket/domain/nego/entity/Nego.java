@@ -21,6 +21,8 @@ public class Nego {
     private Integer price; // 네고가격
     private Integer count; // 네고횟수
 
+
+
     //@ManyToOne
     //@JoinColumn(name = "user_id")
     //private User user; //유저ID
@@ -28,6 +30,8 @@ public class Nego {
     //@ManyToOne
     //@JoinColumn(name = "product_id")
     //private Product product; // 상품ID
+
+
 
     private NegotiationStatus status; // 네고 상태
     private Boolean consent; // 승낙여부
