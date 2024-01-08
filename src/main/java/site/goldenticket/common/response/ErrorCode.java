@@ -15,6 +15,11 @@ public enum ErrorCode {
     COMMON_INVALID_PARAMETER(BAD_REQUEST, "요청한 값이 올바르지 않습니다."),
     COMMON_RESOURCE_NOT_FOUND(BAD_REQUEST, "존재하지 않는 리소스입니다."),
     COMMON_ENTITY_NOT_FOUND(BAD_REQUEST, "존재하지 않는 엔티티입니다."),
+
+    // Auth
+    EMPTY_EMAIL(BAD_REQUEST, "이메일은 필수 값 입니다."),
+    EMPTY_PASSWORD(BAD_REQUEST, "비밀번호는 필수 값 입니다."),
+    LOGIN_FAIL(BAD_REQUEST, "이메일, 비밀번호를 확인해주세요."),
     ;
 
     private final HttpStatus httpStatus;
