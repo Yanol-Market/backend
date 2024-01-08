@@ -18,7 +18,10 @@ public class PricePurposeRequest {
 
     @NotNull
     private Integer price; // 네고 가격
-
+    @NotNull
+    private Long userId;
+    @NotNull
+    private Long productId;
     @NotNull
     private Integer count; // 네고 횟수
 
@@ -26,6 +29,8 @@ public class PricePurposeRequest {
         return Nego.builder()
                 .price(price)
                 .count(count)
+                .productId(productId)
+                .userId(userId)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
