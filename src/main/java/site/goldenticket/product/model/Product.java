@@ -40,6 +40,7 @@ public class Product {
     private int goldenPrice;
     private String content;
     private int viewCount;
+    @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
 
     @Builder
