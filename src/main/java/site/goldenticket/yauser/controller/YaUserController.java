@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import site.goldenticket.yauser.service.YaUserService;
 
 @RestController
-@RequestMapping("yausers")
+@RequestMapping("/yausers")
 @RequiredArgsConstructor
 public class YaUserController {
     private final YaUserService yaUserService;
