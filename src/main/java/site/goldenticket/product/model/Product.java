@@ -13,7 +13,6 @@ import java.time.LocalTime;
 
 @Entity
 @Getter
-@NoArgsConstructor
 public class Product {
     @Id
     @Column(name = "product_id")
@@ -44,7 +43,7 @@ public class Product {
     private ProductStatus productStatus;
 
     @Builder
-    public Product(
+    private Product(
             AreaCode areaCode,
             String accommodationImage,
             String accommodationName,

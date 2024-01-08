@@ -1,5 +1,10 @@
 package site.goldenticket.common.constants;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum AreaCode {
     SEOUL(7, "서울"),
     GYEONGGI(8, "경기도"),
@@ -20,17 +25,4 @@ public enum AreaCode {
 
     private final int areaCode;
     private final String areaName;
-
-    AreaCode(int areaCode, String areaName) {
-        this.areaCode = areaCode;
-        this.areaName = areaName;
-    }
-
-    public int getAreaCode() {
-        return areaCode;
-    }
-
-    public String getAreaName() {
-        return areaName;
-    }
 }
