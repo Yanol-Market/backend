@@ -6,23 +6,24 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Builder
-public class PaymentDetailResponse {
+public record PaymentDetailResponse(
+        Long productId,
+        String imageUrl,
+        String accommodationName,
+        String roomName,
+        String reservationType, //enum 으로
+        Integer standardNumber,
+        Integer maximumNumber,
+        LocalDate checkInDate,
+        LocalTime checkInTime,
+        LocalDate checkOutDate,
+        LocalTime checkOutTime,
+        String userName,
+        String phoneNumber,
+        String email,
+        Integer price,
+        Integer fee,
+        Integer totalPrice
+) {
 
-    private Long productId;
-    private String imageUrl;
-    private String accommodationName;
-    private String roomName;
-    private String reservationType; //enum 으로
-    private Integer standardNumber;
-    private Integer maximumNumber;
-    private LocalDate checkInDate;
-    private LocalTime checkInTime;
-    private LocalDate checkOutDate;
-    private LocalTime checkOutTime;
-    private String userName;
-    private String phoneNumber;
-    private String email;
-    private Integer price;
-    private Integer fee;
-    private Integer totalPrice;
 }
