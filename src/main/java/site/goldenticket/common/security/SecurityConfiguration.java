@@ -12,8 +12,10 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import site.goldenticket.common.security.authentication.AuthenticationConfigurer;
+import site.goldenticket.common.security.authentication.SecurityAuthenticationFailureHandler;
 import site.goldenticket.common.security.authentication.SecurityAuthenticationFilter;
 import site.goldenticket.common.security.authentication.SecurityAuthenticationSuccessHandler;
 
@@ -46,6 +48,7 @@ public class SecurityConfiguration {
                         new AuthenticationConfigurer<>(createAuthenticationFilter()),
                         SecurityAuthenticationFilter -> SecurityAuthenticationFilter
                                 .successHandler(createAuthenticationSuccessHandler())
+                                .failureHandler(createAuthenticationFailureHandler())
                 );
 
         return http.getOrBuild();
@@ -57,5 +60,9 @@ public class SecurityConfiguration {
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
         return new SecurityAuthenticationSuccessHandler(objectMapper);
+    }
+
+    private AuthenticationFailureHandler createAuthenticationFailureHandler() {
+        return new SecurityAuthenticationFailureHandler(objectMapper);
     }
 }
