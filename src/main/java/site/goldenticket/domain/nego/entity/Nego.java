@@ -9,7 +9,6 @@ import site.goldenticket.domain.nego.status.NegotiationStatus;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="nego")
 @NoArgsConstructor
 @Getter
 public class Nego {
@@ -31,8 +30,7 @@ public class Nego {
     //@JoinColumn(name = "product_id")
     //private Product product; // 상품ID
 
-
-
+    @Enumerated(EnumType.STRING)
     private NegotiationStatus status; // 네고 상태
     private Boolean consent; // 승낙여부
     private LocalDateTime expirationTime; // 만료일시
@@ -53,7 +51,7 @@ public class Nego {
         this.id = id;
         this.price = price;
         this.count = (count != null) ? count : 0;
-        this.status = status;
+        this.status = (status != null) ? status : NegotiationStatus.PENDING;
         this.consent = consent;
         this.expirationTime = expirationTime;
         this.createdAt = createdAt;
