@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @RequiredArgsConstructor
@@ -22,6 +21,7 @@ public enum ErrorCode {
     EMPTY_SUCCESS_HANDLER(INTERNAL_SERVER_ERROR, "SuccessHandler 필수 값 입니다."),
     EMPTY_FAILURE_HANDLER(INTERNAL_SERVER_ERROR, "FailureHandler 필수 값 입니다."),
     LOGIN_FAIL(BAD_REQUEST, "이메일, 비밀번호를 확인해주세요."),
+    INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 토큰 입니다."),
     ;
 
     private final HttpStatus httpStatus;
