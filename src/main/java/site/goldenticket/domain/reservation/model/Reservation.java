@@ -6,7 +6,6 @@ import lombok.Getter;
 import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.constants.ReservationStatus;
 import site.goldenticket.common.constants.ReservationType;
-import site.goldenticket.domain.yauser.model.YaUser;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
