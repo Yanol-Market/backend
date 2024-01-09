@@ -26,6 +26,8 @@ import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static site.goldenticket.common.response.ErrorCode.INVALID_TOKEN;
+import static site.goldenticket.common.security.authorization.SecurityErrorCode.ERROR_KEY;
+import static site.goldenticket.common.security.authorization.SecurityErrorCode.TOKEN_EXPIRED;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -57,7 +59,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
                 Authentication authenticated = createAuthentication(userDetails);
                 setSecurityContext(authenticated);
             } catch (ExpiredJwtException e) {
-               request.setAttribute("tokenError", "0001");
+               request.setAttribute(ERROR_KEY, TOKEN_EXPIRED);
             } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
                 throw new InvalidJwtException(INVALID_TOKEN, e);
             }
