@@ -44,6 +44,10 @@ public class Nego {
         this.status = status;
     }
 
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public void setCount(Integer count) {
         this.count = count;
     }

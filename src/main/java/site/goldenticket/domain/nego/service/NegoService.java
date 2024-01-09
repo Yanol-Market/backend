@@ -1,6 +1,7 @@
 package site.goldenticket.domain.nego.service;
 
 import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
+import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
 
 public interface NegoService {
@@ -13,6 +14,6 @@ public interface NegoService {
 
     // 구매자 입장
     PricePurposeResponse proposePrice(PricePurposeRequest request);
-    void pay(); // 결제하기
+    PayResponse pay(Long negoId); // 결제하기
     void payOriginPrice(); // 원라가격으로결제
 }
