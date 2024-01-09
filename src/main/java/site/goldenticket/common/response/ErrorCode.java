@@ -18,7 +18,8 @@ public enum ErrorCode {
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
 
     // Product
-    PRODUCT_ALREADY_EXISTS(CONFLICT, "이미 등록된 상품이 존재합니다.");
+    PRODUCT_ALREADY_EXISTS(CONFLICT, "이미 등록된 상품이 존재합니다."),
+    PRODUCT_NOT_FOUND(NOT_FOUND, "상품 정보가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

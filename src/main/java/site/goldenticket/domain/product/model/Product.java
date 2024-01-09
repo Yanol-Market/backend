@@ -87,4 +87,9 @@ public class Product {
         this.productStatus = productStatus;
         this.reservationId = reservationId;
     }
+
+    public void update(Integer goldenPrice, String content) {
+        this.goldenPrice = goldenPrice;
+        this.content = content;
+    }
 }

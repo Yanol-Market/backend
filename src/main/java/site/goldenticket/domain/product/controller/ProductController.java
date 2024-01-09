@@ -22,4 +22,17 @@ public class ProductController {
     ) {
         return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 등록이 완료되었습니다.", productService.createProduct(productRequest, reservationId)));
     }
+
+    @PutMapping("/{productId}")
+    public ResponseEntity<CommonResponse<Long>> updateProduct(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductRequest productRequest
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 수정이 완료되었습니다.", productService.updateProduct(productRequest, productId)));
+    }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<CommonResponse<Long>> deleteProduct(@PathVariable Long productId) {
+        return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 삭제가 완료되었습니다.", productService.deleteProduct(productId)));
+    }
 }
