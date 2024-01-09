@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum AreaCode {
     SEOUL(7, "서울"),
     GYEONGGI(8, "경기도"),
