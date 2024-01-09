@@ -22,13 +22,13 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> getReservations(Long yaUserId) {
-        List<Reservation> reservationList = findByYaUserIdAndCheckInDateAfter(yaUserId, LocalDate.now());
+        LocalDate currentDate = LocalDate.now();
+        List<Reservation> reservationList = findByYaUserIdAndCheckInDateAfter(yaUserId, currentDate);
 
         return reservationList.stream()
                 .map(ReservationResponse::fromEntity)
                 .collect(Collectors.toList());
     }
-
 
     private List<Reservation> findByYaUserIdAndCheckInDateAfter(Long yaUserId, LocalDate currentDate) {
         return reservationRepository.findByYaUserIdAndCheckInDateAfter(yaUserId, currentDate);
