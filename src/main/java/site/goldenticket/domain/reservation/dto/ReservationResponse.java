@@ -1,7 +1,5 @@
 package site.goldenticket.domain.reservation.dto;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Getter;
 import site.goldenticket.common.constants.ReservationStatus;
