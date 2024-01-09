@@ -6,6 +6,7 @@ import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
 import site.goldenticket.domain.nego.dto.buyer.response.ConfirmPriceResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.DenyPriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
 import site.goldenticket.domain.nego.service.NegoService;
 
@@ -34,5 +35,11 @@ public class NegoController {
         String message = "Negotiation has denied";
         negoService.denyPrice(negoId);
         return CommonResponse.ok("네고가 거절되었습니다", new DenyPriceResponse(message));
+    }
+
+    @PostMapping("/pay/{negoId}")
+    public CommonResponse<PayResponse> pay(@PathVariable Long negoId) {
+        PayResponse payResponse = negoService.pay(negoId);
+        return CommonResponse.ok("결제가 진행됩니다", payResponse);
     }
 }

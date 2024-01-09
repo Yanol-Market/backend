@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
+import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
@@ -72,6 +73,18 @@ public class NegoServiceImpl implements NegoService {
         return PricePurposeResponse.fromEntity(nego);
     }
 
+    @Override
+    public PayResponse pay(Long negoId) {
+        Nego nego = negoRepository.findById(negoId)
+                .orElseThrow(() -> new NoSuchElementException("Negotiation not found with id: " + negoId));
+
+        nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+
+        negoRepository.save(nego);
+
+        return PayResponse.fromEntity(nego);
+    }
+
     private void updateCountForNewNego(Nego nego) {
         // Increment count
         nego.setCount((nego.getCount() != null ? nego.getCount() : 0) + 1);
@@ -79,11 +92,6 @@ public class NegoServiceImpl implements NegoService {
         negoRepository.save(nego);
     }
 
-
-    @Override
-    public void pay() {
-
-    }
 
     @Override
     public void payOriginPrice() {
