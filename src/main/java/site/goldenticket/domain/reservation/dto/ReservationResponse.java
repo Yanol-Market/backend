@@ -20,14 +20,14 @@ public class ReservationResponse {
     private String roomName;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    private long days;
+    private long nights;
     private LocalDate reservationDate;
     private int originPrice;
     private int yanoljaPrice;
 
     public static ReservationResponse fromEntity(Reservation reservation) {
 
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), reservation.getCheckInDate());
+        long nights = ChronoUnit.DAYS.between(product.getCheckInDate(), product.getCheckOutDate());
 
         return ReservationResponse.builder()
                 .reservationId(reservation.getId())
@@ -37,7 +37,7 @@ public class ReservationResponse {
                 .roomName(reservation.getRoomName())
                 .checkInDate(reservation.getCheckInDate())
                 .checkOutDate(reservation.getCheckOutDate())
-                .days(days)
+                .nights(nights)
                 .reservationDate(reservation.getReservationDate())
                 .originPrice(reservation.getOriginPrice())
                 .yanoljaPrice(reservation.getYanoljaPrice())
