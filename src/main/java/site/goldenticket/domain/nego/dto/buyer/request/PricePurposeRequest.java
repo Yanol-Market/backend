@@ -10,8 +10,6 @@ import site.goldenticket.domain.nego.entity.Nego;
 import java.time.LocalDateTime;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 
 public class PricePurposeRequest {

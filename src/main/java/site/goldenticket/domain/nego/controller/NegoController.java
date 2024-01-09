@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
 import site.goldenticket.domain.nego.dto.buyer.response.ConfirmPriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.DenyPriceResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
 import site.goldenticket.domain.nego.service.NegoService;
 
@@ -26,5 +27,12 @@ public class NegoController {
         String message = "Price confirmation successful";
         negoService.confirmPrice(negoId);
         return CommonResponse.ok("네고가 승인되었습니다",new ConfirmPriceResponse(message));
+    }
+
+    @PostMapping("/deny/{negoId}")
+    public CommonResponse<DenyPriceResponse> denyPrice(@PathVariable Long negoId){
+        String message = "Negotiation has denied";
+        negoService.denyPrice(negoId);
+        return CommonResponse.ok("네고가 거절되었습니다", new DenyPriceResponse(message));
     }
 }

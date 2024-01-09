@@ -7,7 +7,7 @@ public interface NegoService {
 
     // 판매자 입장
     void confirmPrice(Long negoId); // 가격승낙
-    void denyPrice(); // 거절하기
+    void denyPrice(Long negoId); // 거절하기
     void modifyPrice(); // 가격수정
 
 
