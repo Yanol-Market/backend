@@ -1,8 +1,10 @@
 package site.goldenticket.domain.nego.status;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public enum NegotiationStatus {
 
     PENDING("대기중"),
@@ -13,7 +15,4 @@ public enum NegotiationStatus {
 
     private final String statusDescription;
 
-    public String getStatusDescription() {
-        return statusDescription;
-    }
 }
