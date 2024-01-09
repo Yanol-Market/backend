@@ -21,6 +21,6 @@ public class ReservationController {
 
     @GetMapping("/{yaUserId}")
     public ResponseEntity<CommonResponse<List<ReservationResponse>>> getReservations(@PathVariable Long yaUserId) {
-        return ResponseEntity.ok(CommonResponse.ok(reservationService.getReservations(yaUserId)));
+        return ResponseEntity.ok(CommonResponse.ok("예약 목록을 성공적으로 조회했습니다.", reservationService.getReservations(yaUserId)));
     }
 }
