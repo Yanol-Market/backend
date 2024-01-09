@@ -30,6 +30,8 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
+        //TODO: User, Product 생기면 아래 builder 지우기
+//        return PaymentDetailResponse.create(user, product, price);
         return PaymentDetailResponse.builder()
                 .productId(product.productId)
                 .imageUrl(product.imageUrl)
@@ -46,8 +48,8 @@ public class PaymentService {
                 .phoneNumber(user.phoneNumber)
                 .email(user.email)
                 .price(price)
-                .fee((int) (price*0.035)) // Assuming goldenPrice is used as a fee in your scenario
-                .totalPrice((int) (price *1.035))
+                .fee((int) (price * 0.035)) // Assuming goldenPrice is used as a fee in your scenario
+                .totalPrice((int) (price * 1.035))
                 .build();
     }
 
