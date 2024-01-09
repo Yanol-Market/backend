@@ -27,7 +27,7 @@ public class ReservationResponse {
 
     public static ReservationResponse fromEntity(Reservation reservation) {
 
-        long nights = ChronoUnit.DAYS.between(product.getCheckInDate(), product.getCheckOutDate());
+        long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
 
         return ReservationResponse.builder()
                 .reservationId(reservation.getId())
