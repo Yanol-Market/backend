@@ -22,6 +22,7 @@ public class SecurityAuthenticationSuccessHandler implements AuthenticationSucce
 
     private final ObjectMapper objectMapper;
     private final TokenProvider tokenProvider;
+    private final RedisService redisService;
 
     @Override
     public void onAuthenticationSuccess(
@@ -31,9 +32,9 @@ public class SecurityAuthenticationSuccessHandler implements AuthenticationSucce
     ) throws IOException {
         String email = authentication.getName();
         log.info("Authentication Name = {}", email);
-
         Token token = tokenProvider.generateToken(email);
         sendResponse(response, token);
+        redisService.set(token.refreshToken(), email, token.refreshTokenExpired());
     }
 
     private void sendResponse(HttpServletResponse response, Token token) throws IOException {

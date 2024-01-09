@@ -33,6 +33,7 @@ public class SecurityConfiguration {
 
     private final ObjectMapper objectMapper;
     private final TokenProvider tokenProvider;
+    private final RedisService redisService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,7 +66,7 @@ public class SecurityConfiguration {
     }
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
-        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenProvider);
+        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenProvider, redisService);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {
