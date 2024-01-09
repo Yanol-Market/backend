@@ -6,7 +6,7 @@ import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
 public interface NegoService {
 
     // 판매자 입장
-    void confirmPrice(); // 가격승낙
+    void confirmPrice(Long negoId); // 가격승낙
     void denyPrice(); // 거절하기
     void modifyPrice(); // 가격수정
 
