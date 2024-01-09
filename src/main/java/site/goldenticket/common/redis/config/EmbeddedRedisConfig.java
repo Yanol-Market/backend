@@ -3,11 +3,12 @@ package site.goldenticket.common.redis.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @Slf4j
-//@Profile({"default", "local"})
+@Profile({"default", "local"})
 @Configuration
 @RequiredArgsConstructor
 public class EmbeddedRedisConfig {
