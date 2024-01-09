@@ -12,6 +12,7 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.NoSuchElementException;
 
@@ -79,7 +80,7 @@ public class NegoServiceImpl implements NegoService {
                 .orElseThrow(() -> new NoSuchElementException("Negotiation not found with id: " + negoId));
 
         nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-
+        nego.setUpdatedAt(LocalDateTime.now()); // 이 부분 추가
         negoRepository.save(nego);
 
         return PayResponse.fromEntity(nego);
