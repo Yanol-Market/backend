@@ -16,10 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import site.goldenticket.common.security.authentication.AuthenticationConfigurer;
-import site.goldenticket.common.security.authentication.SecurityAuthenticationFailureHandler;
-import site.goldenticket.common.security.authentication.SecurityAuthenticationFilter;
-import site.goldenticket.common.security.authentication.SecurityAuthenticationSuccessHandler;
+import site.goldenticket.common.redis.service.RedisService;
+import site.goldenticket.common.security.authentication.*;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -34,6 +32,7 @@ public class SecurityConfiguration {
     };
 
     private final ObjectMapper objectMapper;
+    private final TokenProvider tokenProvider;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -66,7 +65,7 @@ public class SecurityConfiguration {
     }
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
-        return new SecurityAuthenticationSuccessHandler(objectMapper);
+        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenProvider);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {
