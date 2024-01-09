@@ -11,10 +11,7 @@ import site.goldenticket.common.security.authentication.dto.Token;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 import static org.springframework.security.config.Elements.JWT;
@@ -56,7 +53,11 @@ public class TokenProvider {
     public String getUsername(String token)
             throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         Claims claims = getClaims(token);
-        return claims.get(TOKEN_CLAIM_KEY, String.class);
+        String claim = claims.get(TOKEN_CLAIM_KEY, String.class);
+        if (Objects.isNull(claim)) {
+            throw new IllegalArgumentException();
+        }
+        return claim;
     }
 
     private SecretKey getSecretKey(String secretKey) {
