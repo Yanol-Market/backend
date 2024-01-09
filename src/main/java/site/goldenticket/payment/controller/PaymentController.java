@@ -1,6 +1,7 @@
 package site.goldenticket.payment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.payment.dto.response.PaymentDetailResponse;
@@ -14,8 +15,8 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("/{productId}")
-    public CommonResponse<PaymentDetailResponse> getPaymentDetail(@PathVariable("productId") final Long productId) {
+    public ResponseEntity<CommonResponse<PaymentDetailResponse>> getPaymentDetail(@PathVariable final Long productId) {
         PaymentDetailResponse paymentDetail = paymentService.getPaymentDetail(productId);
-        return CommonResponse.ok("Payment details retrieved successfully", paymentDetail);
+        return ResponseEntity.ok(CommonResponse.ok("Payment details retrieved successfully", paymentDetail));
     }
 }
