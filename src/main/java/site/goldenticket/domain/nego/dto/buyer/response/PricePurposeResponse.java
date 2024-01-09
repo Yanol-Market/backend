@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class PricePurposeResponse {
     private Long id;
 
+    private Long productId;
+
     private Integer price; // 네고 가격
 
     private Integer count; // 네고 횟수
@@ -23,6 +25,7 @@ public class PricePurposeResponse {
     public static PricePurposeResponse fromEntity(Nego nego) {
         return PricePurposeResponse.builder()
                 .id(nego.getId())
+                .productId(nego.getProductId())
                 .count(nego.getCount())
                 .price(nego.getPrice())
                 .status(nego.getStatus())
