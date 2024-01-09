@@ -18,7 +18,6 @@ public class ReservationResponse {
     private Long reservationId;
     private ReservationStatus reservationStatus;
     private String accommodationName;
-    @Enumerated(EnumType.STRING)
     private ReservationType reservationType;
     private String roomName;
     private LocalDate checkInDate;
