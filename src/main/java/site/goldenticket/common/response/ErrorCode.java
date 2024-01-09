@@ -15,7 +15,10 @@ public enum ErrorCode {
     COMMON_ENTITY_NOT_FOUND(BAD_REQUEST, "존재하지 않는 엔티티입니다."),
 
     // Reservation
-    RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다.");
+    RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
+
+    // Product
+    PRODUCT_ALREADY_EXISTS(CONFLICT, "이미 등록된 상품이 존재합니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
