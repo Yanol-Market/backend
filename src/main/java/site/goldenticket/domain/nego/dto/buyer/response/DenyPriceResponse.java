@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConfirmPriceResponse {
+public class DenyPriceResponse {
     private String message;
 
 }
