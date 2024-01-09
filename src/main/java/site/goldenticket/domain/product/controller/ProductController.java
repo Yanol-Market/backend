@@ -1,5 +1,6 @@
 package site.goldenticket.domain.product.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProductController {
     @PostMapping("/{reservationId}")
     public ResponseEntity<CommonResponse<Long>> createProduct(
             @PathVariable Long reservationId,
-            @RequestBody ProductRequest productRequest
+            @Valid @RequestBody ProductRequest productRequest
     ) {
         return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 등록이 완료되었습니다.", productService.createProduct(productRequest, reservationId)));
     }
