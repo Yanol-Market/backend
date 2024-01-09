@@ -17,3 +17,8 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+jwt:
+  secret: VTNCeWFXNW5JRk5sWTNWeWFYUjVJRWR2YkdSbGJpQlVhV05yWlhR
+  grant-type: Bearer
+  token-validate-in-seconds: 3600
