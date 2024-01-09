@@ -7,12 +7,14 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import site.goldenticket.common.exception.CustomException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static site.goldenticket.common.response.ErrorCode.COMMON_RESOURCE_NOT_FOUND;
 
 @Slf4j
 @RestControllerAdvice
@@ -43,6 +45,12 @@ public class GlobalExceptionHandler {
                 ERROR_MESSAGE_DELIMITER,
                 errorMessage)
         ));
+    }
+
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    public ResponseEntity<CommonResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.error("[NoResourceFoundException] URL = {}, Message = {}", e.getResourcePath(), e.getMessage());
+        return ResponseEntity.badRequest().body(CommonResponse.error(COMMON_RESOURCE_NOT_FOUND.getMessage()));
     }
 
     @ExceptionHandler(value = Exception.class)
