@@ -3,6 +3,7 @@ package site.goldenticket.domain.product.model;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.common.constants.ReservationType;
@@ -12,9 +13,9 @@ import java.time.LocalTime;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Product {
     @Id
-    @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

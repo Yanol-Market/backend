@@ -1,7 +1,5 @@
 package site.goldenticket.domain.reservation.dto;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Getter;
 import site.goldenticket.common.constants.ReservationStatus;
@@ -18,19 +16,18 @@ public class ReservationResponse {
     private Long reservationId;
     private ReservationStatus reservationStatus;
     private String accommodationName;
-    @Enumerated(EnumType.STRING)
     private ReservationType reservationType;
     private String roomName;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    private long days;
+    private long nights;
     private LocalDate reservationDate;
     private int originPrice;
     private int yanoljaPrice;
 
     public static ReservationResponse fromEntity(Reservation reservation) {
 
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), reservation.getCheckInDate());
+        long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
 
         return ReservationResponse.builder()
                 .reservationId(reservation.getId())
@@ -40,7 +37,7 @@ public class ReservationResponse {
                 .roomName(reservation.getRoomName())
                 .checkInDate(reservation.getCheckInDate())
                 .checkOutDate(reservation.getCheckOutDate())
-                .days(days)
+                .nights(nights)
                 .reservationDate(reservation.getReservationDate())
                 .originPrice(reservation.getOriginPrice())
                 .yanoljaPrice(reservation.getYanoljaPrice())

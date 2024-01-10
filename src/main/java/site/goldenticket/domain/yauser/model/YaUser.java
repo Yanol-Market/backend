@@ -3,12 +3,15 @@ package site.goldenticket.domain.yauser.model;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = PROTECTED)
 public class YaUser {
     @Id
-    @Column(name = "ya_user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
