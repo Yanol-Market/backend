@@ -38,7 +38,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    private Long yaMemberId;
+    private Long yaUserId;
 
     @Builder
     private Reservation(
@@ -57,7 +57,8 @@ public class Reservation {
             LocalDate reservationDate,
             int originPrice,
             int yanoljaPrice,
-            ReservationStatus reservationStatus
+            ReservationStatus reservationStatus,
+            Long yaUserId
     ) {
         this.areaCode = areaCode;
         this.accommodationImage = accommodationImage;
@@ -74,6 +75,11 @@ public class Reservation {
         this.reservationDate = reservationDate;
         this.originPrice = originPrice;
         this.yanoljaPrice = yanoljaPrice;
+        this.reservationStatus = reservationStatus;
+        this.yaUserId = yaUserId;
+    }
+
+    public void setReservationStatus(ReservationStatus reservationStatus) {
         this.reservationStatus = reservationStatus;
     }
 }
