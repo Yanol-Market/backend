@@ -30,13 +30,12 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
-        // 현재 상태가 NEGOTIATING 또는 PAYMENT_PENDING인 경우에만 처리
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setStatus(NegotiationStatus.PENDING);
             nego.setExpirationTime(LocalDateTime.now().plusMinutes(20));
             nego.setConsent(Boolean.TRUE);
-            negoRepository.save(nego);  // 네고 업데이트
+            negoRepository.save(nego);
 
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
@@ -53,23 +52,17 @@ public class NegoServiceImpl implements NegoService {
 
         // status가 NEGOTIATING일 때만 처리
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
-            if (nego.getCount() == 1) {
-                nego.setUpdatedAt(LocalDateTime.now());
-                nego.setConsent(Boolean.FALSE);
-                negoRepository.save(nego);  // 네고 업데이트
-            } else if (nego.getCount() == 2) {
-                // count가 2인 경우, 가격 거절 처리
-                nego.setUpdatedAt(LocalDateTime.now());
-                nego.setConsent(Boolean.FALSE);
-                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-                negoRepository.save(nego);  // 네고 업데이트
-            }
+            nego.setUpdatedAt(LocalDateTime.now());
+            nego.setConsent(Boolean.FALSE);
+
+            negoRepository.save(nego);  // 네고 업데이트
             return DenyPriceResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
             throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
         }
     }
+
 
 
 
@@ -80,6 +73,7 @@ public class NegoServiceImpl implements NegoService {
         updateCountForNewNego(nego);
         nego.setStatus(NegotiationStatus.NEGOTIATING);
         if (nego.getCount() == 3) {
+            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
         }
         negoRepository.save(nego);
