@@ -1,13 +1,18 @@
 package site.goldenticket.domain.nego.dto.buyer.response;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import site.goldenticket.domain.nego.entity.Nego;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class ConfirmPriceResponse {
-    private String message;
+    private Boolean consent;
+
+    public static ConfirmPriceResponse fromEntity(Nego nego){
+        return ConfirmPriceResponse.builder()
+                .consent(nego.getConsent())
+                .build();
+    }
 
 }
