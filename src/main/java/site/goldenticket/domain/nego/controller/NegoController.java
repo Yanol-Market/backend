@@ -23,21 +23,22 @@ public class NegoController {
         return CommonResponse.ok("네고가 전달되었습니다.", response);
     }
 
-    @PostMapping("/confirm/{negoId}")
+    @PatchMapping("/confirm/{negoId}")
     public CommonResponse<ConfirmPriceResponse> confirmPrice(@PathVariable Long negoId) {
         ConfirmPriceResponse response = negoService.confirmPrice(negoId);
-        return CommonResponse.ok("네고가 승인되었습니다",response);
+        return CommonResponse.ok("네고가 승인되었습니다", response);
     }
 
-    @PostMapping("/deny/{negoId}")
+    @PatchMapping("/deny/{negoId}")
     public CommonResponse<DenyPriceResponse> denyPrice(@PathVariable Long negoId){
         DenyPriceResponse response = negoService.denyPrice(negoId);
         return CommonResponse.ok("네고가 거절되었습니다", response);
     }
 
-    @PostMapping("/pay/{negoId}")
+    @PatchMapping("/pay/{negoId}")
     public CommonResponse<PayResponse> pay(@PathVariable Long negoId) {
         PayResponse payResponse = negoService.pay(negoId);
         return CommonResponse.ok("결제가 진행됩니다", payResponse);
     }
+
 }
