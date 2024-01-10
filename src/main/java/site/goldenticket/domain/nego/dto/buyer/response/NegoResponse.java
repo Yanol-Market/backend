@@ -8,12 +8,12 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class PriceResponse {
+public class NegoResponse {
     private Boolean consent;
     private LocalDateTime expirationTime;
 
-    public static PriceResponse fromEntity(Nego nego){
-        return PriceResponse.builder()
+    public static NegoResponse fromEntity(Nego nego){
+        return NegoResponse.builder()
                 .consent(nego.getConsent())
                 .expirationTime(nego.getExpirationTime())
                 .build();

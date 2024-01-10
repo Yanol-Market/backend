@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.buyer.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.buyer.response.PriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.service.NegoService;
@@ -23,14 +23,14 @@ public class NegoController {
     }
 
     @PatchMapping("/confirm/{negoId}")
-    public CommonResponse<PriceResponse> confirmPrice(@PathVariable Long negoId) {
-        PriceResponse response = negoService.confirmPrice(negoId);
+    public CommonResponse<NegoResponse> confirmPrice(@PathVariable Long negoId) {
+        NegoResponse response = negoService.confirmPrice(negoId);
         return CommonResponse.ok("네고가 승인되었습니다", response);
     }
 
     @PatchMapping("/deny/{negoId}")
-    public CommonResponse<PriceResponse> denyPrice(@PathVariable Long negoId){
-        PriceResponse response = negoService.denyPrice(negoId);
+    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId){
+        NegoResponse response = negoService.denyPrice(negoId);
         return CommonResponse.ok("네고가 거절되었습니다", response);
     }
 

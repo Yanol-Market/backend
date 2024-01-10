@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.dto.buyer.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.buyer.response.PriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
@@ -25,7 +25,7 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public PriceResponse confirmPrice(Long negoId) {
+    public NegoResponse confirmPrice(Long negoId) {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
@@ -40,12 +40,12 @@ public class NegoServiceImpl implements NegoService {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException(ErrorCode.COMMON_INVALID_PARAMETER);
         }
-        return PriceResponse.fromEntity(nego);
+        return NegoResponse.fromEntity(nego);
     }
 
 
     @Override
-    public PriceResponse denyPrice(Long negoId) {
+    public NegoResponse denyPrice(Long negoId) {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -55,7 +55,7 @@ public class NegoServiceImpl implements NegoService {
             nego.setConsent(Boolean.FALSE);
             nego.setUpdatedAt(LocalDateTime.now());
             negoRepository.save(nego);  // 네고 업데이트
-            return PriceResponse.fromEntity(nego);
+            return NegoResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
             throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
