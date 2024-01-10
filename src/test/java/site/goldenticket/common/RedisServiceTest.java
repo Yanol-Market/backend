@@ -8,8 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import site.goldenticket.common.redis.service.RedisService;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,24 +51,21 @@ public class RedisServiceTest {
     }
 
     @Test
-    @DisplayName("리스트 데이터 삽입 검증")
-    void redisSetValuesList() {
+    @DisplayName("Map 데이터 삽입 및 조회 검증")
+    void redisSetAndGetMap() {
         // given
-        String key = "listKey";
-        String value1 = "value1";
-        String value2 = "value2";
-        String value3 = "value3";
+        String key = "mapKey";
+        Map<String, List<String>> mapValue = new HashMap<>();
+        mapValue.put("key1", List.of("value1", "value2"));
+        mapValue.put("key2", List.of("value3", "value4"));
 
         // when
-        redisService.setList(key, value1);
-        redisService.setList(key, value2);
-        redisService.setList(key, value3);
+        redisService.setMap(key, mapValue);
 
         // then
-        List<String> result = redisService.getList(key, String.class);
-        assertThat(result).isEqualTo(Arrays.asList("value1", "value2", "value3"));
+        Map<String, List<String>> result = redisService.getMap(key, String.class);
+        assertThat(result).isEqualTo(mapValue);
     }
-
 
     @ParameterizedTest
     @CsvSource({"key,true", "param,false"})
