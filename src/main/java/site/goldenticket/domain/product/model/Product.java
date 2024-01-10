@@ -11,9 +11,11 @@ import site.goldenticket.common.constants.ReservationType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = PROTECTED)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
