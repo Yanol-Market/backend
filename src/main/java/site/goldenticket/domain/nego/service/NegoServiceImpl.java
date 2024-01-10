@@ -82,10 +82,8 @@ public class NegoServiceImpl implements NegoService {
         if (nego.getCount() == 3) {
             throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
         }
-        // 네고 엔티티 저장
         negoRepository.save(nego);
 
-        // 저장된 네고 엔티티를 응답 DTO로 변환
         return PricePurposeResponse.fromEntity(nego);
     }
 
