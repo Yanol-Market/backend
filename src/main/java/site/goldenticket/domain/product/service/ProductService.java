@@ -132,7 +132,7 @@ public class ProductService {
         for (Product product : productList) {
             LocalDate checkInDate = product.getCheckInDate();
 
-            if (currentDate.isBefore(checkInDate)) {
+            if (checkInDate.isBefore(currentDate)) {
                 product.setProductStatus(ProductStatus.EXPIRED);
 
                 log.info("Product Status Update 완료. 상품 ID: {}, 상태: {}", product.getId(), product.getProductStatus());
