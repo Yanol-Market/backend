@@ -95,4 +95,12 @@ public class Product {
         this.goldenPrice = goldenPrice;
         this.content = content;
     }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public void setProductStatus(ProductStatus productStatus) {
+        this.productStatus = productStatus;
+    }
 }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.domain.product.dto.ProductDetailResponse;
 import site.goldenticket.domain.product.dto.ProductRequest;
 import site.goldenticket.domain.product.service.ProductService;
 
@@ -14,6 +15,11 @@ import site.goldenticket.domain.product.service.ProductService;
 public class ProductController {
 
     private final ProductService productService;
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<CommonResponse<ProductDetailResponse>> getProductDetails(@PathVariable Long productId) {
+        return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 조회가 완료되었습니다.", productService.getProductDetails(productId)));
+    }
 
     @PostMapping("/{reservationId}")
     public ResponseEntity<CommonResponse<Long>> createProduct(
