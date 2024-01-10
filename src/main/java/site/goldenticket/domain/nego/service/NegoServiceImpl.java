@@ -79,7 +79,9 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = request.toEntity();
         updateCountForNewNego(nego);
         nego.setStatus(NegotiationStatus.NEGOTIATING);
-
+        if (nego.getCount() == 3) {
+            throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+        }
         // 네고 엔티티 저장
         negoRepository.save(nego);
 
@@ -103,11 +105,11 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
-    private void updateCountForNewNego(Nego nego) {
-        // Increment count
-        nego.setCount((nego.getCount() != null ? nego.getCount() : 0) + 1);
-        // Save the updated entity
-        negoRepository.save(nego);
+    private void updateCountForNewNego(Nego newNego) {
+        // productId와 userId에 해당하는 네고 중 가장 최근의 것을 가져옴
+        Nego latestNego = negoRepository.findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(newNego.getProductId(), newNego.getUserId());
+        // 최근의 네고가 있으면 count를 1 증가, 없으면 1로 초기화
+        newNego.setCount(latestNego != null ? latestNego.getCount() + 1 : 1);
     }
 
 
