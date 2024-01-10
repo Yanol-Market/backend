@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class PricePurposeResponse {
+public class PriceProposeResponse {
     private Long id;
 
     private Long productId;
@@ -24,8 +24,8 @@ public class PricePurposeResponse {
     private LocalDateTime expirationTime; // 만료 일시
 
 
-    public static PricePurposeResponse fromEntity(Nego nego) {
-        return PricePurposeResponse.builder()
+    public static PriceProposeResponse fromEntity(Nego nego) {
+        return PriceProposeResponse.builder()
                 .id(nego.getId())
                 .productId(nego.getProductId())
                 .count(nego.getCount())

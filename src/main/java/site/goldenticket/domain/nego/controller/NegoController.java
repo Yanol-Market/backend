@@ -3,11 +3,10 @@ package site.goldenticket.domain.nego.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
-import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
-import site.goldenticket.domain.nego.dto.buyer.response.ConfirmPriceResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.DenyPriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.request.PriceProposeRequest;
+import site.goldenticket.domain.nego.dto.buyer.response.PriceResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.service.NegoService;
 
 @RestController
@@ -18,20 +17,20 @@ public class NegoController {
     private final NegoService negoService;
 
     @PostMapping("/proposePrice")
-    public CommonResponse<PricePurposeResponse> proposePrice(@RequestBody PricePurposeRequest request) {
-        PricePurposeResponse response = negoService.proposePrice(request);
+    public CommonResponse<PriceProposeResponse> proposePrice(@RequestBody PriceProposeRequest request) {
+        PriceProposeResponse response = negoService.proposePrice(request);
         return CommonResponse.ok("네고가 전달되었습니다.", response);
     }
 
     @PatchMapping("/confirm/{negoId}")
-    public CommonResponse<ConfirmPriceResponse> confirmPrice(@PathVariable Long negoId) {
-        ConfirmPriceResponse response = negoService.confirmPrice(negoId);
+    public CommonResponse<PriceResponse> confirmPrice(@PathVariable Long negoId) {
+        PriceResponse response = negoService.confirmPrice(negoId);
         return CommonResponse.ok("네고가 승인되었습니다", response);
     }
 
     @PatchMapping("/deny/{negoId}")
-    public CommonResponse<DenyPriceResponse> denyPrice(@PathVariable Long negoId){
-        DenyPriceResponse response = negoService.denyPrice(negoId);
+    public CommonResponse<PriceResponse> denyPrice(@PathVariable Long negoId){
+        PriceResponse response = negoService.denyPrice(negoId);
         return CommonResponse.ok("네고가 거절되었습니다", response);
     }
 

@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
-import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
-import site.goldenticket.domain.nego.dto.buyer.response.ConfirmPriceResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.DenyPriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.request.PriceProposeRequest;
+import site.goldenticket.domain.nego.dto.buyer.response.PriceResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
@@ -26,7 +25,7 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public ConfirmPriceResponse confirmPrice(Long negoId) {
+    public PriceResponse confirmPrice(Long negoId) {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
@@ -41,12 +40,12 @@ public class NegoServiceImpl implements NegoService {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException(ErrorCode.COMMON_INVALID_PARAMETER);
         }
-        return ConfirmPriceResponse.fromEntity(nego);
+        return PriceResponse.fromEntity(nego);
     }
 
 
     @Override
-    public DenyPriceResponse denyPrice(Long negoId) {
+    public PriceResponse denyPrice(Long negoId) {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -54,9 +53,9 @@ public class NegoServiceImpl implements NegoService {
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setConsent(Boolean.FALSE);
-
+            nego.setUpdatedAt(LocalDateTime.now());
             negoRepository.save(nego);  // 네고 업데이트
-            return DenyPriceResponse.fromEntity(nego);
+            return PriceResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
             throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
@@ -67,10 +66,11 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public PricePurposeResponse proposePrice(PricePurposeRequest request) {
+    public PriceProposeResponse proposePrice(PriceProposeRequest request) {
 
         Nego nego = request.toEntity();
         updateCountForNewNego(nego);
+        nego.setUpdatedAt(LocalDateTime.now());
         nego.setStatus(NegotiationStatus.NEGOTIATING);
         if (nego.getCount() == 3) {
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
@@ -78,7 +78,7 @@ public class NegoServiceImpl implements NegoService {
         }
         negoRepository.save(nego);
 
-        return PricePurposeResponse.fromEntity(nego);
+        return PriceProposeResponse.fromEntity(nego);
     }
 
     @Override
