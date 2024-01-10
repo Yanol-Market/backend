@@ -40,5 +40,9 @@ public class NegoController {
         PayResponse payResponse = negoService.pay(negoId);
         return CommonResponse.ok("결제가 진행됩니다", payResponse);
     }
-
+ /*   @PostMapping("/payOriginPrice/{negoId}")
+    public CommonResponse<PayResponse> payOriginPrice(@PathVariable Long negoId) {
+        PayResponse payResponse = negoService.payOriginPrice(negoId);
+        return CommonResponse.ok("결제가 완료되었습니다", payResponse);
+    }*/
 }
