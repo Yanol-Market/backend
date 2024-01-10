@@ -1,6 +1,7 @@
 package site.goldenticket.common.redis.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RedisService {
@@ -11,9 +12,9 @@ public interface RedisService {
 
     boolean setIfAbsent(String key, Object value, Long expiredTime);
 
-    <T> List<T> getList(String key, Class<T> elementType);
+    void setMap(String key, Map<String, List<String>> value);
 
-    void setList(String key, Object value);
+    <T> Map<String, List<T>> getMap(String key, Class<T> type);
 
     boolean delete(String key);
 }
