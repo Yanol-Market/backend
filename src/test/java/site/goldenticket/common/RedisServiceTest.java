@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import site.goldenticket.common.redis.service.RedisService;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Redis Service 검증")
@@ -44,6 +48,23 @@ public class RedisServiceTest {
 
         // then
         assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("Map 데이터 삽입 및 조회 검증")
+    void redisSetAndGetMap() {
+        // given
+        String key = "mapKey";
+        Map<String, List<String>> mapValue = new HashMap<>();
+        mapValue.put("key1", List.of("value1", "value2"));
+        mapValue.put("key2", List.of("value3", "value4"));
+
+        // when
+        redisService.setMap(key, mapValue);
+
+        // then
+        Map<String, List<String>> result = redisService.getMap(key, String.class);
+        assertThat(result).isEqualTo(mapValue);
     }
 
     @ParameterizedTest
