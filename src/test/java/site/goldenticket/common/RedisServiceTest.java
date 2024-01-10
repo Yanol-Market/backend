@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import site.goldenticket.common.redis.service.RedisService;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Redis Service 검증")
@@ -45,6 +48,26 @@ public class RedisServiceTest {
         // then
         assertThat(result).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("리스트 데이터 삽입 검증")
+    void redisSetValuesList() {
+        // given
+        String key = "listKey";
+        String value1 = "value1";
+        String value2 = "value2";
+        String value3 = "value3";
+
+        // when
+        redisService.setList(key, value1);
+        redisService.setList(key, value2);
+        redisService.setList(key, value3);
+
+        // then
+        List<String> result = redisService.getList(key, String.class);
+        assertThat(result).isEqualTo(Arrays.asList("value1", "value2", "value3"));
+    }
+
 
     @ParameterizedTest
     @CsvSource({"key,true", "param,false"})
