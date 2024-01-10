@@ -25,16 +25,14 @@ public class NegoController {
 
     @PostMapping("/confirm/{negoId}")
     public CommonResponse<ConfirmPriceResponse> confirmPrice(@PathVariable Long negoId) {
-        String message = "Price confirmation successful";
-        negoService.confirmPrice(negoId);
-        return CommonResponse.ok("네고가 승인되었습니다",new ConfirmPriceResponse(message));
+        ConfirmPriceResponse response = negoService.confirmPrice(negoId);
+        return CommonResponse.ok("네고가 승인되었습니다",response);
     }
 
     @PostMapping("/deny/{negoId}")
     public CommonResponse<DenyPriceResponse> denyPrice(@PathVariable Long negoId){
-        String message = "Negotiation has denied";
-        negoService.denyPrice(negoId);
-        return CommonResponse.ok("네고가 거절되었습니다", new DenyPriceResponse(message));
+        DenyPriceResponse response = negoService.denyPrice(negoId);
+        return CommonResponse.ok("네고가 거절되었습니다", response);
     }
 
     @PostMapping("/pay/{negoId}")

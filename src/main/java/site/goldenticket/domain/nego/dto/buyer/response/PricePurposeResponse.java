@@ -21,6 +21,8 @@ public class PricePurposeResponse {
 
     private LocalDateTime createdAt; // 생성 일시
 
+    private LocalDateTime expirationTime; // 만료 일시
+
 
     public static PricePurposeResponse fromEntity(Nego nego) {
         return PricePurposeResponse.builder()
@@ -30,6 +32,7 @@ public class PricePurposeResponse {
                 .price(nego.getPrice())
                 .status(nego.getStatus())
                 .createdAt(nego.getCreatedAt())
+                .expirationTime(nego.getExpirationTime())
                 .build();
     }
 }

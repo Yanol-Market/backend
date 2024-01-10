@@ -1,13 +1,17 @@
 package site.goldenticket.domain.nego.dto.buyer.response;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import site.goldenticket.domain.nego.entity.Nego;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class DenyPriceResponse {
-    private String message;
+    private Boolean consent;
 
+    public static DenyPriceResponse fromEntity(Nego nego){
+        return DenyPriceResponse.builder()
+                .consent(nego.getConsent())
+                .build();
+    }
 }

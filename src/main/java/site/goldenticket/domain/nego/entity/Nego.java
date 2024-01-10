@@ -52,6 +52,13 @@ public class Nego {
         this.count = count;
     }
 
+    public void setExpirationTime(LocalDateTime expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+    public void setConsent(Boolean consent) {
+        this.consent = consent;
+    }
+
     @Builder
     public Nego(Long id, Integer price, Integer count, Long userId, Long productId,
                 NegotiationStatus status, Boolean consent, LocalDateTime expirationTime,

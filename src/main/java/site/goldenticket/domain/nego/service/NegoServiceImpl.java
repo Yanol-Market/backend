@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.dto.buyer.request.PricePurposeRequest;
+import site.goldenticket.domain.nego.dto.buyer.response.ConfirmPriceResponse;
+import site.goldenticket.domain.nego.dto.buyer.response.DenyPriceResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
 import site.goldenticket.domain.nego.dto.buyer.response.PricePurposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
@@ -24,41 +26,43 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public void confirmPrice(Long negoId) {
+    public ConfirmPriceResponse confirmPrice(Long negoId) {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
         // 현재 상태가 NEGOTIATING 또는 PAYMENT_PENDING인 경우에만 처리
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.setStatus(NegotiationStatus.PENDING);
+            nego.setExpirationTime(LocalDateTime.now().plusMinutes(20));
+            nego.setConsent(Boolean.TRUE);
             negoRepository.save(nego);  // 네고 업데이트
+
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException(ErrorCode.COMMON_INVALID_PARAMETER);
         }
+        return ConfirmPriceResponse.fromEntity(nego);
     }
 
 
     @Override
-    public void denyPrice(Long negoId) {
+    public DenyPriceResponse denyPrice(Long negoId) {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
         if (nego.getCount() == 1) {
+            nego.setConsent(Boolean.FALSE);
             negoRepository.save(nego);  // 네고 업데이트
-            return;
+            return null;
         } else if (nego.getCount() == 2) {
             // count가 2인 경우, 가격 거절 처리
+            nego.setConsent(Boolean.FALSE);
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             negoRepository.save(nego);  // 네고 업데이트
         }
+        return DenyPriceResponse.fromEntity(nego);
     }
 
-
-    @Override
-    public void modifyPrice() {
-
-    }
 
     @Override
     public PricePurposeResponse proposePrice(PricePurposeRequest request) {
