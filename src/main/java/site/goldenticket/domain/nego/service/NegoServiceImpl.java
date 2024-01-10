@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
-import site.goldenticket.domain.nego.dto.buyer.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.buyer.response.NegoResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.PriceProposeResponse;
+import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
+import site.goldenticket.domain.nego.dto.response.NegoResponse;
+import site.goldenticket.domain.nego.dto.response.PayResponse;
+import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
@@ -71,6 +71,7 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = request.toEntity();
         updateCountForNewNego(nego);
         nego.setUpdatedAt(LocalDateTime.now());
+        nego.setConsent(Boolean.FALSE);
         nego.setStatus(NegotiationStatus.NEGOTIATING);
         if (nego.getCount() == 3) {
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);

@@ -1,4 +1,4 @@
-package site.goldenticket.domain.nego.dto.buyer.request;
+package site.goldenticket.domain.nego.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

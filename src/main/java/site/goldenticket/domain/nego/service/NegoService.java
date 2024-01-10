@@ -1,9 +1,9 @@
 package site.goldenticket.domain.nego.service;
 
-import site.goldenticket.domain.nego.dto.buyer.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.buyer.response.NegoResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.PayResponse;
-import site.goldenticket.domain.nego.dto.buyer.response.PriceProposeResponse;
+import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
+import site.goldenticket.domain.nego.dto.response.NegoResponse;
+import site.goldenticket.domain.nego.dto.response.PayResponse;
+import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
 
 public interface NegoService {
 

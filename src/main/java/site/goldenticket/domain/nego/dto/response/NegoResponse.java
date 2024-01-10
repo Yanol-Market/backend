@@ -1,4 +1,4 @@
-package site.goldenticket.domain.nego.dto.buyer.response;
+package site.goldenticket.domain.nego.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
