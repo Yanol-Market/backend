@@ -3,6 +3,7 @@ package site.goldenticket.domain.product.model;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.common.constants.ReservationType;
@@ -10,11 +11,13 @@ import site.goldenticket.common.constants.ReservationType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Getter
+@NoArgsConstructor(access = PROTECTED)
 public class Product {
     @Id
-    @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -86,5 +89,10 @@ public class Product {
         this.viewCount = viewCount;
         this.productStatus = productStatus;
         this.reservationId = reservationId;
+    }
+
+    public void update(Integer goldenPrice, String content) {
+        this.goldenPrice = goldenPrice;
+        this.content = content;
     }
 }

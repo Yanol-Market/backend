@@ -20,7 +20,7 @@ public class ReservationResponse {
     private String roomName;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-    private long nights;
+    private long nights;
     private LocalDate reservationDate;
     private int originPrice;
     private int yanoljaPrice;

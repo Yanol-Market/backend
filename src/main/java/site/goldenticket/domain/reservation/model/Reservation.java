@@ -3,6 +3,7 @@ package site.goldenticket.domain.reservation.model;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.constants.ReservationStatus;
 import site.goldenticket.common.constants.ReservationType;
@@ -10,11 +11,13 @@ import site.goldenticket.common.constants.ReservationType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Getter
+@NoArgsConstructor(access = PROTECTED)
 public class Reservation {
     @Id
-    @Column(name = "reservation_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
