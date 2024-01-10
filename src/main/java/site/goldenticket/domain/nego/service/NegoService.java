@@ -15,5 +15,5 @@ public interface NegoService {
     // 구매자 입장
     PricePurposeResponse proposePrice(PricePurposeRequest request);
     PayResponse pay(Long negoId); // 결제하기
-    void payOriginPrice(); // 원라가격으로결제
+    //PayResponse payOriginPrice(Long negoId); // 원래가격으로결제
 }

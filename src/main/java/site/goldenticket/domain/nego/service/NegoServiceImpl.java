@@ -105,10 +105,29 @@ public class NegoServiceImpl implements NegoService {
     }
 
 
-    @Override
-    public void payOriginPrice() {
+//    @Override
+//    public PayResponse payOriginPrice(Long negoId) {
+//        Nego nego = negoRepository.findById(negoId)
+//                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
+//
+//        if (nego.getConsent()) {
+//            Integer originPrice = nego.getProduct().getOriginPrice();
+//
+//
+//            // 네고의 가격을 상품의 원래 가격으로 업데이트
+//            nego.setPrice(originPrice);
+//
+//            // 네고 상태를 완료로 변경
+//            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+//            nego.setUpdatedAt(LocalDateTime.now());
+//            negoRepository.save(nego);
+//
+//            return PayResponse.fromEntity(nego);
+//        } else {
+//            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+//        }
+//    }
 
-    }
 
     static class Product {
         private Long productId = 1L;

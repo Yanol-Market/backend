@@ -59,6 +59,10 @@ public class Nego {
         this.consent = consent;
     }
 
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
     @Builder
     public Nego(Long id, Integer price, Integer count, Long userId, Long productId,
                 NegotiationStatus status, Boolean consent, LocalDateTime expirationTime,
