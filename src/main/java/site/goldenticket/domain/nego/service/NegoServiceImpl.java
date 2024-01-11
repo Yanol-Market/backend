@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 public class NegoServiceImpl implements NegoService {
 
     private final NegoRepository negoRepository;
-
+    private final SchedulerService schedulerService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId) {
