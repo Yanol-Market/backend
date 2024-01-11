@@ -17,7 +17,7 @@ import static site.goldenticket.domain.nego.status.NegotiationStatus.PENDING;
 public class SchedulerService {
     private final NegoRepository negoRepository;
 
-    @Scheduled(fixedDelay = 1000) // 10초
+    @Scheduled(fixedDelay = 180000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
 
@@ -25,11 +25,12 @@ public class SchedulerService {
 
         for (Nego nego : pendingNegos) {
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(10))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
                 nego.setStatus(NEGOTIATION_APPROVED);
                 nego.setUpdatedAt(currentTime);
             }
         }
         negoRepository.saveAll(pendingNegos);
     }
+
 }
