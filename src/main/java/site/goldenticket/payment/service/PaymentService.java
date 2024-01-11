@@ -1,5 +1,6 @@
 package site.goldenticket.payment.service;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
@@ -53,7 +54,8 @@ public class PaymentService {
                 .build();
     }
 
-    static class Product {
+    @Getter
+    public static class Product {
         private Long productId = 1L;
         private Long userId = 101L;
         private String imageUrl = "default-image-url.jpg";
@@ -78,7 +80,8 @@ public class PaymentService {
         }
     }
 
-    static class User {
+    @Getter
+    public static class User {
         private Long id = 1L;
         private String name = "test";
         private String phoneNumber = "010-1234-5678";
