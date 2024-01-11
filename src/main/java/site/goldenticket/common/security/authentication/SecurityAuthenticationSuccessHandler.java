@@ -15,6 +15,7 @@ import site.goldenticket.common.security.authentication.dto.Token;
 import site.goldenticket.common.security.exception.SaveTokenException;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -36,10 +37,12 @@ public class SecurityAuthenticationSuccessHandler implements AuthenticationSucce
     ) throws IOException {
         String email = authentication.getName();
         log.info("Authentication Name = {}", email);
-        Token token = tokenProvider.generateToken(email);
+
+        String randomToken = UUID.randomUUID().toString();
+        Token token = tokenProvider.generateToken(randomToken, email);
 
         try {
-            redisService.set(token.refreshToken(), email, token.refreshTokenExpired());
+            redisService.set(randomToken, email, token.refreshTokenExpired());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new SaveTokenException(SAVE_REFRESH_TOKEN_FAILED);

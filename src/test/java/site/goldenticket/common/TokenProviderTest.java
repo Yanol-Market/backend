@@ -20,9 +20,9 @@ class TokenProviderTest {
 
     @Test
     @DisplayName("Token 생성 및 Claim 조회 검증")
-    void createAccessToken() throws Exception {
+    void createAccessToken() {
         // given
-        Token token = tokenProvider.generateToken(EMAIL);
+        Token token = tokenProvider.generateToken("randomToken", EMAIL);
 
         // when
         String result = tokenProvider.getUsername(token.accessToken());

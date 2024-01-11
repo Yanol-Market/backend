@@ -40,10 +40,10 @@ public class TokenProvider {
         this.refreshTokenExpiredTime = tokenValidateInSeconds * TOKEN_REFRESH_INTERVAL;
     }
 
-    public Token generateToken(String username) {
+    public Token generateToken(String randomToken, String username) {
         return Token.builder()
                 .grantType(grantType)
-                .refreshToken(createRefreshToken())
+                .refreshToken(createRefreshToken(randomToken))
                 .refreshTokenExpired(refreshTokenExpiredTime)
                 .accessToken(createAccessToken(username))
                 .accessTokenExpired(accessTokenExpiredTime)
@@ -78,13 +78,13 @@ public class TokenProvider {
                 .compact();
     }
 
-    private String createRefreshToken() {
+    private String createRefreshToken(String randomToken) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + refreshTokenExpiredTime * MILLISECONDS_TO_SECONDS);
 
         return Jwts.builder()
                 .setHeader(createHeader())
-                .setSubject(UUID.randomUUID().toString())
+                .setSubject(randomToken)
                 .setIssuedAt(now)
                 .setExpiration(expireDate)
                 .signWith(key, HS256)
