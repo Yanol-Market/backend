@@ -2,23 +2,28 @@ package site.goldenticket.domain.product.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.goldenticket.common.constants.AreaCode;
+import site.goldenticket.common.constants.PriceRange;
 import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.common.constants.ReservationStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.dto.ProductDetailResponse;
 import site.goldenticket.domain.product.dto.ProductRequest;
+import site.goldenticket.domain.product.dto.SearchProductResponse;
 import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.common.pagination.slice.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.reservation.model.Reservation;
 import site.goldenticket.domain.reservation.service.ReservationService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
@@ -33,12 +38,33 @@ public class ProductService {
     private final RedisService redisService;
 
     @Transactional(readOnly = true)
+    public Slice<SearchProductResponse> getProductsBySearch(
+            AreaCode areaCode, String accommodationName, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
+            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+    ) {
+        CustomSlice<Product> productSlice = productRepository.getProductsBySearch(
+                areaCode, accommodationName, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+        );
+
+        SearchProductResponse searchProductResponse = SearchProductResponse.fromEntity(
+                accommodationName, checkInDate, checkOutDate, productSlice.getTotalElements(), productSlice
+        );
+
+        return new SliceImpl<>(
+                Collections.singletonList(searchProductResponse),
+                pageable,
+                productSlice.hasNext()
+        );
+    }
+
+    @Transactional(readOnly = true)
     public ProductDetailResponse getProductDetails(Long productId) {
         Product product = getProduct(productId);
 
-        // TODO: 적절한 사용자 이메일 값을 얻어와서 사용
-        String userEmail = "test@email.com";
-        updateProductViews(userEmail, productId.toString());
+        // TODO : 사용자 별 이메일로 키 값 설정 하기
+        // TODO : 로그인 및 비로그인 사용자 모두 한 번만 조회수 증가가 일어날 수 있도록 고유 키 값 고민
+        String userKey = "test@email.com";
+        updateProductViewCount(userKey, productId.toString());
 
         return ProductDetailResponse.fromEntity(product);
     }
@@ -46,7 +72,10 @@ public class ProductService {
     @Transactional
     public Long createProduct(ProductRequest productRequest, Long reservationId) {
         Reservation reservation = reservationService.getReservation(reservationId);
-        checkReservationStatus(reservation.getReservationStatus());
+
+        if (ReservationStatus.REGISTERED.equals(reservation.getReservationStatus())) {
+            throw new CustomException(PRODUCT_ALREADY_EXISTS);
+        }
 
         reservation.setReservationStatus(ReservationStatus.REGISTERED);
         reservationService.saveReservation(reservation);
@@ -72,37 +101,32 @@ public class ProductService {
 
         return productId;
     }
-
-    private void checkReservationStatus(ReservationStatus reservationStatus) {
-        if (ReservationStatus.REGISTERED.equals(reservationStatus)) {
-            throw new CustomException(PRODUCT_ALREADY_EXISTS);
-        }
-    }
-
+    
     private Product getProduct(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
-    private void updateProductViews(String userKey, String productKey) {
-        // 사용자가 조회한 상품 목록 가져오기
-        Map<String, List<String>> userViewMap = redisService.getMap(userKey, String.class);
+    private void updateProductViewCount(String userKey, String productKey) {
+        String viewProductKey = userKey.concat(":").concat("viewProductList");
 
-        // 1. 사용자의 조회 이력에 해당 상품이 포함되어 있지 않으면
-        if (!userViewMap.containsKey("viewProduct") || !userViewMap.get("viewProduct").contains(productKey)) {
+        List<String> viewProductList = redisService.getList(viewProductKey, String.class);
 
-            // 1-1. 사용자의 조회 이력에 해당 상품 추가 ( 누적 증가 방지 )
-            List<String> viewedProductList = userViewMap.computeIfAbsent("viewProduct", k -> new ArrayList<>());
-            viewedProductList.add(productKey);
-            redisService.setMap(userKey, userViewMap);
+        // 1. 사용자 조회 이력에 해당 상품이 포함되어 있지 않으면
+        if (!viewProductList.contains(productKey)) {
+
+            // 1-1. 사용자 조회 이력에 해당 상품 추가
+            redisService.leftPush(viewProductKey, productKey);
+            log.info("User View Product List 추가. 사용자 이메일: {}, 조회 상품 아이디: {}", userKey, productKey);
 
             // 1-2. 해당 상품의 조회수 가져온 후 증가
-            int viewCount = redisService.get(productKey, String.class).map(Integer::parseInt).orElse(0) + 1;
-
-            // 1-3. 조회수 업데이트
-            redisService.set(productKey, String.valueOf(viewCount), 86400L);
+            Double currentViewCount = redisService.getZScore("viewCountRanking", productKey);
+            Double updateViewCount = (currentViewCount != null) ? currentViewCount + 1 : 1;
+            redisService.addZScore("viewCountRanking", productKey, updateViewCount);
+            log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", productKey, updateViewCount);
         }
-        // 2. 이미 조회한 상품이라면 조회수 업데이트를 수행하지 않음
+        System.out.println(viewProductList);
+        // 2. 이미 조회한 이력이 있을 경우 실행 하지 않음
     }
 
     @Transactional
@@ -112,13 +136,10 @@ public class ProductService {
         for (Product product : productList) {
             String productKey = String.valueOf(product.getId());
 
-            int dailyViewCount = redisService.get(productKey, String.class).map(Integer::parseInt).orElse(0);
-            int updatedViewCount = product.getViewCount() + dailyViewCount;
+            Double currentViewCount = redisService.getZScore("viewCountRanking", productKey);
+            product.setViewCount(Integer.parseInt(String.valueOf(currentViewCount)));
 
-            product.setViewCount(updatedViewCount);
-            redisService.delete(productKey);
-
-            log.info("Product ViewCount Update 완료. 상품 ID: {}, 조회수: {}", product.getId(), updatedViewCount);
+            log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", product.getId(), currentViewCount);
         }
 
         productRepository.saveAll(productList);
