@@ -6,7 +6,14 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.payment.dto.response.PaymentDetailResponse;
+import site.goldenticket.payment.dto.response.PaymentReadyResponse;
+import site.goldenticket.payment.model.Order;
+import site.goldenticket.payment.model.Order.OrderStatus;
+import site.goldenticket.payment.repository.IamportRepository;
+import site.goldenticket.payment.repository.OrderRepository;
+import site.goldenticket.payment.repository.PaymentRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -14,6 +21,8 @@ import java.time.LocalTime;
 @RequiredArgsConstructor
 public class PaymentService {
 
+    private final OrderRepository orderRepository;
+    private final IamportRepository iamportRepository;
 //    private final UserService userService;
 //    private final NegoService negoService;
 //    private final ProductService productService;
@@ -31,27 +40,35 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
-        //TODO: User, Product 생기면 아래 builder 지우기
-//        return PaymentDetailResponse.create(user, product, price);
-        return PaymentDetailResponse.builder()
-                .productId(product.productId)
-                .imageUrl(product.imageUrl)
-                .accommodationName(product.accommodationName)
-                .roomName(product.roomName)
-                .reservationType(product.reservationType)
-                .standardNumber(product.standardNumber)
-                .maximumNumber(product.maximumNumber)
-                .checkInDate(product.checkInDate)
-                .checkInTime(product.checkInTime)
-                .checkOutDate(product.checkOutDate)
-                .checkOutTime(product.checkOutTime)
-                .userName(user.name)
-                .phoneNumber(user.phoneNumber)
-                .email(user.email)
+        return PaymentDetailResponse.create(user, product, price);
+    }
+
+//    결제 테이블에 결제 정보 검증하고 사전에 결제 정보 저장
+    public PaymentReadyResponse preparePayment(Long productId) {
+        //TODO: 유저 id 가져오기, 해당 유저 유효성 검사
+        User user = new User();
+
+        //TODO: productId,userId 이용하여 해당 유저가 네고를 진행 하였는지 확인, 진행하였다면 상품 가격 바꾸기
+        Integer price = 1000;
+
+        //TODO: productId로 상품 테이블에서 상품 가져오기
+        Product product = new Product();
+        if (product.isNotOnSale()) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
+        Order order = Order.builder()
+                .productId(product.getProductId())
+                .userId(user.getId())
+                .status(OrderStatus.REQUEST_PAYMENT)
                 .price(price)
-                .fee((int) (price * 0.035)) // Assuming goldenPrice is used as a fee in your scenario
-                .totalPrice((int) (price * 1.035))
                 .build();
+
+        Order savedOrder = orderRepository.save(order);
+
+        //TODO: paymentService로 분리
+        iamportRepository.prepare(savedOrder.getId(), BigDecimal.valueOf(savedOrder.getTotalPrice()));
+        return PaymentReadyResponse.create(user, product, savedOrder);
     }
 
     @Getter
