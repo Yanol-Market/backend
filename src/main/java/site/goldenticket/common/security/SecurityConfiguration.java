@@ -20,13 +20,18 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.common.security.authentication.*;
 import site.goldenticket.common.security.authorization.SecurityAccessDeniedHandler;
 import site.goldenticket.common.security.authorization.SecurityAuthenticationEntryPoint;
 import site.goldenticket.common.security.authorization.TokenAuthorityConfigurer;
 
-import static org.springframework.http.HttpMethod.GET;
+import java.util.List;
+
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
@@ -52,6 +57,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(createCorsConfigurationSource()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -76,6 +82,28 @@ public class SecurityConfiguration {
                 );
 
         return http.getOrBuild();
+    }
+
+    @Bean
+    public CorsConfigurationSource createCorsConfigurationSource() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://golden-ticket6.netlify.app"
+        ));
+        corsConfiguration.setAllowedMethods(List.of(
+                GET.name(),
+                POST.name(),
+                PUT.name(),
+                PATCH.name(),
+                DELETE.name()
+        ));
+        corsConfiguration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+
+        return source;
     }
 
     private AbstractAuthenticationProcessingFilter createAuthenticationFilter() {
