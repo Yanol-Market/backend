@@ -1,4 +1,4 @@
-package site.goldenticket.common.security;
+package site.goldenticket.common;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

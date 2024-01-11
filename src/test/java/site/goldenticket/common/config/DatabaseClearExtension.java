@@ -1,4 +1,4 @@
-package site.goldenticket.common;
+package site.goldenticket.common.config;
 
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

@@ -1,4 +1,4 @@
-package site.goldenticket.common;
+package site.goldenticket.common.config;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
