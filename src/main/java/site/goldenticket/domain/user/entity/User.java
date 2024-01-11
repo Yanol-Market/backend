@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import site.goldenticket.common.entiy.BaseTimeEntity;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -15,28 +16,26 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "users")
 @SQLRestriction("deleted = false")
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
+    private String email;
     private String name;
     private String nickname;
-    private String email;
     private String password;
     private String phoneNumber;
     private String imageUrl;
-    private String yanoljaId;
+    private String bankName;
+    private String accountNumber;
 
     @Enumerated(STRING)
     private RoleType role;
 
-    private String bankName;
-    private String accountNumber;
+    private String yanoljaId;
     private boolean deleted;
-    private String withdrawalReason;
-    private String withdrawalAt;
 
     @Builder
     private User(
