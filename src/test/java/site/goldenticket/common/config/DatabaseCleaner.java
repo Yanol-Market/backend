@@ -1,4 +1,4 @@
-package site.goldenticket.common;
+package site.goldenticket.common.config;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
