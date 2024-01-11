@@ -1,6 +1,7 @@
 package site.goldenticket.payment.dto.response;
 
 import lombok.Builder;
+import site.goldenticket.payment.service.PaymentService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,58 +26,26 @@ public record PaymentDetailResponse(
         Integer fee,
         Integer totalPrice
 ) {
-    public static PaymentDetailResponse create(User user, Product product, int price) {
+    public static PaymentDetailResponse create(PaymentService.User user, PaymentService.Product product, int price) {
 
         return new PaymentDetailResponse(
-                product.productId,
-                product.imageUrl,
-                product.accommodationName,
-                product.roomName,
-                product.reservationType,
-                product.standardNumber,
-                product.maximumNumber,
-                product.checkInDate,
-                product.checkInTime,
-                product.checkOutDate,
-                product.checkOutTime,
-                user.name,
-                user.phoneNumber,
-                user.email,
+                product.getProductId(),
+                product.getImageUrl(),
+                product.getAccommodationName(),
+                product.getRoomName(),
+                product.getReservationType(),
+                product.getStandardNumber(),
+                product.getMaximumNumber(),
+                product.getCheckInDate(),
+                product.getCheckInTime(),
+                product.getCheckOutDate(),
+                product.getCheckOutTime(),
+                user.getName(),
+                user.getPhoneNumber(),
+                user.getEmail(),
                 price,
-                (int) (price * 0.035),
-                (int) (price * 1.035)
+                (int) (price * 0.05),
+                (int) (price * 1.05)
         );
-    }
-
-    static class Product {
-        private Long productId = 1L;
-        private Long userId = 101L;
-        private String imageUrl = "default-image-url.jpg";
-        private String accommodationName = "Default Accommodation";
-        private String roomName = "Default Room";
-        private String reservationType = "숙박";
-        private Integer standardNumber = 1;
-        private Integer maximumNumber = 2;
-        private Integer goldenPrice = 100;
-        private LocalDate checkInDate = LocalDate.now();
-        private LocalTime checkInTime = LocalTime.now();
-        private LocalDate checkOutDate = LocalDate.now().plusDays(1);
-        private LocalTime checkOutTime = LocalTime.now().plusHours(1);
-        private String status = "판매중";
-
-        public boolean isOnSale() {
-            return this.status.equals("판매중");
-        }
-
-        public boolean isNotOnSale() {
-            return !isOnSale();
-        }
-    }
-
-    static class User {
-        private Long id = 1L;
-        private String name = "test";
-        private String phoneNumber = "010-1234-5678";
-        private String email = "test@mail";
     }
 }
