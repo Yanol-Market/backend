@@ -26,6 +26,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Integer price;
+    private Boolean buyerViewCheck;
     @CreatedDate
     private LocalDateTime createdAt;
     @LastModifiedDate
