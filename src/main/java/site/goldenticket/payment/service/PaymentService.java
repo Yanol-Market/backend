@@ -11,7 +11,6 @@ import site.goldenticket.payment.model.Order;
 import site.goldenticket.payment.model.Order.OrderStatus;
 import site.goldenticket.payment.repository.IamportRepository;
 import site.goldenticket.payment.repository.OrderRepository;
-import site.goldenticket.payment.repository.PaymentRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
