@@ -12,9 +12,7 @@ import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.NoSuchElementException;
 
 @Service
@@ -38,6 +36,9 @@ public class NegoServiceImpl implements NegoService {
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException(ErrorCode.COMMON_INVALID_PARAMETER);
+        }
+        if (nego.getCount() == 2) {
+            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMONT_CANNOT_CONFIRM_NEGO);
         }
         return NegoResponse.fromEntity(nego);
     }
@@ -87,12 +88,11 @@ public class NegoServiceImpl implements NegoService {
 
             negoRepository.save(nego);
         } else {
-            throw new CustomException("네고를 제안할 수 없는 상태입니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+            throw new CustomException("네고를 제안할 수 없는 상태입니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
         }
 
         return PriceProposeResponse.fromEntity(nego);
     }
-
 
 
     @Override
@@ -107,7 +107,7 @@ public class NegoServiceImpl implements NegoService {
 
             return PayResponse.fromEntity(nego);
         } else {
-            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_NEGO_APPROVAL_REQUIRED);
         }
     }
 
@@ -142,37 +142,4 @@ public class NegoServiceImpl implements NegoService {
 //        }
 //    }
 
-
-    static class Product {
-        private Long productId = 1L;
-        private Long userId = 101L;
-        private String imageUrl = "default-image-url.jpg";
-        private String accommodationName = "Default Accommodation";
-        private String roomName = "Default Room";
-        private String reservationType = "숙박";
-        private Integer standardNumber = 1;
-        private Integer maximumNumber = 2;
-        private Integer goldenPrice = 100;
-        private LocalDate checkInDate = LocalDate.now();
-        private LocalTime checkInTime = LocalTime.now();
-        private LocalDate checkOutDate = LocalDate.now().plusDays(1);
-        private LocalTime checkOutTime = LocalTime.now().plusHours(1);
-        private String status = "판매중";
-
-        public boolean isOnSale() {
-            return this.status.equals("판매중");
-        }
-
-        public boolean isNotOnSale() {
-            return !isOnSale();
-        }
-    }
-
-
-    static class User {
-        private Long id = 1L;
-        private String name = "test";
-        private String phoneNumber = "010-1234-5678";
-        private String email = "test@mail";
-    }
 }
