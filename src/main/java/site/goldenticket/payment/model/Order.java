@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import site.goldenticket.common.constants.OrderStatus;
 
 import java.time.LocalDateTime;
 
@@ -40,10 +41,6 @@ public class Order {
         this.price = price;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-    }
-
-    public enum OrderStatus {
-        REQUEST_PAYMENT, WAITING_TRANSFER, COMPLETED_TRANSFER, FAIL, CANCEL
     }
 
     public Integer getTotalPrice() {
