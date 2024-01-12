@@ -66,7 +66,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildRegionCondition(QProduct product, AreaCode areaCode) {
-        return areaCode != null ? product.areaCode.eq(areaCode) : null;
+        return areaCode != AreaCode.ALL ? product.areaCode.eq(areaCode) : null;
     }
 
     private BooleanExpression buildAccommodationNameCondition(QProduct product, String keyword) {
@@ -82,7 +82,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildPriceRangeCondition(QProduct product, PriceRange priceRange) {
-        return priceRange != null ? product.goldenPrice.between(priceRange.getMinPrice(), priceRange.getMaxPrice()) : null;
+        return priceRange != PriceRange.FULL_RANGE ? product.goldenPrice.between(priceRange.getMinPrice(), priceRange.getMaxPrice()) : null;
     }
 
     private BooleanExpression buildStatusCondition(QProduct product) {

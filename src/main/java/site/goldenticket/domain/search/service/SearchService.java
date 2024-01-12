@@ -10,6 +10,7 @@ import site.goldenticket.common.redis.constants.RedisConstants;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.common.util.IdGeneratorUtil;
 import site.goldenticket.domain.search.dto.SearchHistoryRequest;
+import site.goldenticket.domain.search.dto.SearchHistoryResponse;
 import site.goldenticket.domain.search.dto.SearchResponse;
 import site.goldenticket.domain.search.model.SearchHistory;
 
@@ -26,8 +27,8 @@ public class SearchService {
     private final RedisService redisService;
 
     @Transactional
-    public String createRecentSearchHistory(SearchHistoryRequest searchHistoryRequest) {
-        SearchHistory searchHistory = SearchHistoryRequest.toEntity(searchHistoryRequest);
+    public SearchHistoryResponse createRecentSearchHistory(SearchHistoryRequest searchHistoryRequest) {
+        SearchHistory searchHistory = searchHistoryRequest.toEntity();
 
         // TODO : 사용자 별 이메일로 키 값 설정 하기
         // TODO : 로그인 한 사용자에 한해서 검색 기록 저장
@@ -53,7 +54,7 @@ public class SearchService {
 
         createSearchRanking(searchHistoryRequest.getKeyword());
 
-        return searchHistoryRequest.getKeyword();
+        return SearchHistoryResponse.fromEntity(searchHistory);
     }
 
     @Transactional
@@ -68,7 +69,7 @@ public class SearchService {
     }
 
     @Transactional(readOnly = true)
-    public SearchResponse getUserSearchAndRankingInfo() {
+    public SearchResponse getRecentSearchHistory() {
         String userKey = "test@email.com";
         if (userKey == null) {
             return SearchResponse.fromEntity(Collections.emptyList(), getSearchRanking());

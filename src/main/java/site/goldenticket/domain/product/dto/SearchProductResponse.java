@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 @Builder
 public class SearchProductResponse {
 
-    String area;
-    String keyword;
-    LocalDate checkInDate;
-    LocalDate checkOutDate;
-    String price;
-    long totalCounts;
-    List<ProductResponse> productResponseList;
+    private String areaName;
+    private String keyword;
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private String priceRange;
+    private long totalCounts;
+    private List<ProductResponse> productResponseList;
 
     public static SearchProductResponse fromEntity(
             AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange, long totalCounts, Slice<Product> productSlice
@@ -30,16 +30,13 @@ public class SearchProductResponse {
                 .map(ProductResponse::fromEntity)
                 .collect(Collectors.toList());
 
-        String area = areaCode != null ? areaCode.getAreaName() : "전체";
-        String price = priceRange != null ? priceRange.getLabel() : "전체";
-
         return SearchProductResponse.builder()
-                .area(area)
+                .areaName(areaCode.getAreaName())
                 .keyword(keyword)
                 .checkInDate(checkInDate)
                 .checkOutDate(checkOutDate)
                 .totalCounts(totalCounts)
-                .price(price)
+                .priceRange(priceRange.getLabel())
                 .productResponseList(productResponseList)
                 .build();
     }
