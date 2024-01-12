@@ -1,6 +1,7 @@
 package site.goldenticket.domain.nego.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
@@ -14,6 +15,7 @@ import site.goldenticket.domain.nego.status.NegotiationStatus;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class NegoServiceImpl implements NegoService {
 
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
-            throw new CustomException(ErrorCode.COMMON_INVALID_PARAMETER);
+            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMONT_CANNOT_CONFIRM_NEGO);
         }
         if (nego.getCount() == 2) {
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMONT_CANNOT_CONFIRM_NEGO);
@@ -49,18 +51,24 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
-        // status가 NEGOTIATING일 때만 처리
-        if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
+        if (nego.getStatus() == NegotiationStatus.NEGOTIATING || nego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setConsent(Boolean.FALSE);
             nego.setUpdatedAt(LocalDateTime.now());
+
+            // 네고 취소 상태로 변경
+            if (nego.getCount() == 2) {
+                nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
+            }
+
             negoRepository.save(nego);  // 네고 업데이트
             return NegoResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
-            throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+            throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMONT_ONLY_CAN_DENY_WHEN_NEGOTIATING);
         }
     }
+
 
     // 가격제안은 productId를 받아서 사용할 예정 아래는 임시!
     @Override
@@ -82,8 +90,10 @@ public class NegoServiceImpl implements NegoService {
             nego.setStatus(NegotiationStatus.NEGOTIATING);
 
             if (nego.getCount() == 3) {
+                // 3번째 가격 제안이면 NEGO 취소로 상태 변경
                 nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
-                throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
+                negoRepository.save(nego);
+                return PriceProposeResponse.fromEntity(nego); // NEGO 취소 상태로 변경하고 응답
             }
 
             negoRepository.save(nego);
@@ -113,9 +123,19 @@ public class NegoServiceImpl implements NegoService {
 
     private void updateCountForNewNego(Nego newNego) {
         // productId와 userId에 해당하는 네고 중 가장 최근의 것을 가져옴
-        Nego latestNego = negoRepository.findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(newNego.getProductId(), newNego.getUserId());
+        Optional<Nego> latestNegoOptional = negoRepository.findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(newNego.getProductId(), newNego.getUserId(), PageRequest.of(0, 1))
+                .stream()
+                .findFirst();
+
         // 최근의 네고가 있으면 count를 1 증가, 없으면 1로 초기화
-        newNego.setCount(latestNego != null ? latestNego.getCount() + 1 : 1);
+        int newCount = latestNegoOptional.map(latestNego -> latestNego.getCount() + 1).orElse(1);
+
+        // 여기서 count가 3인 경우 예외 처리
+        if (newCount > 2) {
+            throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
+        }
+
+        newNego.setCount(newCount);
     }
 
 
