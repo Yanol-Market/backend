@@ -71,6 +71,9 @@ public class ProductService {
 
     @Transactional
     public Long createProduct(ProductRequest productRequest, Long reservationId) {
+        // TODO : 사용자 식별자 값 저장
+        Long userId = 1L;
+
         Reservation reservation = reservationService.getReservation(reservationId);
 
         if (ReservationStatus.REGISTERED.equals(reservation.getReservationStatus())) {
@@ -80,7 +83,7 @@ public class ProductService {
         reservation.setReservationStatus(ReservationStatus.REGISTERED);
         reservationService.saveReservation(reservation);
 
-        return productRepository.save(productRequest.toEntity(reservation, reservationId)).getId();
+        return productRepository.save(productRequest.toEntity(reservation, reservationId, userId)).getId();
     }
 
     @Transactional

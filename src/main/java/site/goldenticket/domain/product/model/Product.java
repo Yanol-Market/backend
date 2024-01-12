@@ -44,6 +44,7 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
 
+    private Long userId;
     private Long reservationId;
 
     @Builder
@@ -67,7 +68,8 @@ public class Product {
             String content,
             int viewCount,
             ProductStatus productStatus,
-            Long reservationId
+            Long reservationId,
+            Long userId
     ) {
         this.areaCode = areaCode;
         this.accommodationImage = accommodationImage;
@@ -89,6 +91,7 @@ public class Product {
         this.viewCount = viewCount;
         this.productStatus = productStatus;
         this.reservationId = reservationId;
+        this.userId = userId;
     }
 
     public void update(Integer goldenPrice, String content) {
