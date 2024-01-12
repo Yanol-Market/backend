@@ -38,9 +38,14 @@ import static org.springframework.http.HttpMethod.*;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private static final String[] PERMIT_ALL_GET_URLS = new String[]{
+    private static final String[] PERMIT_ALL_GET_URLS = new String[] {
             "/favicon.ico",
-            "/docs/**"
+            "/docs/**",
+            "/users/check/**"
+    };
+
+    private static final String[] PERMIT_ALL_POST_URLS = new String[] {
+            "/users"
     };
 
     private final ObjectMapper objectMapper;
@@ -63,6 +68,7 @@ public class SecurityConfiguration {
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(GET, PERMIT_ALL_GET_URLS).permitAll()
+                        .requestMatchers(POST, PERMIT_ALL_POST_URLS).permitAll()
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
                         .anyRequest().authenticated()
                 )
