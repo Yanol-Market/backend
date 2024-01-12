@@ -12,6 +12,7 @@ import java.util.Objects;
 @Getter
 public class SearchHistory {
 
+    Long id;
     String keyword;
     String area;
     LocalDate checkInDate;
@@ -31,6 +32,10 @@ public class SearchHistory {
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.priceRange = priceRange;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

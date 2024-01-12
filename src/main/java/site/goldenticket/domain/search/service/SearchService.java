@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.constants.RedisConstants;
 import site.goldenticket.common.redis.service.RedisService;
+import site.goldenticket.common.util.IdGeneratorUtil;
 import site.goldenticket.domain.search.dto.SearchHistoryRequest;
 import site.goldenticket.domain.search.dto.SearchResponse;
 import site.goldenticket.domain.search.model.SearchHistory;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static site.goldenticket.common.response.ErrorCode.SEARCH_HISTORY_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,8 @@ public class SearchService {
                 Object poppedValue = redisService.rightPop(searchHistoryKey);
                 log.info("가장 오래된 검색 기록 삭제: {}", poppedValue);
             }
+
+            searchHistory.setId(IdGeneratorUtil.createID());
 
             redisService.leftPush(searchHistoryKey, searchHistory);
             log.info("새로운 검색 기록 추가: {}", searchHistory);
@@ -69,6 +75,27 @@ public class SearchService {
         }
 
         return SearchResponse.fromEntity(getSearchHistory(userKey), getSearchRanking());
+    }
+
+    @Transactional
+    public Long deleteUserSearchHistory(Long searchHistoryId) {
+        String userKey = "test@email.com";
+        String searchHistoryKey = userKey.concat(":").concat("searchHistory");
+        List<SearchHistory> searchHistoryList = redisService.getList(searchHistoryKey, SearchHistory.class);
+
+        Optional<SearchHistory> searchHistory = searchHistoryList.stream()
+                .filter(history -> history.getId().equals(searchHistoryId))
+                .findFirst();
+
+        if (searchHistory.isPresent()) {
+            redisService.removeList(searchHistoryKey, searchHistory.get());
+
+            log.info("검색어 삭제 완료: '{}'", searchHistoryId);
+        } else {
+            throw new CustomException(SEARCH_HISTORY_NOT_FOUND);
+        }
+
+        return searchHistoryId;
     }
 
     public List<SearchHistory> getSearchHistory(String userKey) {

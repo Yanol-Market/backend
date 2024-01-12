@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Builder
 public class SearchHistoryResponse {
 
+    Long id;
     String keyword;
     String area;
     LocalDate checkInDate;
@@ -19,6 +20,7 @@ public class SearchHistoryResponse {
     public static SearchHistoryResponse fromEntity(SearchHistory searchHistory) {
 
         return SearchHistoryResponse.builder()
+                .id(searchHistory.getId())
                 .keyword(searchHistory.getKeyword())
                 .area(searchHistory.getArea())
                 .checkInDate(searchHistory.getCheckInDate())

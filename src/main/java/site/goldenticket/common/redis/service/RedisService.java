@@ -18,6 +18,8 @@ public interface RedisService {
 
     <T> List<T> getList(String key, Class<T> type);
 
+    void removeList(String key, Object value);
+
     Double getZScore(String rankingKey, String keyword);
 
     void addZScore(String rankingKey, String keyword, Double newScore);

@@ -98,6 +98,18 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public void removeList(String key, Object value) {
+        log.info("Remove from Redis List - Key: [{}], Old Value: [{}]", key, value);
+        try {
+            String serializedValue = objectMapper.writeValueAsString(value);
+            redisTemplate.opsForList().remove(key, 0, serializedValue);
+        } catch (Exception e) {
+            log.error("Redis Remove List Exception", e);
+            throw new CustomException("Redis removeList() Error", COMMON_SYSTEM_ERROR);
+        }
+    }
+
+    @Override
     public Double getZScore(String rankingKey, String keyword) {
         Double score = redisTemplate.opsForZSet().score(rankingKey, keyword);
         log.info("Get ZScore - Ranking Key: {}, Keyword: {}, Score: {}", rankingKey, keyword, score);
@@ -124,12 +136,14 @@ public class RedisServiceImpl implements RedisService {
         return size;
     }
 
+    @Override
     public Object rightPop(String key) {
         Object poppedValue = redisTemplate.opsForList().rightPop(key);
         log.info("Right Pop from List - Key: {}, Popped Value: {}", key, poppedValue);
         return poppedValue;
     }
 
+    @Override
     public void leftPush(String key, Object value) {
         try {
             String serializedValue = objectMapper.writeValueAsString(value);

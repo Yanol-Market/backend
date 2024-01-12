@@ -26,4 +26,9 @@ public class SearchController {
     public ResponseEntity<CommonResponse<SearchResponse>> getUserSearchAndRankingInfo() {
         return ResponseEntity.ok(CommonResponse.ok("사용자 검색어 및 실시간 검색어 조회 성공", searchService.getUserSearchAndRankingInfo()));
     }
+
+    @DeleteMapping("/{searchHistoryId}")
+    public ResponseEntity<CommonResponse<Long>> deleteUserSearchHistory(@PathVariable Long searchHistoryId) {
+        return ResponseEntity.ok(CommonResponse.ok("사용자 검색어 삭제 성공", searchService.deleteUserSearchHistory(searchHistoryId)));
+    }
 }
