@@ -13,6 +13,7 @@ import site.goldenticket.common.constants.PriceRange;
 import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.common.constants.ReservationStatus;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.common.pagination.constants.PaginationConstants;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
@@ -166,7 +167,7 @@ public class ProductService {
     }
 
     public HomeProductResponse getHomeProduct() {
-        Pageable pageable = PageRequest.of(0, 5);
+        Pageable pageable = PageRequest.of(PaginationConstants.DEFAULT_PAGE, PaginationConstants.MIN_PAGE_SIZE);
 
         List<ProductResponse> goldenPriceTop5 = getProductResponses(productRepository.findTop5ByGoldenPriceAsc(pageable));
         List<ProductResponse> viewCountTop5 = getProductResponses(productRepository.findTop5ByViewCountDesc(pageable));
