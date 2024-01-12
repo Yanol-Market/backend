@@ -21,6 +21,7 @@ public class NegoController {
         PriceProposeResponse response = negoService.proposePrice(request);
         return CommonResponse.ok("네고가 전달되었습니다.", response);
     }
+    // 가격제안은 /proposePrice/productId가 될 예정
 
     @PatchMapping("/confirm/{negoId}")
     public CommonResponse<NegoResponse> confirmPrice(@PathVariable Long negoId) {

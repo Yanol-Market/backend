@@ -61,6 +61,7 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
+    // 가격제안은 productId를 받아서 사용할 예정 아래는 임시!
     @Override
     public PriceProposeResponse proposePrice(PriceProposeRequest request) {
         Nego nego = request.toEntity();
