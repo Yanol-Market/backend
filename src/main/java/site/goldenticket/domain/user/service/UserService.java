@@ -18,4 +18,9 @@ public class UserService {
         log.info("Duplicated Check Email = {}", email);
         return userRepository.findByEmail(email).isPresent();
     }
+
+    public boolean isExistNickname(String nickname) {
+        log.info("Duplicated Check Nickname = {}", nickname);
+        return userRepository.existsByNickname(nickname);
+    }
 }

@@ -20,4 +20,9 @@ public class UserController {
     public ResponseEntity<CommonResponse<Boolean>> duplicateEmail(@RequestParam String email) {
         return ResponseEntity.ok(CommonResponse.ok(userService.isExistEmail(email)));
     }
+
+    @GetMapping("/check/nickname")
+    public ResponseEntity<CommonResponse<Boolean>> duplicateNickname(@RequestParam String nickname) {
+        return ResponseEntity.ok(CommonResponse.ok(userService.isExistNickname(nickname)));
+    }
 }
