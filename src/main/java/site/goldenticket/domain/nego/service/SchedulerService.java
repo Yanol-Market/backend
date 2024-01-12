@@ -25,7 +25,7 @@ public class SchedulerService {
         for (Nego nego : pendingNegos) {
             LocalDateTime updatedAt = nego.getUpdatedAt();
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(5))) {
-                nego.setStatus(NEGOTIATING);
+                nego.setStatus(NEGOTIATION_TIMEOUT);
                 nego.setUpdatedAt(currentTime);
             }
         }

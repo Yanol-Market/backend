@@ -37,10 +37,10 @@ public class NegoServiceImpl implements NegoService {
 
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
-            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMONT_CANNOT_CONFIRM_NEGO);
+            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMON_CANNOT_CONFIRM_NEGO);
         }
         if (nego.getCount() == 2) {
-            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMONT_CANNOT_CONFIRM_NEGO);
+            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMON_CANNOT_CONFIRM_NEGO);
         }
         return NegoResponse.fromEntity(nego);
     }
@@ -65,7 +65,7 @@ public class NegoServiceImpl implements NegoService {
             return NegoResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
-            throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMONT_ONLY_CAN_DENY_WHEN_NEGOTIATING);
+            throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMON_ONLY_CAN_DENY_WHEN_NEGOTIATING);
         }
     }
 
@@ -77,23 +77,42 @@ public class NegoServiceImpl implements NegoService {
         updateCountForNewNego(nego);
         nego.setUpdatedAt(LocalDateTime.now());
 
+        // 네고 상태가 TIMEOUT이면 가격 제안 불가능 예외 처리
+        if (NegotiationStatus.NEGOTIATION_TIMEOUT.equals(nego.getStatus())) {
+            throw new CustomException("20분이 지나 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
+        }
+
         if (Boolean.TRUE.equals(nego.getConsent())) {
             throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
         }
 
-        // 승낙 여부가 null인 경우 false로 설정
+        // 네고를 한 사용자의 ID로 네고를 찾음
+        Optional<Nego> userNegoOptional = negoRepository.findLatestNegoByUserIdOrderByCreatedAtDesc(
+                        nego.getUserId(), PageRequest.of(0, 1))
+                .stream()
+                .findFirst();
+
+        userNegoOptional.ifPresent(userNego -> {
+            if (NegotiationStatus.NEGOTIATION_TIMEOUT.equals(userNego.getStatus())) {
+                throw new CustomException("이미 타임아웃된 네고가 있어 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
+            }
+
+            if (Boolean.TRUE.equals(userNego.getConsent()) && NegotiationStatus.PENDING.equals(userNego.getStatus())) {
+                throw new CustomException("이미 승인된 네고가 있어 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+            }
+        });
+
         if (nego.getConsent() == null) {
             nego.setConsent(Boolean.FALSE);
         }
 
-        if (Boolean.FALSE.equals(nego.getConsent())) {
+        if (Boolean.FALSE.equals(nego.getConsent()) || NegotiationStatus.NEGOTIATING.equals(nego.getStatus())) {
             nego.setStatus(NegotiationStatus.NEGOTIATING);
 
             if (nego.getCount() == 3) {
-                // 3번째 가격 제안이면 NEGO 취소로 상태 변경
                 nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
                 negoRepository.save(nego);
-                return PriceProposeResponse.fromEntity(nego); // NEGO 취소 상태로 변경하고 응답
+                return PriceProposeResponse.fromEntity(nego);
             }
 
             negoRepository.save(nego);
