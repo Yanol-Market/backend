@@ -87,6 +87,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource createCorsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "https://golden-ticket6.netlify.app"
@@ -99,7 +100,7 @@ public class SecurityConfiguration {
                 DELETE.name(),
                 OPTIONS.name()
         ));
-        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
