@@ -28,7 +28,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<CommonResponse<Slice<SearchProductResponse>>> getProductsBySearch(
             @RequestParam(required = false) AreaCode areaCode,
-            @RequestParam String accommodationName,
+            @RequestParam String keyword,
             @RequestParam LocalDate checkInDate,
             @RequestParam LocalDate checkOutDate,
             @RequestParam(required = false) PriceRange priceRange,
@@ -40,7 +40,7 @@ public class ProductController {
             ) Pageable pageable
     ) {
         Slice<SearchProductResponse> searchProductResponseSlice = productService.getProductsBySearch(
-                areaCode, accommodationName, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
         );
 
         return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 조회가 완료되었습니다.", searchProductResponseSlice));

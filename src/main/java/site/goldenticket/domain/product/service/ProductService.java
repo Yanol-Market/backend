@@ -39,15 +39,15 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Slice<SearchProductResponse> getProductsBySearch(
-            AreaCode areaCode, String accommodationName, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
+            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
             LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
     ) {
         CustomSlice<Product> productSlice = productRepository.getProductsBySearch(
-                areaCode, accommodationName, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
         );
 
         SearchProductResponse searchProductResponse = SearchProductResponse.fromEntity(
-                accommodationName, checkInDate, checkOutDate, productSlice.getTotalElements(), productSlice
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice.getTotalElements(), productSlice
         );
 
         return new SliceImpl<>(
