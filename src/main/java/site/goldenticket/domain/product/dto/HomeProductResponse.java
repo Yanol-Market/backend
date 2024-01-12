@@ -8,8 +8,8 @@ import java.util.List;
 @Getter
 @Builder
 public class HomeProductResponse {
-    List<ProductResponse> goldenPriceTop5;
-    List<ProductResponse> viewCountTop5;
-    List<ProductResponse> recentRegisteredTop5;
-    List<ProductResponse> dayUseTop5;
+    private List<ProductResponse> goldenPriceTop5;
+    private List<ProductResponse> viewCountTop5;
+    private List<ProductResponse> recentRegisteredTop5;
+    private List<ProductResponse> dayUseTop5;
 }

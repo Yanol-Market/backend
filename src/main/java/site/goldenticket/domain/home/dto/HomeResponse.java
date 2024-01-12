@@ -7,5 +7,5 @@ import site.goldenticket.domain.product.dto.HomeProductResponse;
 @Getter
 @Builder
 public class HomeResponse {
-    HomeProductResponse homeProductResponse;
+    private HomeProductResponse homeProductResponse;
 }
