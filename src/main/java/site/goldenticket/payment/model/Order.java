@@ -1,10 +1,7 @@
 package site.goldenticket.payment.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import site.goldenticket.common.constants.OrderStatus;
@@ -45,5 +42,9 @@ public class Order {
 
     public Integer getTotalPrice() {
         return (int) (this.price*1.05);
+    }
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
     }
 }
