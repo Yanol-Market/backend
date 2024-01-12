@@ -3,14 +3,19 @@ package site.goldenticket.payment.service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import site.goldenticket.common.constants.OrderStatus;
+import site.goldenticket.common.constants.PaymentStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.payment.dto.request.PaymentRequest;
 import site.goldenticket.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.payment.dto.response.PaymentReadyResponse;
+import site.goldenticket.payment.dto.response.PaymentResponse;
 import site.goldenticket.payment.model.Order;
-import site.goldenticket.payment.model.Order.OrderStatus;
+import site.goldenticket.payment.model.Payment;
 import site.goldenticket.payment.repository.IamportRepository;
 import site.goldenticket.payment.repository.OrderRepository;
+import site.goldenticket.payment.repository.PaymentRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,6 +27,7 @@ public class PaymentService {
 
     private final OrderRepository orderRepository;
     private final IamportRepository iamportRepository;
+    private final PaymentRepository paymentRepository;
 //    private final UserService userService;
 //    private final NegoService negoService;
 //    private final ProductService productService;
@@ -68,6 +74,22 @@ public class PaymentService {
         //TODO: paymentService로 분리
         iamportRepository.prepare(savedOrder.getId(), BigDecimal.valueOf(savedOrder.getTotalPrice()));
         return PaymentReadyResponse.create(user, product, savedOrder);
+    }
+
+    public PaymentResponse savePayment(PaymentRequest request) {
+        Payment payment = iamportRepository.findPaymentByImpUid(request.getImpUid());
+        Payment saved = paymentRepository.save(payment);
+        PaymentStatus status = saved.getStatus();//결제 취소를 제외한 READY, PAID, FAILED 중에 하나
+
+        if (status.equals(PaymentStatus.PAID)) {
+            //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
+            Order order = orderRepository.findById(saved.getOrderId()).orElseThrow();
+            order.updateStatus(OrderStatus.WAITING_TRANSFER);
+            //TODO: 네고 상태값 네고 종료로 변경
+            return new PaymentResponse(PaymentResponse.PaymentResult.SUCCESS);
+        } else {
+            return new PaymentResponse(PaymentResponse.PaymentResult.FAILED);
+        }
     }
 
     @Getter
