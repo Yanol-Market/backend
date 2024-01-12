@@ -11,7 +11,7 @@ public class ProductRequest {
     private Integer goldenPrice;
     private String content;
 
-    public Product toEntity(Reservation reservation, Long reservationId) {
+    public Product toEntity(Reservation reservation, Long reservationId, Long userId) {
 
         return Product.builder()
                 .areaCode(reservation.getAreaCode())
@@ -34,6 +34,7 @@ public class ProductRequest {
                 .viewCount(0)
                 .productStatus(ProductStatus.SELLING)
                 .reservationId(reservationId)
+                .userId(userId)
                 .build();
     }
 }

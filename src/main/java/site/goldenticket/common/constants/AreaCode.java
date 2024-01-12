@@ -21,7 +21,8 @@ public enum AreaCode {
     GYEONGBUK(6598, "경북"),
     GWANGJU(100056, "광주"),
     JEONNAM(100064, "전남"),
-    JEONBUK(6600, "전북");
+    JEONBUK(6600, "전북"),
+    ALL(0, "전체");
 
     private final int areaCode;
     private final String areaName;
