@@ -22,7 +22,6 @@ import java.util.NoSuchElementException;
 public class NegoServiceImpl implements NegoService {
 
     private final NegoRepository negoRepository;
-    private final SchedulerService schedulerService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId) {
@@ -62,25 +61,38 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
-
-
-
     @Override
     public PriceProposeResponse proposePrice(PriceProposeRequest request) {
-
         Nego nego = request.toEntity();
         updateCountForNewNego(nego);
         nego.setUpdatedAt(LocalDateTime.now());
-        nego.setConsent(Boolean.FALSE);
-        nego.setStatus(NegotiationStatus.NEGOTIATING);
-        if (nego.getCount() == 3) {
-            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-            throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+
+        if (Boolean.TRUE.equals(nego.getConsent())) {
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
         }
-        negoRepository.save(nego);
+
+        // 승낙 여부가 null인 경우 false로 설정
+        if (nego.getConsent() == null) {
+            nego.setConsent(Boolean.FALSE);
+        }
+
+        if (Boolean.FALSE.equals(nego.getConsent())) {
+            nego.setStatus(NegotiationStatus.NEGOTIATING);
+
+            if (nego.getCount() == 3) {
+                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+                throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
+            }
+
+            negoRepository.save(nego);
+        } else {
+            throw new CustomException("네고를 제안할 수 없는 상태입니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+        }
 
         return PriceProposeResponse.fromEntity(nego);
     }
+
+
 
     @Override
     public PayResponse pay(Long negoId) {

@@ -9,15 +9,14 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATION_APPROVED;
-import static site.goldenticket.domain.nego.status.NegotiationStatus.PENDING;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.*;
 
 @Service
 @RequiredArgsConstructor
 public class SchedulerService {
     private final NegoRepository negoRepository;
 
-    @Scheduled(fixedDelay = 180000)
+    @Scheduled(fixedDelay = 1000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
 
@@ -25,8 +24,8 @@ public class SchedulerService {
 
         for (Nego nego : pendingNegos) {
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
-                nego.setStatus(NEGOTIATION_APPROVED);
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(5))) {
+                nego.setStatus(NEGOTIATING);
                 nego.setUpdatedAt(currentTime);
             }
         }
