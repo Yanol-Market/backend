@@ -2,6 +2,7 @@ package site.goldenticket.domain.product.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -13,9 +14,7 @@ import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.common.constants.ReservationStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
-import site.goldenticket.domain.product.dto.ProductDetailResponse;
-import site.goldenticket.domain.product.dto.ProductRequest;
-import site.goldenticket.domain.product.dto.SearchProductResponse;
+import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.common.pagination.slice.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
@@ -24,6 +23,7 @@ import site.goldenticket.domain.reservation.service.ReservationService;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
@@ -128,7 +128,6 @@ public class ProductService {
             redisService.addZScore("viewCountRanking", productKey, updateViewCount);
             log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", productKey, updateViewCount);
         }
-        System.out.println(viewProductList);
         // 2. 이미 조회한 이력이 있을 경우 실행 하지 않음
     }
 
@@ -164,5 +163,27 @@ public class ProductService {
         }
 
         productRepository.saveAll(productList);
+    }
+
+    public HomeProductResponse getHomeProduct() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        List<ProductResponse> goldenPriceTop5 = getProductResponses(productRepository.findTop5ByGoldenPriceAsc(pageable));
+        List<ProductResponse> viewCountTop5 = getProductResponses(productRepository.findTop5ByViewCountDesc(pageable));
+        List<ProductResponse> recentRegisteredTop5 = getProductResponses(productRepository.findTop5ByIdDesc(pageable));
+        List<ProductResponse> dayUseTop5 = getProductResponses(productRepository.findTop5DayUseProductsCheckInDateAsc(pageable));
+
+        return HomeProductResponse.builder()
+                .goldenPriceTop5(goldenPriceTop5)
+                .viewCountTop5(viewCountTop5)
+                .recentRegisteredTop5(recentRegisteredTop5)
+                .dayUseTop5(dayUseTop5)
+                .build();
+    }
+
+    private List<ProductResponse> getProductResponses(List<Product> products) {
+        return products.stream()
+                .map(ProductResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 }
