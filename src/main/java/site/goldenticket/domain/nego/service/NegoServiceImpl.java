@@ -82,7 +82,7 @@ public class NegoServiceImpl implements NegoService {
             nego.setStatus(NegotiationStatus.NEGOTIATING);
 
             if (nego.getCount() == 3) {
-                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+                nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
                 throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
             }
 
