@@ -96,7 +96,8 @@ public class SecurityConfiguration {
                 POST.name(),
                 PUT.name(),
                 PATCH.name(),
-                DELETE.name()
+                DELETE.name(),
+                OPTIONS.name()
         ));
         corsConfiguration.setAllowCredentials(true);
 
