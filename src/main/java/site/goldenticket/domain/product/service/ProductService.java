@@ -59,15 +59,22 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductDetailResponse getProductDetails(Long productId) {
-        Product product = getProduct(productId);
+    public Slice<RegionProductResponse> getProductsByAreaCode(
+            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+    ) {
+        CustomSlice<Product> productSlice = productRepository.getProductsByAreaCode(
+                areaCode, cursorCheckInDate, cursorId, pageable
+        );
 
-        // TODO : 사용자 별 이메일로 키 값 설정 하기
-        // TODO : 로그인 및 비로그인 사용자 모두 한 번만 조회수 증가가 일어날 수 있도록 고유 키 값 고민
-        String userKey = "test@email.com";
-        updateProductViewCount(userKey, productId.toString());
+        RegionProductResponse regionProductResponse = RegionProductResponse.fromEntity(
+                productSlice.getTotalElements(), productSlice
+        );
 
-        return ProductDetailResponse.fromEntity(product);
+        return new SliceImpl<>(
+                Collections.singletonList(regionProductResponse),
+                pageable,
+                productSlice.hasNext()
+        );
     }
 
     @Transactional
@@ -85,6 +92,18 @@ public class ProductService {
         reservationService.saveReservation(reservation);
 
         return productRepository.save(productRequest.toEntity(reservation, reservationId, userId)).getId();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProductDetails(Long productId) {
+        Product product = getProduct(productId);
+
+        // TODO : 사용자 별 이메일로 키 값 설정 하기
+        // TODO : 로그인 및 비로그인 사용자 모두 한 번만 조회수 증가가 일어날 수 있도록 고유 키 값 고민
+        String userKey = "test@email.com";
+        updateProductViewCount(userKey, productId.toString());
+
+        return ProductDetailResponse.fromEntity(product);
     }
 
     @Transactional
@@ -182,8 +201,8 @@ public class ProductService {
                 .build();
     }
 
-    private List<ProductResponse> getProductResponses(List<Product> products) {
-        return products.stream()
+    private List<ProductResponse> getProductResponses(List<Product> productList) {
+        return productList.stream()
                 .map(ProductResponse::fromEntity)
                 .collect(Collectors.toList());
     }

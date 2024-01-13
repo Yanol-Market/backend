@@ -1,11 +1,13 @@
 package site.goldenticket.domain.product.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.reservation.model.Reservation;
 
 @Getter
+@Builder
 public class ProductRequest {
 
     private Integer goldenPrice;

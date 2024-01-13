@@ -13,4 +13,8 @@ public interface ProductRepositoryCustom {
             AreaCode region, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
             LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
     );
+
+    CustomSlice<Product> getProductsByAreaCode(
+            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+    );
 }

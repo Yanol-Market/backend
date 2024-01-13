@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.goldenticket.common.constants.AreaCode;
+import site.goldenticket.common.constants.PriceRange;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.constants.RedisConstants;
 import site.goldenticket.common.redis.service.RedisService;
@@ -14,6 +16,7 @@ import site.goldenticket.domain.search.dto.SearchHistoryResponse;
 import site.goldenticket.domain.search.dto.SearchResponse;
 import site.goldenticket.domain.search.model.SearchHistory;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,7 +30,16 @@ public class SearchService {
     private final RedisService redisService;
 
     @Transactional
-    public SearchHistoryResponse createRecentSearchHistory(SearchHistoryRequest searchHistoryRequest) {
+    public SearchHistoryResponse createRecentSearchHistory(AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange) {
+
+        SearchHistoryRequest searchHistoryRequest = SearchHistoryRequest.builder()
+                .areaCode(areaCode)
+                .keyword(keyword)
+                .checkInDate(checkInDate)
+                .checkOutDate(checkOutDate)
+                .priceRange(priceRange)
+                .build();
+
         SearchHistory searchHistory = searchHistoryRequest.toEntity();
 
         // TODO : 사용자 별 이메일로 키 값 설정 하기
