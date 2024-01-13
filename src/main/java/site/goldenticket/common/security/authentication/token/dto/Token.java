@@ -1,4 +1,4 @@
-package site.goldenticket.common.security.authentication.dto;
+package site.goldenticket.common.security.authentication.token.dto;
 
 import lombok.Builder;
 

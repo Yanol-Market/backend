@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.goldenticket.common.security.authentication.TokenProvider;
+import site.goldenticket.common.security.authentication.token.TokenProvider;
 import site.goldenticket.common.security.exception.InvalidJwtException;
 
 import java.io.IOException;
