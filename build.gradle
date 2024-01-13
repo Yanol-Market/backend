@@ -42,7 +42,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
-    runtimeOnly 'com.h2database:h2:1.4.200'
+    runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
 
     // QueryDSL
@@ -58,8 +58,16 @@ dependencies {
     //iamport
     implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
 
+    // jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
     // Testcontainers Core
     implementation 'org.testcontainers:testcontainers:1.19.3'
+
+    // Rest Assured
+    testImplementation 'io.rest-assured:rest-assured:5.3.2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -69,7 +77,7 @@ dependencies {
 def querydslDir = layout.buildDirectory.dir("generated/querydsl")
 
 sourceSets {
-    main.java.srcDirs += [querydslDir]
+    main.java.srcDirs += [ querydslDir ]
 }
 
 tasks.withType(JavaCompile).configureEach {
