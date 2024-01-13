@@ -20,11 +20,11 @@ public class SearchProductResponse {
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private String priceRange;
-    private long totalCounts;
+    private long totalCount;
     private List<ProductResponse> productResponseList;
 
     public static SearchProductResponse fromEntity(
-            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange, long totalCounts, Slice<Product> productSlice
+            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange, long totalCount, Slice<Product> productSlice
     ) {
         List<ProductResponse> productResponseList = productSlice.getContent().stream()
                 .map(ProductResponse::fromEntity)
@@ -35,7 +35,7 @@ public class SearchProductResponse {
                 .keyword(keyword)
                 .checkInDate(checkInDate)
                 .checkOutDate(checkOutDate)
-                .totalCounts(totalCounts)
+                .totalCount(totalCount)
                 .priceRange(priceRange.getLabel())
                 .productResponseList(productResponseList)
                 .build();

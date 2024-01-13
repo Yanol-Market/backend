@@ -1,12 +1,15 @@
 package site.goldenticket.domain.product.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.constants.PriceRange;
@@ -16,6 +19,7 @@ import site.goldenticket.domain.product.model.QProduct;
 import site.goldenticket.common.pagination.slice.CustomSlice;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -34,21 +38,58 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     ) {
         QProduct product = QProduct.product;
 
-        BooleanBuilder predicate = new BooleanBuilder()
-                .and(buildRegionCondition(product, areaCode))
-                .and(buildAccommodationNameCondition(product, keyword))
-                .and(buildCheckInCheckOutCondition(product, checkInDate, checkOutDate))
-                .and(buildPriceRangeCondition(product, priceRange))
-                .and(buildStatusCondition(product));
+        BooleanBuilder predicate = new BooleanBuilder();
+        predicate.and(buildRegionCondition(product, areaCode));
+        predicate.and(buildAccommodationNameCondition(product, keyword));
+        predicate.and(buildCheckInCheckOutCondition(product, checkInDate, checkOutDate));
+        predicate.and(buildPriceRangeCondition(product, priceRange));
+        predicate.and(buildStatusCondition(product));
 
         long totalCount = jpaQueryFactory
                 .selectFrom(product)
                 .where(predicate)
-                .fetchCount();
+                .fetchResults()
+                .getTotal();
 
         predicate.and(buildCursorCondition(product, cursorCheckInDate, cursorId));
 
-        OrderSpecifier[] orderSpecifiers = {product.checkInDate.asc(), product.id.desc()};
+        OrderSpecifier[] orderSpecifiers = createOrderSpecifier(product, pageable);
+
+        QueryResults<Product> results = jpaQueryFactory
+                .selectFrom(product)
+                .where(predicate)
+                .orderBy(orderSpecifiers)
+                .limit(pageable.getPageSize() + 1)
+                .fetchResults();
+
+        List<Product> content = results.getResults();
+        boolean hasNext = results.getTotal() > pageable.getPageSize();
+
+        if (hasNext) {
+            content.remove(pageable.getPageSize());
+        }
+
+        return new CustomSlice<>(content, pageable, hasNext, totalCount);
+    }
+
+    @Override
+    public CustomSlice<Product> getProductsByAreaCode(
+            AreaCode areaCode,  LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+    ) {
+        QProduct product = QProduct.product;
+
+        BooleanBuilder predicate = new BooleanBuilder();
+        predicate.and(buildRegionCondition(product, areaCode));
+
+        long totalCount = jpaQueryFactory
+                .selectFrom(product)
+                .where(predicate)
+                .fetchResults()
+                .getTotal();
+
+        predicate.and(buildCursorCondition(product, cursorCheckInDate, cursorId));
+
+        OrderSpecifier[] orderSpecifiers = createOrderSpecifier(product, pageable);
 
         List<Product> content = jpaQueryFactory
                 .selectFrom(product)
@@ -66,15 +107,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildRegionCondition(QProduct product, AreaCode areaCode) {
-        return areaCode != AreaCode.ALL ? product.areaCode.eq(areaCode) : null;
+        return (areaCode != AreaCode.ALL) ? product.areaCode.eq(areaCode) : null;
     }
 
     private BooleanExpression buildAccommodationNameCondition(QProduct product, String keyword) {
-        return Expressions.booleanTemplate(
-                "lower(replace({0}, ' ', '')) like '%' || lower(replace({1}, ' ', '')) || '%'",
-                product.accommodationName,
-                keyword
-        );
+        return Expressions.booleanTemplate("lower(replace({0}, ' ', '')) like '%' || lower(replace({1}, ' ', '')) || '%'", product.accommodationName, keyword);
     }
 
     private BooleanExpression buildCheckInCheckOutCondition(QProduct product, LocalDate checkInDate, LocalDate checkOutDate) {
@@ -82,7 +119,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildPriceRangeCondition(QProduct product, PriceRange priceRange) {
-        return priceRange != PriceRange.FULL_RANGE ? product.goldenPrice.between(priceRange.getMinPrice(), priceRange.getMaxPrice()) : null;
+        return (priceRange != PriceRange.FULL_RANGE) ? product.goldenPrice.between(priceRange.getMinPrice(), priceRange.getMaxPrice()) : null;
     }
 
     private BooleanExpression buildStatusCondition(QProduct product) {
@@ -90,9 +127,22 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildCursorCondition(QProduct product, LocalDate cursorCheckInDate, Long cursorId) {
-        return (cursorCheckInDate != null && cursorId != null) ?
-                product.checkInDate.gt(cursorCheckInDate)
-                    .or(product.checkInDate.eq(cursorCheckInDate).and(product.id.lt(cursorId)))
-                : null;
+        return (cursorCheckInDate != null && cursorId != null) ? product.checkInDate.gt(cursorCheckInDate).or(product.checkInDate.eq(cursorCheckInDate).and(product.id.lt(cursorId))) : null;
+    }
+
+    private OrderSpecifier[] createOrderSpecifier(QProduct product, Pageable pageable) {
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+
+        Sort sort = pageable.getSort();
+        String property = sort.stream().findFirst().map(Sort.Order::getProperty).orElse(null);
+
+        if ("checkInDate".equals(property)) {
+            Sort.Direction direction = sort.stream().findFirst().map(Sort.Order::getDirection).orElse(Sort.Direction.ASC);
+
+            orderSpecifiers.add(new OrderSpecifier(direction == Sort.Direction.DESC ? Order.DESC : Order.ASC, product.checkInDate));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, product.id));
+        }
+
+        return orderSpecifiers.toArray(OrderSpecifier[]::new);
     }
 }
