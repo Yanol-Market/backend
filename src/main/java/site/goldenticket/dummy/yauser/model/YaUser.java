@@ -1,15 +1,20 @@
-package site.goldenticket.domain.yauser.model;
+package site.goldenticket.dummy.yauser.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Entity
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
+
 @Getter
+@Entity
+@NoArgsConstructor(access = PROTECTED)
 public class YaUser {
     @Id
     @Column(name = "ya_user_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     private String name;
