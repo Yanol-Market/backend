@@ -22,7 +22,11 @@ public enum ErrorCode {
     EMPTY_FAILURE_HANDLER(INTERNAL_SERVER_ERROR, "FailureHandler 필수 값 입니다."),
     LOGIN_FAIL(BAD_REQUEST, "이메일, 비밀번호를 확인해주세요."),
     INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 토큰 입니다."),
-    SAVE_REFRESH_TOKEN_FAILED(UNAUTHORIZED, "Token 저장 중 오류가 발생 했습니다.")
+    SAVE_REFRESH_TOKEN_FAILED(UNAUTHORIZED, "Token 저장 중 오류가 발생 했습니다."),
+
+    // User
+    ALREADY_EXIST_EMAIL(BAD_REQUEST, "이미 사용중인 이메일입니다. 이미 가입하신 적이 있다면 로그인을 시도해주세요"),
+    ALREADY_EXIST_NICKNAME(BAD_REQUEST, "이미 사용중인 아이디입니다."),
     ;
 
     private final HttpStatus httpStatus;
