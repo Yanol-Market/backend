@@ -8,5 +8,5 @@ public class PaymentRequest {
     @NotNull
     private String impUid;
     @NotNull
-    private String merchantUid;
+    private Long orderId;
 }
