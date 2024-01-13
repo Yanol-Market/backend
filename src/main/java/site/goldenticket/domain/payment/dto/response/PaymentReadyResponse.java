@@ -4,7 +4,7 @@ import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.service.PaymentService;
 
 public record PaymentReadyResponse(
-        Long id,
+        Long orderId,
         String roomName,
         Integer price,
         String email,
