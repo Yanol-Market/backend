@@ -15,6 +15,8 @@ import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentResponse;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.model.Payment;
+import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.user.service.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,9 +29,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final IamportRepository iamportRepository;
     private final PaymentRepository paymentRepository;
-//    private final UserService userService;
+    private final UserService userService;
 //    private final NegoService negoService;
-//    private final ProductService productService;
+    private final ProductService productService;
 
     public PaymentDetailResponse getPaymentDetail(Long productId) {
         //TODO: 유저 id 가져오기, 해당 유저 유효성 검사
@@ -93,7 +95,7 @@ public class PaymentService {
 
         //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
         //만약 만료시간 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 주문 실패, 결제 취소 로직 필요
-
+        iamportRepository.cancelPaymentByImpUid(request.getImpUid());
         //TODO: 네고 상태값 네고 종료로 변경
         Order savedOrder = orderRepository.findById(saved.getOrderId()).orElseThrow();
         savedOrder.updateStatus(OrderStatus.WAITING_TRANSFER);
