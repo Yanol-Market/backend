@@ -78,18 +78,28 @@ public class PaymentService {
 
     public PaymentResponse savePayment(PaymentRequest request) {
         Payment payment = iamportRepository.findPaymentByImpUid(request.getImpUid());
-        Payment saved = paymentRepository.save(payment);
-        PaymentStatus status = saved.getStatus();//결제 취소를 제외한 READY, PAID, FAILED 중에 하나
+        Order order = orderRepository.findById(request.getOrderId()).orElseThrow();
 
-        if (status.equals(PaymentStatus.PAID)) {
+        if (!payment.getAmount().equals(order.getPrice())) {
+            throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
+        }
+
+        Payment saved = paymentRepository.save(payment);
+
+        if (!payment.isPaid()) {
             //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
-            Order order = orderRepository.findById(saved.getOrderId()).orElseThrow();
-            order.updateStatus(OrderStatus.WAITING_TRANSFER);
-            //TODO: 네고 상태값 네고 종료로 변경
-            return new PaymentResponse(PaymentResponse.PaymentResult.SUCCESS);
-        } else {
+            //만약 만료시간이 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 결제 실패
             return new PaymentResponse(PaymentResponse.PaymentResult.FAILED);
         }
+
+        //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
+        //만약 만료시간 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 주문 실패, 결제 취소 로직 필요
+
+        //TODO: 네고 상태값 네고 종료로 변경
+        Order savedOrder = orderRepository.findById(saved.getOrderId()).orElseThrow();
+        savedOrder.updateStatus(OrderStatus.WAITING_TRANSFER);
+        //TODO: 상품 상태를 예약중으로 업데이트(ProductService 사용 예정)
+        return new PaymentResponse(PaymentResponse.PaymentResult.SUCCESS);
     }
 
     @Getter
