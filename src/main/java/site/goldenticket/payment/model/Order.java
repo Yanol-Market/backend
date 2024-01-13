@@ -1,12 +1,10 @@
 package site.goldenticket.payment.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import site.goldenticket.common.constants.OrderStatus;
 
 import java.time.LocalDateTime;
 
@@ -42,11 +40,11 @@ public class Order {
         this.updatedAt = updatedAt;
     }
 
-    public enum OrderStatus {
-        REQUEST_PAYMENT, WAITING_TRANSFER, COMPLETED_TRANSFER, FAIL, CANCEL
-    }
-
     public Integer getTotalPrice() {
         return (int) (this.price*1.05);
+    }
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
     }
 }

@@ -3,14 +3,19 @@ package site.goldenticket.payment.service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import site.goldenticket.common.constants.OrderStatus;
+import site.goldenticket.common.constants.PaymentStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.payment.dto.request.PaymentRequest;
 import site.goldenticket.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.payment.dto.response.PaymentReadyResponse;
+import site.goldenticket.payment.dto.response.PaymentResponse;
 import site.goldenticket.payment.model.Order;
-import site.goldenticket.payment.model.Order.OrderStatus;
+import site.goldenticket.payment.model.Payment;
 import site.goldenticket.payment.repository.IamportRepository;
 import site.goldenticket.payment.repository.OrderRepository;
+import site.goldenticket.payment.repository.PaymentRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,6 +27,7 @@ public class PaymentService {
 
     private final OrderRepository orderRepository;
     private final IamportRepository iamportRepository;
+    private final PaymentRepository paymentRepository;
 //    private final UserService userService;
 //    private final NegoService negoService;
 //    private final ProductService productService;
@@ -68,6 +74,32 @@ public class PaymentService {
         //TODO: paymentService로 분리
         iamportRepository.prepare(savedOrder.getId(), BigDecimal.valueOf(savedOrder.getTotalPrice()));
         return PaymentReadyResponse.create(user, product, savedOrder);
+    }
+
+    public PaymentResponse savePayment(PaymentRequest request) {
+        Payment payment = iamportRepository.findPaymentByImpUid(request.getImpUid());
+        Order order = orderRepository.findById(request.getOrderId()).orElseThrow();
+
+        if (!payment.getAmount().equals(order.getPrice())) {
+            throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
+        }
+
+        Payment saved = paymentRepository.save(payment);
+
+        if (!payment.isPaid()) {
+            //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
+            //만약 만료시간이 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 결제 실패
+            return new PaymentResponse(PaymentResponse.PaymentResult.FAILED);
+        }
+
+        //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
+        //만약 만료시간 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 주문 실패, 결제 취소 로직 필요
+
+        //TODO: 네고 상태값 네고 종료로 변경
+        Order savedOrder = orderRepository.findById(saved.getOrderId()).orElseThrow();
+        savedOrder.updateStatus(OrderStatus.WAITING_TRANSFER);
+        //TODO: 상품 상태를 예약중으로 업데이트(ProductService 사용 예정)
+        return new PaymentResponse(PaymentResponse.PaymentResult.SUCCESS);
     }
 
     @Getter
