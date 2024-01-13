@@ -1,4 +1,4 @@
-package site.goldenticket.payment.model;
+package site.goldenticket.domain.payment.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import site.goldenticket.common.constants.PaymentStatus;
+import site.goldenticket.common.entiy.BaseTimeEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Payment {
+public class Payment extends BaseTimeEntity {
 
     @Id
     @Column(name = "payment_id")
@@ -40,18 +41,14 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
     private LocalDateTime startedAt;
-    private LocalDate paidAt;
-    private LocalDate failedAt;
+    private LocalDateTime paidAt;
+    private LocalDateTime failedAt;
     private String failReason;
     private String receiptUrl;
     private boolean cashReceiptIssued;
-    @CreatedDate
-    private LocalDateTime createdAt;
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
 
     @Builder
-    public Payment(String impUid, Long orderId, String paymentMethod, String pgTid, boolean escrow, String applyNum, String bankCode, String bankName, String cardCode, String cardName, String cardNumber, int cardQuota, String name, Integer amount, String buyerName, String buyerEmail, String buyerTel, PaymentStatus status, LocalDateTime startedAt, LocalDate paidAt, LocalDate failedAt, String failReason, String receiptUrl, boolean cashReceiptIssued) {
+    public Payment(String impUid, Long orderId, String paymentMethod, String pgTid, boolean escrow, String applyNum, String bankCode, String bankName, String cardCode, String cardName, String cardNumber, int cardQuota, String name, Integer amount, String buyerName, String buyerEmail, String buyerTel, PaymentStatus status, LocalDateTime startedAt, LocalDateTime paidAt, LocalDateTime failedAt, String failReason, String receiptUrl, boolean cashReceiptIssued) {
         this.impUid = impUid;
         this.orderId = orderId;
         this.paymentMethod = paymentMethod;

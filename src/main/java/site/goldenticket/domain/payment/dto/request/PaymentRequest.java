@@ -1,4 +1,4 @@
-package site.goldenticket.payment.dto.request;
+package site.goldenticket.domain.payment.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

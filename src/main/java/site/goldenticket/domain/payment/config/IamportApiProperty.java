@@ -1,4 +1,4 @@
-package site.goldenticket.payment.config;
+package site.goldenticket.domain.payment.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

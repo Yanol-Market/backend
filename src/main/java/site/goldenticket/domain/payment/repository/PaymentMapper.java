@@ -1,7 +1,7 @@
-package site.goldenticket.payment.repository;
+package site.goldenticket.domain.payment.repository;
 
 import org.springframework.stereotype.Component;
-import site.goldenticket.payment.model.Payment;
+import site.goldenticket.domain.payment.model.Payment;
 
 import static site.goldenticket.common.utils.Converter.*;
 
@@ -28,8 +28,8 @@ public class PaymentMapper {
                 .buyerTel(payment.getBuyerTel())
                 .status(convertStatus(payment.getStatus()))
                 .startedAt(convertUnixToLocalDateTime(payment.getStartedAt()))
-                .paidAt(convertDatetoLocalDate(payment.getPaidAt()))
-                .failedAt(convertDatetoLocalDate(payment.getFailedAt()))
+                .paidAt(convertDatetoLocalDateTime(payment.getPaidAt()))
+                .failedAt(convertDatetoLocalDateTime(payment.getFailedAt()))
                 .failReason(payment.getFailReason())
                 .receiptUrl(payment.getReceiptUrl())
                 .cashReceiptIssued(payment.isCashReceiptIssued())

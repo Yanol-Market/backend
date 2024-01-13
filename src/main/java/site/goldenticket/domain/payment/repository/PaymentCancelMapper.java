@@ -1,7 +1,7 @@
-package site.goldenticket.payment.repository;
+package site.goldenticket.domain.payment.repository;
 
 import org.springframework.stereotype.Component;
-import site.goldenticket.payment.model.PaymentCancelDetail;
+import site.goldenticket.domain.payment.model.PaymentCancelDetail;
 
 import java.util.Arrays;
 import java.util.List;

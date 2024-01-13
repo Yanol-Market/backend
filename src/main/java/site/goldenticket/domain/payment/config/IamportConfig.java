@@ -1,4 +1,4 @@
-package site.goldenticket.payment.config;
+package site.goldenticket.domain.payment.config;
 
 import com.siot.IamportRestClient.IamportClient;
 import lombok.RequiredArgsConstructor;

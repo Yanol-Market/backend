@@ -1,4 +1,4 @@
-package site.goldenticket.payment.model;
+package site.goldenticket.domain.payment.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
