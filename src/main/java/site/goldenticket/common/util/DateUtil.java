@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 public class DateUtil {
-
     private DateUtil() {}
 
     public static long daysBetween(LocalDate startDate, LocalDate endDate) {
