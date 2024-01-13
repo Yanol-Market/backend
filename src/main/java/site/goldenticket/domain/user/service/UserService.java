@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.JoinResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
+
+import static site.goldenticket.common.response.ErrorCode.ALREADY_EXIST_EMAIL;
+import static site.goldenticket.common.response.ErrorCode.ALREADY_EXIST_NICKNAME;
 
 @Slf4j
 @Service
@@ -31,9 +35,22 @@ public class UserService {
 
     @Transactional
     public JoinResponse join(JoinRequest joinRequest) {
+        joinValidate(joinRequest);
+        log.info("Join User Info = {}", joinRequest);
+
         String encodePassword = passwordEncoder.encode(joinRequest.password());
         User user = joinRequest.toEntity(encodePassword);
         userRepository.save(user);
         return JoinResponse.from(user);
+    }
+
+    private void joinValidate(JoinRequest joinRequest) {
+        if (isExistEmail(joinRequest.email())) {
+            throw new CustomException(ALREADY_EXIST_EMAIL);
+        }
+
+        if (isExistNickname(joinRequest.nickname())) {
+            throw new CustomException(ALREADY_EXIST_NICKNAME);
+        }
     }
 }
