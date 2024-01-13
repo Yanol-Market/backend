@@ -10,19 +10,19 @@ import java.time.LocalDate;
 @Builder
 public class SearchHistoryResponse {
 
-    Long id;
-    String keyword;
-    String area;
-    LocalDate checkInDate;
-    LocalDate checkOutDate;
-    String priceRange;
+    private Long id;
+    private String areaName;
+    private String keyword;
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private String priceRange;
 
     public static SearchHistoryResponse fromEntity(SearchHistory searchHistory) {
 
         return SearchHistoryResponse.builder()
                 .id(searchHistory.getId())
+                .areaName(searchHistory.getAreaName())
                 .keyword(searchHistory.getKeyword())
-                .area(searchHistory.getArea())
                 .checkInDate(searchHistory.getCheckInDate())
                 .checkOutDate(searchHistory.getCheckOutDate())
                 .priceRange(searchHistory.getPriceRange())

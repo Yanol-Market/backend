@@ -15,26 +15,26 @@ import java.time.LocalTime;
 @Builder
 public class ProductDetailResponse {
 
-    String accommodationImage;
-    String accommodationName;
-    String accommodationAddress;
-    ReservationType reservationType;
-    String roomName;
-    int standardNumber;
-    int maximumNumber;
-    LocalTime checkInTime;
-    LocalTime checkOutTime;
-    LocalDate checkInDate;
-    LocalDate checkOutDate;
-    long nights;
-    long days;
-    int originPrice;
-    int yanoljaPrice;
-    int goldenPrice;
-    int originPriceRatio;
-    int marketPriceRatio;
-    String content;
-    ProductStatus productStatus;
+    private String accommodationImage;
+    private String accommodationName;
+    private String accommodationAddress;
+    private ReservationType reservationType;
+    private String roomName;
+    private int standardNumber;
+    private int maximumNumber;
+    private LocalTime checkInTime;
+    private LocalTime checkOutTime;
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private long nights;
+    private long days;
+    private int originPrice;
+    private int yanoljaPrice;
+    private int goldenPrice;
+    private int originPriceRatio;
+    private int marketPriceRatio;
+    private String content;
+    private ProductStatus productStatus;
 
     public static ProductDetailResponse fromEntity(Product product) {
 

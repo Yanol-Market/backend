@@ -29,14 +29,14 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     @Override
     public CustomSlice<Product> getProductsBySearch(
-            AreaCode areaCode, String accommodationName, LocalDate checkInDate, LocalDate checkOutDate,
+            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate,
             PriceRange priceRange, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
     ) {
         QProduct product = QProduct.product;
 
         BooleanBuilder predicate = new BooleanBuilder()
                 .and(buildRegionCondition(product, areaCode))
-                .and(buildAccommodationNameCondition(product, accommodationName))
+                .and(buildAccommodationNameCondition(product, keyword))
                 .and(buildCheckInCheckOutCondition(product, checkInDate, checkOutDate))
                 .and(buildPriceRangeCondition(product, priceRange))
                 .and(buildStatusCondition(product));
@@ -66,14 +66,14 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildRegionCondition(QProduct product, AreaCode areaCode) {
-        return areaCode != null ? product.areaCode.eq(areaCode) : null;
+        return areaCode != AreaCode.ALL ? product.areaCode.eq(areaCode) : null;
     }
 
-    private BooleanExpression buildAccommodationNameCondition(QProduct product, String accommodationName) {
+    private BooleanExpression buildAccommodationNameCondition(QProduct product, String keyword) {
         return Expressions.booleanTemplate(
                 "lower(replace({0}, ' ', '')) like '%' || lower(replace({1}, ' ', '')) || '%'",
                 product.accommodationName,
-                accommodationName
+                keyword
         );
     }
 
@@ -82,7 +82,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression buildPriceRangeCondition(QProduct product, PriceRange priceRange) {
-        return priceRange != null ? product.goldenPrice.between(priceRange.getMinPrice(), priceRange.getMaxPrice()) : null;
+        return priceRange != PriceRange.FULL_RANGE ? product.goldenPrice.between(priceRange.getMinPrice(), priceRange.getMaxPrice()) : null;
     }
 
     private BooleanExpression buildStatusCondition(QProduct product) {

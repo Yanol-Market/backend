@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 @Builder
 public class SearchResponse {
 
-    private final List<SearchHistoryResponse> searchHistoryList;
-    private final List<String> searchRankingList;
+    private List<SearchHistoryResponse> searchHistoryList;
+    private List<String> searchRankingList;
 
     public static SearchResponse fromEntity(List<SearchHistory> searchHistoryList, List<String> searchRankingList) {
 
@@ -25,6 +25,5 @@ public class SearchResponse {
                 .searchRankingList(searchRankingList)
                 .build();
     }
-
 }
 

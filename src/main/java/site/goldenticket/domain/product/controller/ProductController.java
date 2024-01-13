@@ -15,8 +15,12 @@ import site.goldenticket.domain.product.dto.ProductDetailResponse;
 import site.goldenticket.domain.product.dto.ProductRequest;
 import site.goldenticket.domain.product.dto.SearchProductResponse;
 import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.search.dto.SearchHistoryRequest;
+import site.goldenticket.domain.search.dto.SearchHistoryResponse;
+import site.goldenticket.domain.search.service.SearchService;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/products")
@@ -24,14 +28,15 @@ import java.time.LocalDate;
 public class ProductController {
 
     private final ProductService productService;
+    private final SearchService searchService;
 
     @GetMapping
-    public ResponseEntity<CommonResponse<Slice<SearchProductResponse>>> getProductsBySearch(
-            @RequestParam(required = false) AreaCode areaCode,
-            @RequestParam String accommodationName,
+    public CompletableFuture<ResponseEntity<CommonResponse<Slice<SearchProductResponse>>>> getProductsBySearch(
+            @RequestParam AreaCode areaCode,
+            @RequestParam String keyword,
             @RequestParam LocalDate checkInDate,
             @RequestParam LocalDate checkOutDate,
-            @RequestParam(required = false) PriceRange priceRange,
+            @RequestParam PriceRange priceRange,
             @RequestParam(required = false) LocalDate cursorCheckInDate,
             @RequestParam(required = false) Long cursorId,
             @PageableDefault(
@@ -39,11 +44,23 @@ public class ProductController {
                     size = PaginationConstants.DEFAULT_PAGE_SIZE
             ) Pageable pageable
     ) {
-        Slice<SearchProductResponse> searchProductResponseSlice = productService.getProductsBySearch(
-                areaCode, accommodationName, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+        CompletableFuture<Slice<SearchProductResponse>> productResponseFuture = CompletableFuture.supplyAsync(() ->
+                productService.getProductsBySearch(areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable)
         );
 
-        return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 조회가 완료되었습니다.", searchProductResponseSlice));
+        CompletableFuture<SearchHistoryResponse> searchHistoryFuture = CompletableFuture.supplyAsync(() ->
+                searchService.createRecentSearchHistory(SearchHistoryRequest.builder()
+                        .areaCode(areaCode)
+                        .keyword(keyword)
+                        .checkInDate(checkInDate)
+                        .checkOutDate(checkOutDate)
+                        .priceRange(priceRange)
+                        .build())
+        );
+
+        return productResponseFuture.thenCombine(searchHistoryFuture, (productResponseSlice, searchHistory) ->
+                ResponseEntity.ok(CommonResponse.ok("검색 결과가 성공적으로 조회 및 저장되었습니다.", productResponseSlice))
+        );
     }
 
     @GetMapping("/{productId}")

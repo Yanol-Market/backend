@@ -12,23 +12,23 @@ import java.util.Objects;
 @Getter
 public class SearchHistory {
 
-    Long id;
-    String keyword;
-    String area;
-    LocalDate checkInDate;
-    LocalDate checkOutDate;
-    String priceRange;
+    private Long id;
+    private final String areaName;
+    private final String keyword;
+    private final LocalDate checkInDate;
+    private final LocalDate checkOutDate;
+    private final String priceRange;
 
     @Builder
     @JsonCreator
-    public SearchHistory(
+    private SearchHistory(
             @JsonProperty("keyword") String keyword,
-            @JsonProperty("area") String area,
+            @JsonProperty("areaName") String areaName,
             @JsonProperty("checkInDate") @JsonFormat(pattern = "yyyy-MM-dd") LocalDate checkInDate,
             @JsonProperty("checkOutDate") @JsonFormat(pattern = "yyyy-MM-dd") LocalDate checkOutDate,
             @JsonProperty("priceRange") String priceRange) {
+        this.areaName = areaName;
         this.keyword = keyword;
-        this.area = area;
         this.checkInDate = checkInDate;
         this.checkOutDate = checkOutDate;
         this.priceRange = priceRange;
@@ -45,8 +45,8 @@ public class SearchHistory {
 
         SearchHistory other = (SearchHistory) obj;
 
-        return Objects.equals(keyword, other.keyword) &&
-                Objects.equals(area, other.area) &&
+        return Objects.equals(areaName, other.areaName) &&
+                Objects.equals(keyword, other.keyword) &&
                 Objects.equals(checkInDate, other.checkInDate) &&
                 Objects.equals(checkOutDate, other.checkOutDate) &&
                 Objects.equals(priceRange, other.priceRange);
