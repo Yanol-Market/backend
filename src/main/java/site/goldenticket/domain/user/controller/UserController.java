@@ -2,12 +2,14 @@ package site.goldenticket.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.domain.user.dto.JoinRequest;
+import site.goldenticket.domain.user.dto.JoinResponse;
 import site.goldenticket.domain.user.service.UserService;
+
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,5 +26,11 @@ public class UserController {
     @GetMapping("/check/nickname")
     public ResponseEntity<CommonResponse<Boolean>> duplicateNickname(@RequestParam String nickname) {
         return ResponseEntity.ok(CommonResponse.ok(userService.isExistNickname(nickname)));
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonResponse<JoinResponse>> join(@RequestBody @Validated JoinRequest joinRequest) {
+        JoinResponse response = userService.join(joinRequest);
+        return new ResponseEntity<>(CommonResponse.ok(response), CREATED);
     }
 }
