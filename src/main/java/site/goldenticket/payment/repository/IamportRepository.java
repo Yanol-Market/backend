@@ -8,14 +8,17 @@ import org.springframework.stereotype.Repository;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.payment.model.Payment;
+import site.goldenticket.payment.model.PaymentCancelDetail;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class IamportRepository {
     private final IamportClient iamportClient;
     private final PaymentMapper paymentMapper;
+    private final PaymentCancelMapper paymentCancelMapper;
 
     public void prepare(Long orderId, BigDecimal price) {
         try {
@@ -29,10 +32,20 @@ public class IamportRepository {
         try {
             IamportResponse<com.siot.IamportRestClient.response.Payment> response =
                     iamportClient.paymentByImpUid(impUid);
-            //TODO: 결제 취소 결과 올때는 결제 취소 디테일에 저장, 지금은 결제 취소 건은 생각 안할거임~
             return paymentMapper.mapFrom(response.getResponse());
         } catch (Exception e) {
             throw new CustomException(ErrorCode.IAMPORT_ERROR);
         }
     }
+
+    public List<PaymentCancelDetail> findPaymentCancelByImpUid(String impUid) {
+        try {
+            IamportResponse<com.siot.IamportRestClient.response.Payment> response =
+                    iamportClient.paymentByImpUid(impUid);
+            return paymentCancelMapper.mapFrom(response.getResponse().getCancelHistory());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.IAMPORT_ERROR);
+        }
+    }
+
 }
