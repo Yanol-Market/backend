@@ -1,14 +1,9 @@
 package site.goldenticket.payment.repository;
 
 import org.springframework.stereotype.Component;
-import site.goldenticket.common.constants.PaymentStatus;
 import site.goldenticket.payment.model.Payment;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import static site.goldenticket.common.utils.Converter.*;
 
 @Component
 public class PaymentMapper {
@@ -39,23 +34,5 @@ public class PaymentMapper {
                 .receiptUrl(payment.getReceiptUrl())
                 .cashReceiptIssued(payment.isCashReceiptIssued())
                 .build();
-    }
-
-    public LocalDateTime convertUnixToLocalDateTime(long unixTimestamp) {
-        // Instant를 사용하여 유닉스 타임스탬프를 LocalDateTime으로 변환
-        Instant instant = Instant.ofEpochSecond(unixTimestamp);
-        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-    }
-
-    public LocalDate convertDatetoLocalDate(Date date) {
-        // java.util.Date를 java.time.Instant로 변환
-        Instant instant = date.toInstant();
-
-        // java.time.Instant를 java.time.LocalDate로 변환
-        return instant.atZone(ZoneId.systemDefault()).toLocalDate();
-    }
-
-    public PaymentStatus convertStatus(String status) {
-        return PaymentStatus.valueOf(status.toUpperCase());
     }
 }
