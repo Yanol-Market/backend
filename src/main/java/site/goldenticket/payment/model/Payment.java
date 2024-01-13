@@ -77,4 +77,8 @@ public class Payment {
         this.receiptUrl = receiptUrl;
         this.cashReceiptIssued = cashReceiptIssued;
     }
+
+    public boolean isPaid(){
+        return status == PaymentStatus.PAID;
+    }
 }
