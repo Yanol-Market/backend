@@ -73,7 +73,7 @@ public class Nego {
         this.count = (count != null) ? count : 0;
         this.userId = userId;
         this.productId = productId;
-        this.status = (status != null) ? status : NegotiationStatus.PENDING;
+        this.status = (status != null) ? status : NegotiationStatus.PAYMENT_PENDING;
         this.consent = consent;
         this.expirationTime = expirationTime;
         this.createdAt = createdAt;

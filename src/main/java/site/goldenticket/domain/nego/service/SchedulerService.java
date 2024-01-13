@@ -20,11 +20,11 @@ public class SchedulerService {
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
 
-        List<Nego> pendingNegos = negoRepository.findByStatus(PENDING);
+        List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
 
         for (Nego nego : pendingNegos) {
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(5))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(10))) {
                 nego.setStatus(NEGOTIATION_TIMEOUT);
                 nego.setUpdatedAt(currentTime);
             }

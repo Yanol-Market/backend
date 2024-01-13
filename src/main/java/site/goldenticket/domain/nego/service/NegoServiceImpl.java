@@ -30,7 +30,7 @@ public class NegoServiceImpl implements NegoService {
 
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.setUpdatedAt(LocalDateTime.now());
-            nego.setStatus(NegotiationStatus.PENDING);
+            nego.setStatus(NegotiationStatus.PAYMENT_PENDING);
             nego.setExpirationTime(LocalDateTime.now().plusMinutes(20));
             nego.setConsent(Boolean.TRUE);
             negoRepository.save(nego);
@@ -97,7 +97,7 @@ public class NegoServiceImpl implements NegoService {
                 throw new CustomException("이미 타임아웃된 네고가 있어 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
             }
 
-            if (Boolean.TRUE.equals(userNego.getConsent()) && NegotiationStatus.PENDING.equals(userNego.getStatus())) {
+            if (Boolean.TRUE.equals(userNego.getConsent()) && NegotiationStatus.PAYMENT_PENDING.equals(userNego.getStatus())) {
                 throw new CustomException("이미 승인된 네고가 있어 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
             }
         });

@@ -7,7 +7,6 @@ import lombok.Getter;
 @Getter
 public enum NegotiationStatus {
 
-    PENDING("대기중"),
     NEGOTIATING("네고중"),
     PAYMENT_PENDING("결제대기중"),
     NEGOTIATION_COMPLETED("네고 종료"),
