@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import site.goldenticket.common.constants.OrderStatus;
+import site.goldenticket.common.entiy.BaseTimeEntity;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "Orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order {
+public class Order extends BaseTimeEntity {
 
     @Id
     @Column(name = "order_id")
