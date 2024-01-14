@@ -1,10 +1,10 @@
-package site.goldenticket.payment.dto.response;
+package site.goldenticket.domain.payment.dto.response;
 
-import site.goldenticket.payment.model.Order;
-import site.goldenticket.payment.service.PaymentService;
+import site.goldenticket.domain.payment.model.Order;
+import site.goldenticket.domain.payment.service.PaymentService;
 
 public record PaymentReadyResponse(
-        Long id,
+        Long orderId,
         String roomName,
         Integer price,
         String email,

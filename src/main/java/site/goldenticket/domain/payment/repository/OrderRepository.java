@@ -1,7 +1,7 @@
-package site.goldenticket.payment.repository;
+package site.goldenticket.domain.payment.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import site.goldenticket.payment.model.Order;
+import site.goldenticket.domain.payment.model.Order;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 }

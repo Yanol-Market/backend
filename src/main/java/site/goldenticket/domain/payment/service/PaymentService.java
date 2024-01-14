@@ -1,21 +1,22 @@
-package site.goldenticket.payment.service;
+package site.goldenticket.domain.payment.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.constants.OrderStatus;
-import site.goldenticket.common.constants.PaymentStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
-import site.goldenticket.payment.dto.request.PaymentRequest;
-import site.goldenticket.payment.dto.response.PaymentDetailResponse;
-import site.goldenticket.payment.dto.response.PaymentReadyResponse;
-import site.goldenticket.payment.dto.response.PaymentResponse;
-import site.goldenticket.payment.model.Order;
-import site.goldenticket.payment.model.Payment;
-import site.goldenticket.payment.repository.IamportRepository;
-import site.goldenticket.payment.repository.OrderRepository;
-import site.goldenticket.payment.repository.PaymentRepository;
+import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
+import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
+import site.goldenticket.domain.payment.repository.IamportRepository;
+import site.goldenticket.domain.payment.repository.OrderRepository;
+import site.goldenticket.domain.payment.repository.PaymentRepository;
+import site.goldenticket.domain.payment.dto.request.PaymentRequest;
+import site.goldenticket.domain.payment.dto.response.PaymentResponse;
+import site.goldenticket.domain.payment.model.Order;
+import site.goldenticket.domain.payment.model.Payment;
+import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.user.service.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,9 +29,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final IamportRepository iamportRepository;
     private final PaymentRepository paymentRepository;
-//    private final UserService userService;
+    private final UserService userService;
 //    private final NegoService negoService;
-//    private final ProductService productService;
+    private final ProductService productService;
 
     public PaymentDetailResponse getPaymentDetail(Long productId) {
         //TODO: 유저 id 가져오기, 해당 유저 유효성 검사
@@ -54,7 +55,7 @@ public class PaymentService {
         User user = new User();
 
         //TODO: productId,userId 이용하여 해당 유저가 네고를 진행 하였는지 확인, 진행하였다면 상품 가격 바꾸기
-        Integer price = 1000;
+        Integer price = 100;
 
         //TODO: productId로 상품 테이블에서 상품 가져오기
         Product product = new Product();
@@ -94,7 +95,7 @@ public class PaymentService {
 
         //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
         //만약 만료시간 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 주문 실패, 결제 취소 로직 필요
-
+        iamportRepository.cancelPaymentByImpUid(request.getImpUid());
         //TODO: 네고 상태값 네고 종료로 변경
         Order savedOrder = orderRepository.findById(saved.getOrderId()).orElseThrow();
         savedOrder.updateStatus(OrderStatus.WAITING_TRANSFER);
@@ -104,7 +105,7 @@ public class PaymentService {
 
     @Getter
     public static class Product {
-        private Long productId = 1L;
+        private Long productId = 100L;
         private Long userId = 101L;
         private String imageUrl = "default-image-url.jpg";
         private String accommodationName = "Default Accommodation";

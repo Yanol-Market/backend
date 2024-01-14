@@ -1,7 +1,7 @@
-package site.goldenticket.payment.dto.response;
+package site.goldenticket.domain.payment.dto.response;
 
 import lombok.Builder;
-import site.goldenticket.payment.service.PaymentService;
+import site.goldenticket.domain.payment.service.PaymentService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

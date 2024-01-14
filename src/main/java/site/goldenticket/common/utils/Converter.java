@@ -18,12 +18,12 @@ public final class Converter {
         return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
-    public static LocalDate convertDatetoLocalDate(Date date) {
+    public static LocalDateTime convertDatetoLocalDateTime(Date date) {
         // java.util.Date를 java.time.Instant로 변환
         Instant instant = date.toInstant();
 
         // java.time.Instant를 java.time.LocalDate로 변환
-        return instant.atZone(ZoneId.systemDefault()).toLocalDate();
+        return instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     public static PaymentStatus convertStatus(String status) {
