@@ -87,4 +87,12 @@ public class Product {
         this.productStatus = productStatus;
         this.reservationId = reservationId;
     }
+
+    public boolean isOnSale() {
+        return this.productStatus == ProductStatus.SELLING;
+    }
+
+    public boolean isNotOnSale() {
+        return !isOnSale();
+    }
 }
