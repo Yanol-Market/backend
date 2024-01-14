@@ -1,4 +1,4 @@
-package site.goldenticket.domain.wish.entity;
+package site.goldenticket.domain.wishRegion.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
