@@ -1,7 +1,8 @@
 package site.goldenticket.domain.payment.dto.response;
 
 import site.goldenticket.domain.payment.model.Order;
-import site.goldenticket.domain.payment.service.PaymentService;
+import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.user.entity.User;
 
 public record PaymentReadyResponse(
         Long orderId,
@@ -11,7 +12,7 @@ public record PaymentReadyResponse(
         String userName,
         String phoneNumber
 ) {
-    public static PaymentReadyResponse create(PaymentService.User user, PaymentService.Product product, Order order) {
+    public static PaymentReadyResponse create(User user, Product product, Order order) {
 
         return new PaymentReadyResponse(
                 order.getId(),
