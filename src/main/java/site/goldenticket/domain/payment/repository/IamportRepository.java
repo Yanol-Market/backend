@@ -13,6 +13,7 @@ import site.goldenticket.domain.payment.model.PaymentCancelDetail;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,11 +30,11 @@ public class IamportRepository {
         }
     }
 
-    public Payment findPaymentByImpUid(String impUid) {
+    public Optional<Payment> findPaymentByImpUid(String impUid) {
         try {
             IamportResponse<com.siot.IamportRestClient.response.Payment> response =
                     iamportClient.paymentByImpUid(impUid);
-            return paymentMapper.mapFrom(response.getResponse());
+            return Optional.ofNullable(paymentMapper.mapFrom(response.getResponse()));
         } catch (Exception e) {
             throw new CustomException(ErrorCode.IAMPORT_ERROR);
         }
