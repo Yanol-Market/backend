@@ -22,8 +22,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import site.goldenticket.common.redis.service.RedisService;
-import site.goldenticket.common.security.authentication.*;
+import site.goldenticket.common.security.authentication.AuthenticationConfigurer;
+import site.goldenticket.common.security.authentication.SecurityAuthenticationFailureHandler;
+import site.goldenticket.common.security.authentication.SecurityAuthenticationFilter;
+import site.goldenticket.common.security.authentication.SecurityAuthenticationSuccessHandler;
+import site.goldenticket.common.security.authentication.token.TokenProvider;
+import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.authorization.SecurityAccessDeniedHandler;
 import site.goldenticket.common.security.authorization.SecurityAuthenticationEntryPoint;
 import site.goldenticket.common.security.authorization.TokenAuthorityConfigurer;
@@ -39,6 +43,7 @@ public class SecurityConfiguration {
 
     private static final String[] PERMIT_ALL_URLS = new String[]{
             "/h2-console/**",
+            "/dummy/**"
     };
 
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
@@ -48,13 +53,14 @@ public class SecurityConfiguration {
     };
 
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
-            "/users"
+            "/users",
+            "/yanolja-login"
     };
 
     private final ObjectMapper objectMapper;
-    private final TokenProvider tokenProvider;
     private final UserDetailsService userDetailsService;
-    private final RedisService redisService;
+    private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -122,7 +128,7 @@ public class SecurityConfiguration {
     }
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
-        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenProvider, redisService);
+        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenService);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {

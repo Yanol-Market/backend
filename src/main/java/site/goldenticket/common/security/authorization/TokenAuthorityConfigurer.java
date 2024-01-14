@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import site.goldenticket.common.security.authentication.TokenProvider;
+import site.goldenticket.common.security.authentication.token.TokenProvider;
 
 @RequiredArgsConstructor
 public class TokenAuthorityConfigurer
