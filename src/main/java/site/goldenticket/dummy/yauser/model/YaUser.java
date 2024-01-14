@@ -12,8 +12,8 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 public class YaUser {
+
     @Id
-    @Column(name = "ya_user_id")
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
