@@ -8,7 +8,7 @@ public final class UserUtils {
     public static String PASSWORD = "password";
     public static String NAME = "name";
     public static String NICKNAME = "nickname";
-    public static String PHONE_NUMBER = "010-0000-0000";
+    public static String PHONE_NUMBER = "01000000000";
 
     public static User createUser(String encodePassword) {
         return User.builder()
