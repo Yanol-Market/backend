@@ -1,7 +1,9 @@
 package site.goldenticket.domain.payment.dto.response;
 
 import lombok.Builder;
-import site.goldenticket.domain.payment.service.PaymentService;
+import site.goldenticket.common.constants.ReservationType;
+import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.user.entity.User;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +14,7 @@ public record PaymentDetailResponse(
         String imageUrl,
         String accommodationName,
         String roomName,
-        String reservationType, //enum 으로
+        ReservationType reservationType, //enum 으로
         Integer standardNumber,
         Integer maximumNumber,
         LocalDate checkInDate,
@@ -26,11 +28,11 @@ public record PaymentDetailResponse(
         Integer fee,
         Integer totalPrice
 ) {
-    public static PaymentDetailResponse create(PaymentService.User user, PaymentService.Product product, int price) {
+    public static PaymentDetailResponse of(User user, Product product, int price) {
 
         return new PaymentDetailResponse(
-                product.getProductId(),
-                product.getImageUrl(),
+                product.getId(),
+                product.getAccommodationImage(),
                 product.getAccommodationName(),
                 product.getRoomName(),
                 product.getReservationType(),
