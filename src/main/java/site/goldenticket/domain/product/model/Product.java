@@ -1,8 +1,10 @@
 package site.goldenticket.domain.product.model;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.constants.ProductStatus;
 import site.goldenticket.common.constants.ReservationType;
@@ -12,6 +14,7 @@ import java.time.LocalTime;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
     @Id
     @Column(name = "product_id")
@@ -86,5 +89,13 @@ public class Product {
         this.viewCount = viewCount;
         this.productStatus = productStatus;
         this.reservationId = reservationId;
+    }
+
+    public boolean isOnSale() {
+        return this.productStatus == ProductStatus.SELLING;
+    }
+
+    public boolean isNotOnSale() {
+        return !isOnSale();
     }
 }

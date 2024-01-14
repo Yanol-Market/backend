@@ -2,12 +2,8 @@ package site.goldenticket.domain.payment.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.entiy.BaseTimeEntity;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,26 +22,23 @@ public class Order extends BaseTimeEntity {
     private OrderStatus status;
     private Integer price;
     private Boolean buyerViewCheck;
-    @CreatedDate
-    private LocalDateTime createdAt;
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
 
-    @Builder
-    private Order(Long productId, Long userId, OrderStatus status, Integer price, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private Order(Long productId, Long userId, OrderStatus status, Integer price) {
         this.productId = productId;
         this.userId = userId;
         this.status = status;
         this.price = price;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+    }
+
+    public static Order of(Long productId, Long userId, Integer price) {
+        return new Order(productId, userId, OrderStatus.REQUEST_PAYMENT, price);
     }
 
     public Integer getTotalPrice() {
         return (int) (this.price*1.05);
     }
 
-    public void updateStatus(OrderStatus status) {
-        this.status = status;
+    public void waitTransfer() {
+        status = OrderStatus.WAITING_TRANSFER;
     }
 }

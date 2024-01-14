@@ -4,12 +4,9 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import site.goldenticket.common.constants.PaymentStatus;
 import site.goldenticket.common.entiy.BaseTimeEntity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,7 +29,7 @@ public class Payment extends BaseTimeEntity {
     private String cardCode;
     private String cardName;
     private String cardNumber;
-    private int cardQuota;
+    private Integer cardQuota;
     private String name;
     private Integer amount;
     private String buyerName;
@@ -48,7 +45,7 @@ public class Payment extends BaseTimeEntity {
     private boolean cashReceiptIssued;
 
     @Builder
-    public Payment(String impUid, Long orderId, String paymentMethod, String pgTid, boolean escrow, String applyNum, String bankCode, String bankName, String cardCode, String cardName, String cardNumber, int cardQuota, String name, Integer amount, String buyerName, String buyerEmail, String buyerTel, PaymentStatus status, LocalDateTime startedAt, LocalDateTime paidAt, LocalDateTime failedAt, String failReason, String receiptUrl, boolean cashReceiptIssued) {
+    public Payment(String impUid, Long orderId, String paymentMethod, String pgTid, boolean escrow, String applyNum, String bankCode, String bankName, String cardCode, String cardName, String cardNumber, Integer cardQuota, String name, Integer amount, String buyerName, String buyerEmail, String buyerTel, PaymentStatus status, LocalDateTime startedAt, LocalDateTime paidAt, LocalDateTime failedAt, String failReason, String receiptUrl, boolean cashReceiptIssued) {
         this.impUid = impUid;
         this.orderId = orderId;
         this.paymentMethod = paymentMethod;
@@ -77,5 +74,17 @@ public class Payment extends BaseTimeEntity {
 
     public boolean isPaid(){
         return status == PaymentStatus.PAID;
+    }
+
+    public boolean isNotPaid() {
+        return !isPaid();
+    }
+
+    public boolean isSameAmount(Integer price) {
+        return this.amount.equals(price);
+    }
+
+    public boolean isDifferentAmount(Integer price) {
+        return !isSameAmount(price);
     }
 }
