@@ -19,13 +19,11 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import site.goldenticket.common.security.authentication.LoginAuthenticationConfigurer;
-import site.goldenticket.common.security.authentication.LoginAuthenticationFailureHandler;
-import site.goldenticket.common.security.authentication.LoginAuthenticationFilter;
-import site.goldenticket.common.security.authentication.LoginAuthenticationSuccessHandler;
+import site.goldenticket.common.security.authentication.*;
 import site.goldenticket.common.security.authentication.token.TokenProvider;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.authorization.SecurityAccessDeniedHandler;
@@ -81,6 +79,9 @@ public class SecurityConfiguration {
                         .requestMatchers(POST, PERMIT_ALL_POST_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
+                .logout(logoutConfigurer -> logoutConfigurer
+                        .addLogoutHandler(createLogoutHandler())
+                )
                 .with(
                         new LoginAuthenticationConfigurer<>(createAuthenticationFilter()),
                         SecurityAuthenticationFilter -> SecurityAuthenticationFilter
@@ -129,6 +130,10 @@ public class SecurityConfiguration {
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
         return new LoginAuthenticationSuccessHandler(objectMapper, tokenService);
+    }
+
+    private LogoutHandler createLogoutHandler() {
+        return new LogoutTokenHandler(objectMapper, tokenService);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {
