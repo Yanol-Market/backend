@@ -4,8 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import site.goldenticket.common.security.authentication.TokenProvider;
-import site.goldenticket.common.security.authentication.dto.Token;
+import site.goldenticket.common.security.authentication.token.TokenProvider;
+import site.goldenticket.common.security.authentication.token.dto.Token;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static site.goldenticket.common.utils.UserUtils.EMAIL;

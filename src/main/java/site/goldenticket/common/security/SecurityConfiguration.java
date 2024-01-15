@@ -19,11 +19,13 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.common.security.authentication.*;
+import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.authorization.SecurityAccessDeniedHandler;
 import site.goldenticket.common.security.authorization.SecurityAuthenticationEntryPoint;
 import site.goldenticket.common.security.authorization.TokenAuthorityConfigurer;
@@ -39,6 +41,7 @@ public class SecurityConfiguration {
 
     private static final String[] PERMIT_ALL_URLS = new String[]{
             "/h2-console/**",
+            "/dummy/**"
     };
 
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
@@ -48,13 +51,13 @@ public class SecurityConfiguration {
     };
 
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
-            "/users"
+            "/users",
+            "/yanolja-login"
     };
 
     private final ObjectMapper objectMapper;
-    private final TokenProvider tokenProvider;
     private final UserDetailsService userDetailsService;
-    private final RedisService redisService;
+    private final TokenService tokenService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -75,14 +78,18 @@ public class SecurityConfiguration {
                         .requestMatchers(POST, PERMIT_ALL_POST_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
+                .logout(logoutConfigurer -> logoutConfigurer
+                        .addLogoutHandler(createLogoutHandler())
+                        .logoutSuccessHandler(createLogoutSuccessHandler())
+                )
                 .with(
-                        new AuthenticationConfigurer<>(createAuthenticationFilter()),
+                        new LoginAuthenticationConfigurer<>(createAuthenticationFilter()),
                         SecurityAuthenticationFilter -> SecurityAuthenticationFilter
                                 .successHandler(createAuthenticationSuccessHandler())
                                 .failureHandler(createAuthenticationFailureHandler())
                 )
                 .with(
-                        new TokenAuthorityConfigurer(tokenProvider, userDetailsService),
+                        new TokenAuthorityConfigurer(tokenService, userDetailsService),
                         Customizer.withDefaults()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
@@ -118,15 +125,23 @@ public class SecurityConfiguration {
     }
 
     private AbstractAuthenticationProcessingFilter createAuthenticationFilter() {
-        return new SecurityAuthenticationFilter(objectMapper);
+        return new LoginAuthenticationFilter(objectMapper);
     }
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
-        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenProvider, redisService);
+        return new LoginAuthenticationSuccessHandler(objectMapper, tokenService);
+    }
+
+    private LogoutHandler createLogoutHandler() {
+        return new LogoutTokenHandler(objectMapper, tokenService);
+    }
+
+    private LogoutSuccessHandler createLogoutSuccessHandler() {
+        return new LogoutTokenSuccessHandler(objectMapper);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {
-        return new SecurityAuthenticationFailureHandler(objectMapper);
+        return new LoginAuthenticationFailureHandler(objectMapper);
     }
 
     private AccessDeniedHandler createAccessDeniedHandler() {

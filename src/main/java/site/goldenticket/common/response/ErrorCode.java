@@ -22,7 +22,6 @@ public enum ErrorCode {
     COMMON_NEGO_TIMEOUT(BAD_REQUEST,"20분이 지나 제안할수 없습니다"),
     COMMON_NEGO_ALREADY_NEGOTIATING(BAD_REQUEST,"이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
 
-
     // Auth
     EMPTY_EMAIL(BAD_REQUEST, "이메일은 필수 값 입니다."),
     EMPTY_PASSWORD(BAD_REQUEST, "비밀번호는 필수 값 입니다."),
@@ -31,11 +30,13 @@ public enum ErrorCode {
     LOGIN_FAIL(BAD_REQUEST, "이메일, 비밀번호를 확인해주세요."),
     INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 토큰 입니다."),
     SAVE_REFRESH_TOKEN_FAILED(UNAUTHORIZED, "Token 저장 중 오류가 발생 했습니다."),
+    EMPTY_REFRESH_TOKEN(BAD_REQUEST, "Refresh Token은 필수 값 입니다."),
+    EMPTY_ACCESS_TOKEN(BAD_REQUEST, "Access Token은 필수 값 입니다."),
+    LOGOUT_ACCESS_TOKEN(UNAUTHORIZED, "로그아웃 된 토큰입니다."),
 
     // User
     ALREADY_EXIST_EMAIL(BAD_REQUEST, "이미 사용중인 이메일입니다. 이미 가입하신 적이 있다면 로그인을 시도해주세요"),
     ALREADY_EXIST_NICKNAME(BAD_REQUEST, "이미 사용중인 아이디입니다."),
-
     ;
 
     private final HttpStatus httpStatus;

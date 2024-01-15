@@ -18,12 +18,20 @@ public class CommonResponse<T> {
         this.data = data;
     }
 
+    public static CommonResponse<Void> ok() {
+        return ok(null);
+    }
+
     public static <T> CommonResponse<T> ok(T data) {
         return ok(null, data);
     }
 
     public static <T> CommonResponse<T> ok(String message, T data) {
         return new CommonResponse<>(SUCCESS, message, data);
+    }
+
+    public static <T> CommonResponse<T> fail(T data) {
+        return fail(null, data);
     }
 
     public static CommonResponse<Void> fail(String message) {

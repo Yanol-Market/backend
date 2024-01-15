@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
 import site.goldenticket.common.entiy.BaseTimeEntity;
 
@@ -20,6 +21,7 @@ import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "users")
 @SQLRestriction("deleted = false")
+@ToString(exclude = {"password", "agreement"})
 public class User extends BaseTimeEntity {
 
     @Id
