@@ -22,10 +22,10 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import site.goldenticket.common.security.authentication.AuthenticationConfigurer;
-import site.goldenticket.common.security.authentication.SecurityAuthenticationFailureHandler;
-import site.goldenticket.common.security.authentication.SecurityAuthenticationFilter;
-import site.goldenticket.common.security.authentication.SecurityAuthenticationSuccessHandler;
+import site.goldenticket.common.security.authentication.LoginAuthenticationConfigurer;
+import site.goldenticket.common.security.authentication.LoginAuthenticationFailureHandler;
+import site.goldenticket.common.security.authentication.LoginAuthenticationFilter;
+import site.goldenticket.common.security.authentication.LoginAuthenticationSuccessHandler;
 import site.goldenticket.common.security.authentication.token.TokenProvider;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.authorization.SecurityAccessDeniedHandler;
@@ -82,7 +82,7 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated()
                 )
                 .with(
-                        new AuthenticationConfigurer<>(createAuthenticationFilter()),
+                        new LoginAuthenticationConfigurer<>(createAuthenticationFilter()),
                         SecurityAuthenticationFilter -> SecurityAuthenticationFilter
                                 .successHandler(createAuthenticationSuccessHandler())
                                 .failureHandler(createAuthenticationFailureHandler())
@@ -124,15 +124,15 @@ public class SecurityConfiguration {
     }
 
     private AbstractAuthenticationProcessingFilter createAuthenticationFilter() {
-        return new SecurityAuthenticationFilter(objectMapper);
+        return new LoginAuthenticationFilter(objectMapper);
     }
 
     private AuthenticationSuccessHandler createAuthenticationSuccessHandler() {
-        return new SecurityAuthenticationSuccessHandler(objectMapper, tokenService);
+        return new LoginAuthenticationSuccessHandler(objectMapper, tokenService);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {
-        return new SecurityAuthenticationFailureHandler(objectMapper);
+        return new LoginAuthenticationFailureHandler(objectMapper);
     }
 
     private AccessDeniedHandler createAccessDeniedHandler() {

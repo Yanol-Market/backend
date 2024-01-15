@@ -20,7 +20,7 @@ import static site.goldenticket.common.response.ErrorCode.LOGIN_FAIL;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SecurityAuthenticationFailureHandler implements AuthenticationFailureHandler {
+public class LoginAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     private final ObjectMapper objectMapper;
 
