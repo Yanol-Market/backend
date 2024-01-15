@@ -13,3 +13,8 @@ spring:
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
+
+jwt:
+  secret: ${SECRET_KEY}
+  grant-type: ${GRANT_TYPE}
+  token-validate-in-seconds: ${VALIDATE_TIME}

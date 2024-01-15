@@ -1,4 +1,4 @@
-package site.goldenticket.common;
+package site.goldenticket.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.extension.ExtendWith;
