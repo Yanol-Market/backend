@@ -60,6 +60,13 @@ public class TokenProvider {
         return claim;
     }
 
+    public String getSubject(String token)
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        Claims claims = getClaims(token);
+        return claims.getSubject();
+    }
+
+
     private SecretKey getSecretKey(String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);

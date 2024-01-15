@@ -31,4 +31,14 @@ public class TokenServiceImpl implements TokenService {
 
         return AuthenticationToken.of(token);
     }
+
+    @Override
+    public void removeRefreshToken(String refreshToken) {
+        String randomToken = tokenProvider.getSubject(refreshToken);
+        log.info("삭제 RefreshToken randomToken = [{}]", randomToken);
+
+        if (redisService.delete(randomToken)) {
+            log.info("[{}} RefreshToken 삭제 성공", randomToken);
+        }
+    }
 }
