@@ -29,6 +29,7 @@ public class LogoutTokenHandler implements LogoutHandler {
             Authentication authentication
     ) {
         LogoutRequest logoutRequest = getLogoutInfo(request);
+        log.info("Logout Info = {}", logoutRequest);
         tokenService.removeRefreshToken(logoutRequest.refreshToken());
         tokenService.addBlackList(logoutRequest.accessToken());
     }
