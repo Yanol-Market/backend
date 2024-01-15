@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static site.goldenticket.common.response.ErrorCode.INVALID_TOKEN;
+import static site.goldenticket.common.response.ErrorCode.LOGOUT_ACCESS_TOKEN;
 import static site.goldenticket.common.security.authorization.SecurityErrorCode.ERROR_KEY;
 import static site.goldenticket.common.security.authorization.SecurityErrorCode.TOKEN_EXPIRED;
 
@@ -51,6 +52,10 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
             String token = authorization.substring(GRANT_TYPE.length());
             log.info("accessToken = {}", token);
 
+            if (tokenService.isBlackListToken(token)) {
+                throw new InvalidJwtException(LOGOUT_ACCESS_TOKEN);
+            }
+
             try {
                 String username = tokenService.getUsername(token);
                 log.info("Authority username = {}", username);
@@ -73,9 +78,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private boolean isValidToken(String token) {
-        return StringUtils.hasText(token)
-                && token.startsWith(GRANT_TYPE)
-                && tokenService.isBlackListToken(token);
+        return StringUtils.hasText(token) && token.startsWith(GRANT_TYPE);
     }
 
     private UsernamePasswordAuthenticationToken createAuthentication(UserDetails userDetails) {
