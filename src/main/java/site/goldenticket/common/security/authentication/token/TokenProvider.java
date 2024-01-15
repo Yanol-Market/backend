@@ -11,7 +11,10 @@ import site.goldenticket.common.security.authentication.token.dto.Token;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 import static org.springframework.security.config.Elements.JWT;
@@ -23,6 +26,7 @@ public class TokenProvider {
     private static final int MILLISECONDS_TO_SECONDS = 1000;
     private static final int TOKEN_REFRESH_INTERVAL = 24;
     private static final String TOKEN_CLAIM_KEY = "username";
+    private static final String TOKEN_EXPIRATION_KEY = "exp";
 
     private final Key key;
     private final String grantType;
@@ -60,12 +64,17 @@ public class TokenProvider {
         return claim;
     }
 
+    public Long getExpiration(String token)
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        Claims claims = getClaims(token);
+        return claims.get(TOKEN_EXPIRATION_KEY, Long.class);
+    }
+
     public String getSubject(String token)
             throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
         Claims claims = getClaims(token);
         return claims.getSubject();
     }
-
 
     private SecretKey getSecretKey(String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);

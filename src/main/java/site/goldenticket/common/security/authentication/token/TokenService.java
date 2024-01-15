@@ -7,4 +7,6 @@ public interface TokenService {
     AuthenticationToken generatedToken(String randomToken, String username);
 
     void removeRefreshToken(String refreshToken);
+
+    void addBlackList(String accessToken);
 }

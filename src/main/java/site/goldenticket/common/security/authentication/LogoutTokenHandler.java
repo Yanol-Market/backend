@@ -30,6 +30,7 @@ public class LogoutTokenHandler implements LogoutHandler {
     ) {
         LogoutRequest logoutRequest = getLogoutInfo(request);
         tokenService.removeRefreshToken(logoutRequest.refreshToken());
+        tokenService.addBlackList(logoutRequest.accessToken());
     }
 
     private LogoutRequest getLogoutInfo(HttpServletRequest request) {
