@@ -20,7 +20,7 @@ public enum ErrorCode {
     COMMON_NEGO_APPROVAL_REQUIRED(BAD_REQUEST, "네고 승인이 필요합니다."),
     COMMON_ONLY_CAN_DENY_WHEN_NEGOTIATING(BAD_REQUEST,"네고 중인 경우에만 거절할 수 있습니다."),
     COMMON_NEGO_TIMEOUT(BAD_REQUEST,"20분이 지나 제안할수 없습니다"),
-    COMMON_NEGO_ALREADY_NEGOTIATING(BAD_REQUEST,"이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다.")
+    COMMON_NEGO_ALREADY_NEGOTIATING(BAD_REQUEST,"이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
 
 
     // Auth
