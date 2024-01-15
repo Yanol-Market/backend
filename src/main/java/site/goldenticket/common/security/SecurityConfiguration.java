@@ -80,6 +80,7 @@ public class SecurityConfiguration {
                 )
                 .logout(logoutConfigurer -> logoutConfigurer
                         .addLogoutHandler(createLogoutHandler())
+                        .logoutSuccessHandler(createLogoutSuccessHandler())
                 )
                 .with(
                         new LoginAuthenticationConfigurer<>(createAuthenticationFilter()),
@@ -133,6 +134,10 @@ public class SecurityConfiguration {
 
     private LogoutHandler createLogoutHandler() {
         return new LogoutTokenHandler(objectMapper, tokenService);
+    }
+
+    private LogoutSuccessHandler createLogoutSuccessHandler() {
+        return new LogoutTokenSuccessHandler(objectMapper);
     }
 
     private AuthenticationFailureHandler createAuthenticationFailureHandler() {

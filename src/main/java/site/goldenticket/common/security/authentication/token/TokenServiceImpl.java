@@ -53,7 +53,7 @@ public class TokenServiceImpl implements TokenService {
     public void removeRefreshToken(String refreshToken) {
         try {
             String randomToken = tokenProvider.getSubject(refreshToken);
-            log.info("삭제 RefreshToken randomToken = [{}]", randomToken);
+            log.info("Remove randomToken = [{}]", randomToken);
 
             if (redisService.delete(REDIS_REFERS_TOKEN_PREFIX + randomToken)) {
                 log.info("[{}] RefreshToken 삭제 성공", randomToken);
