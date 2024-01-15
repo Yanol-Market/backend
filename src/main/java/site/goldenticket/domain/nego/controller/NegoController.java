@@ -16,9 +16,9 @@ import site.goldenticket.domain.nego.service.NegoService;
 public class NegoController {
     private final NegoService negoService;
 
-    @PostMapping("/proposePrice")
-    public CommonResponse<PriceProposeResponse> proposePrice(@RequestBody PriceProposeRequest request) {
-        PriceProposeResponse response = negoService.proposePrice(request);
+    @PostMapping("/proposePrice{productId}")
+    public CommonResponse<PriceProposeResponse> proposePrice(@RequestBody PriceProposeRequest request, @PathVariable Long productId) {
+        PriceProposeResponse response = negoService.proposePrice(productId, request);
         return CommonResponse.ok("네고가 전달되었습니다.", response);
     }
     // 가격제안은 /proposePrice/productId가 될 예정
