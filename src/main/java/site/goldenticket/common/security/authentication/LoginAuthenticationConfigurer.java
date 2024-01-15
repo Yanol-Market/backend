@@ -14,7 +14,7 @@ import static site.goldenticket.common.response.ErrorCode.EMPTY_FAILURE_HANDLER;
 import static site.goldenticket.common.response.ErrorCode.EMPTY_SUCCESS_HANDLER;
 
 @RequiredArgsConstructor
-public class AuthenticationConfigurer<T extends AbstractAuthenticationProcessingFilter>
+public class LoginAuthenticationConfigurer<T extends AbstractAuthenticationProcessingFilter>
         extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
     private final T authenticationFilter;
@@ -36,12 +36,12 @@ public class AuthenticationConfigurer<T extends AbstractAuthenticationProcessing
         );
     }
 
-    public AuthenticationConfigurer<T> successHandler(AuthenticationSuccessHandler successHandler) {
+    public LoginAuthenticationConfigurer<T> successHandler(AuthenticationSuccessHandler successHandler) {
         this.successHandler = successHandler;
         return this;
     }
 
-    public AuthenticationConfigurer<T> failureHandler(AuthenticationFailureHandler failureHandler) {
+    public LoginAuthenticationConfigurer<T> failureHandler(AuthenticationFailureHandler failureHandler) {
         this.failureHandler = failureHandler;
         return this;
     }

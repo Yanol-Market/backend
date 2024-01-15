@@ -17,14 +17,14 @@ import java.io.IOException;
 import static site.goldenticket.common.response.ErrorCode.COMMON_INVALID_PARAMETER;
 
 @Slf4j
-public class SecurityAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER =
             new AntPathRequestMatcher("/login", "POST");
 
     private final ObjectMapper objectMapper;
 
-    public SecurityAuthenticationFilter(ObjectMapper objectMapper) {
+    public LoginAuthenticationFilter(ObjectMapper objectMapper) {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
         this.objectMapper = objectMapper;
     }

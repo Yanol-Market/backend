@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.goldenticket.common.security.authentication.token.TokenProvider;
+import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.exception.InvalidJwtException;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
 
     private static final String GRANT_TYPE = "Bearer ";
 
-    private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -52,7 +52,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
             log.info("accessToken = {}", token);
 
             try {
-                String username = tokenProvider.getUsername(token);
+                String username = tokenService.getUsername(token);
                 log.info("Authority username = {}", username);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -73,7 +73,9 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private boolean isValidToken(String token) {
-        return StringUtils.hasText(token) && token.startsWith(GRANT_TYPE);
+        return StringUtils.hasText(token)
+                && token.startsWith(GRANT_TYPE)
+                && tokenService.isBlackListToken(token);
     }
 
     private UsernamePasswordAuthenticationToken createAuthentication(UserDetails userDetails) {

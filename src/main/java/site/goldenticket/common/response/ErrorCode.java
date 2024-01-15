@@ -30,6 +30,8 @@ public enum ErrorCode {
     LOGIN_FAIL(BAD_REQUEST, "이메일, 비밀번호를 확인해주세요."),
     INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 토큰 입니다."),
     SAVE_REFRESH_TOKEN_FAILED(UNAUTHORIZED, "Token 저장 중 오류가 발생 했습니다."),
+    EMPTY_REFRESH_TOKEN(BAD_REQUEST, "Refresh Token은 필수 값 입니다."),
+    EMPTY_ACCESS_TOKEN(BAD_REQUEST, "Access Token은 필수 값 입니다."),
 
     // User
     ALREADY_EXIST_EMAIL(BAD_REQUEST, "이미 사용중인 이메일입니다. 이미 가입하신 적이 있다면 로그인을 시도해주세요"),
