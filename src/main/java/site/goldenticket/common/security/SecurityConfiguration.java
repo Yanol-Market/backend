@@ -20,11 +20,11 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import site.goldenticket.common.security.authentication.*;
-import site.goldenticket.common.security.authentication.token.TokenProvider;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.authorization.SecurityAccessDeniedHandler;
 import site.goldenticket.common.security.authorization.SecurityAuthenticationEntryPoint;
@@ -57,7 +57,6 @@ public class SecurityConfiguration {
 
     private final ObjectMapper objectMapper;
     private final UserDetailsService userDetailsService;
-    private final TokenProvider tokenProvider;
     private final TokenService tokenService;
 
     @Bean
@@ -89,7 +88,7 @@ public class SecurityConfiguration {
                                 .failureHandler(createAuthenticationFailureHandler())
                 )
                 .with(
-                        new TokenAuthorityConfigurer(tokenProvider, userDetailsService),
+                        new TokenAuthorityConfigurer(tokenService, userDetailsService),
                         Customizer.withDefaults()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling

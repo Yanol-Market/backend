@@ -44,6 +44,12 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    public String getUsername(String token)
+            throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
+        return tokenProvider.getUsername(token);
+    }
+
+    @Override
     public void removeRefreshToken(String refreshToken) {
         try {
             String randomToken = tokenProvider.getSubject(refreshToken);
@@ -74,5 +80,10 @@ public class TokenServiceImpl implements TokenService {
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
             throw new InvalidJwtException(INVALID_TOKEN, e);
         }
+    }
+
+    @Override
+    public boolean isBlackListToken(String token) {
+        return redisService.get(REDIS_BLACK_LIST_PREFIX + token, String.class).isPresent();
     }
 }
