@@ -51,7 +51,7 @@ public class NegoServiceImpl implements NegoService {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMON_CANNOT_CONFIRM_NEGO);
         }
-        if (nego.getCount() == 2) {
+        if (nego.getCount() > 3) {
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMON_CANNOT_CONFIRM_NEGO);
         }
         return NegoResponse.fromEntity(nego);
@@ -93,10 +93,19 @@ public class NegoServiceImpl implements NegoService {
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
         Product product = productService.getProduct(productId);
+        Nego nego = negoRepository.findByProduct(product);
 
         // 사용자별 상품에 대한 네고 조회
         Nego userNego = negoRepository.findByUserAndProduct(user, product)
                 .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
+
+        if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+        }
+
+        if(userNego.getStatus()==NegotiationStatus.NEGOTIATION_TIMEOUT){
+            throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
+        }
 
         // count 증가
         int newCount = userNego.getCount() + 1;
@@ -150,22 +159,20 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
-        if (nego.getConsent()) {
-            Integer originPrice = nego.getProduct().getOriginPrice();
+        Integer originPrice = nego.getProduct().getOriginPrice();
 
 
-            // 네고의 가격을 상품의 원래 가격으로 업데이트
-            nego.setPrice(originPrice);
+        // 네고의 가격을 상품의 원래 가격으로 업데이트
+        nego.setPrice(originPrice);
 
-            // 네고 상태를 완료로 변경
-            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-            nego.setUpdatedAt(LocalDateTime.now());
-            negoRepository.save(nego);
+        // 네고 상태를 완료로 변경
+        nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+        nego.setConsent(Boolean.TRUE);
+        nego.setUpdatedAt(LocalDateTime.now());
+        negoRepository.save(nego);
 
-            return PayResponse.fromEntity(nego);
-        } else {
-            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_INVALID_PARAMETER);
-        }
+        return PayResponse.fromEntity(nego);
+
     }
 
     @Override
