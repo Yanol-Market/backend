@@ -21,7 +21,7 @@ public class Chat extends BaseTimeEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    private Long ChatRoomId;
+    private Long chatRoomId;
 
     @Enumerated(EnumType.STRING)
     private SenderType senderType;
@@ -35,7 +35,7 @@ public class Chat extends BaseTimeEntity {
     @Builder
     public Chat(Long id, Long chatRoomId, SenderType senderType, Long userId, String content, Boolean viewed) {
         this.id = id;
-        this.ChatRoomId = chatRoomId;
+        this.chatRoomId = chatRoomId;
         this.senderType = senderType;
         this.userId = userId;
         this.content = content;
