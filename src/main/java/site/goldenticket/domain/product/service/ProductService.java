@@ -213,6 +213,10 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
+    public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
     private String getOrCreateAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         String anonymousKey = null;
