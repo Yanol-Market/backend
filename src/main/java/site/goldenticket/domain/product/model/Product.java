@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.goldenticket.common.constants.AreaCode;
-import site.goldenticket.common.constants.ProductStatus;
-import site.goldenticket.common.constants.ReservationType;
+import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.domain.product.constants.ProductStatus;
+import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -43,8 +43,10 @@ public class Product {
     private int viewCount;
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
+    private boolean sellerViewCheck;
 
     private Long reservationId;
+    private Long userId;
 
     @Builder
     private Product(
@@ -67,7 +69,9 @@ public class Product {
             String content,
             int viewCount,
             ProductStatus productStatus,
-            Long reservationId
+            Long reservationId,
+            Long userId,
+            boolean sellerViewCheck
     ) {
         this.areaCode = areaCode;
         this.accommodationImage = accommodationImage;
@@ -89,6 +93,8 @@ public class Product {
         this.viewCount = viewCount;
         this.productStatus = productStatus;
         this.reservationId = reservationId;
+        this.userId = userId;
+        this.sellerViewCheck = sellerViewCheck;
     }
 
     public void update(Integer goldenPrice, String content) {
