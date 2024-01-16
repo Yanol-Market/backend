@@ -76,7 +76,8 @@ public class NegoServiceImpl implements NegoService {
 
     // 가격제안은 productId를 받아서 사용할 예정 아래는 임시!
     @Override
-    public PriceProposeResponse proposePrice(PriceProposeRequest request) {
+    public PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request) {
+        // productId 활용 추가
         Nego nego = request.toEntity();
         updateCountForNewNego(nego);
         nego.setUpdatedAt(LocalDateTime.now());
@@ -91,8 +92,8 @@ public class NegoServiceImpl implements NegoService {
         }
 
         // 네고를 한 사용자의 ID로 네고를 찾음
-        Optional<Nego> userNegoOptional = negoRepository.findLatestNegoByUserIdOrderByCreatedAtDesc(
-                        nego.getUserId(), PageRequest.of(0, 1))
+        Optional<Nego> userNegoOptional = negoRepository.findLatestNegoByUserIdAndProductIdOrderByCreatedAtDesc(
+                        nego.getUserId(), productId, PageRequest.of(0, 1))
                 .stream()
                 .findFirst();
 
@@ -126,6 +127,7 @@ public class NegoServiceImpl implements NegoService {
 
         return PriceProposeResponse.fromEntity(nego);
     }
+
 
 
     @Override

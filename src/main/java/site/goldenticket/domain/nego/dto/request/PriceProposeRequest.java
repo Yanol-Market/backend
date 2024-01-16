@@ -17,15 +17,12 @@ public class PriceProposeRequest {
     @NotNull
     private Long userId;
     @NotNull
-    private Long productId;
-    @NotNull
     private Integer count; // 네고 횟수
 
     public Nego toEntity(){
         return Nego.builder()
                 .price(price)
                 .count(count)
-                .productId(productId)
                 .userId(userId)
                 .createdAt(LocalDateTime.now())
                 .build();
