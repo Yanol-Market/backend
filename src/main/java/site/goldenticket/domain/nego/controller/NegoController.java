@@ -1,9 +1,11 @@
 package site.goldenticket.domain.nego.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
+import site.goldenticket.domain.nego.dto.response.NegoAvailableResponse;
 import site.goldenticket.domain.nego.dto.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.response.PayResponse;
 import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
@@ -14,10 +16,12 @@ import site.goldenticket.domain.nego.service.NegoService;
 @RequiredArgsConstructor
 
 public class NegoController {
+
     private final NegoService negoService;
 
     @PostMapping("/proposePrice{productId}")
-    public CommonResponse<PriceProposeResponse> proposePrice(@RequestBody PriceProposeRequest request, @PathVariable Long productId) {
+    public CommonResponse<PriceProposeResponse> proposePrice(
+        @RequestBody PriceProposeRequest request, @PathVariable Long productId) {
         PriceProposeResponse response = negoService.proposePrice(productId, request);
         return CommonResponse.ok("네고가 전달되었습니다.", response);
     }
@@ -30,7 +34,7 @@ public class NegoController {
     }
 
     @PatchMapping("/deny/{negoId}")
-    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId){
+    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId) {
         NegoResponse response = negoService.denyPrice(negoId);
         return CommonResponse.ok("네고가 거절되었습니다", response);
     }
@@ -40,6 +44,14 @@ public class NegoController {
         PayResponse payResponse = negoService.pay(negoId);
         return CommonResponse.ok("결제가 진행됩니다", payResponse);
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<CommonResponse<NegoAvailableResponse>> getNegoAvailable(
+        @RequestParam Long productId) {
+        Long userId = 1L; //시큐리티 적용 후 수정 예정
+        return ResponseEntity.ok(CommonResponse.ok(negoService.isAvailableNego(userId, productId)));
+    }
+
  /*   @PostMapping("/payOriginPrice/{negoId}")
     public CommonResponse<PayResponse> payOriginPrice(@PathVariable Long negoId) {
         PayResponse payResponse = negoService.payOriginPrice(negoId);
