@@ -1,10 +1,9 @@
-package site.goldenticket.domain.reservation.dto;
+package site.goldenticket.dummy.reservation.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import site.goldenticket.common.constants.ReservationStatus;
-import site.goldenticket.common.constants.ReservationType;
-import site.goldenticket.domain.reservation.model.Reservation;
+import site.goldenticket.dummy.reservation.constants.ReservationType;
+import site.goldenticket.dummy.reservation.model.Reservation;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -14,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 public class ReservationResponse {
 
     private Long reservationId;
-    private ReservationStatus reservationStatus;
     private String accommodationName;
     private ReservationType reservationType;
     private String roomName;
@@ -31,7 +29,6 @@ public class ReservationResponse {
 
         return ReservationResponse.builder()
                 .reservationId(reservation.getId())
-                .reservationStatus(reservation.getReservationStatus())
                 .accommodationName(reservation.getAccommodationName())
                 .reservationType(reservation.getReservationType())
                 .roomName(reservation.getRoomName())

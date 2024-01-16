@@ -1,12 +1,12 @@
-package site.goldenticket.domain.reservation.model;
+package site.goldenticket.dummy.reservation.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.goldenticket.common.constants.AreaCode;
-import site.goldenticket.common.constants.ReservationStatus;
-import site.goldenticket.common.constants.ReservationType;
+import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.dummy.reservation.constants.ReservationStatus;
+import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -80,9 +80,5 @@ public class Reservation {
         this.yanoljaPrice = yanoljaPrice;
         this.reservationStatus = reservationStatus;
         this.yaUserId = yaUserId;
-    }
-
-    public void setReservationStatus(ReservationStatus reservationStatus) {
-        this.reservationStatus = reservationStatus;
     }
 }

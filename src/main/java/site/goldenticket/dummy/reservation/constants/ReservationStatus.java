@@ -1,4 +1,4 @@
-package site.goldenticket.common.constants;
+package site.goldenticket.dummy.reservation.constants;
 
 public enum ReservationStatus {
     REGISTERED,
