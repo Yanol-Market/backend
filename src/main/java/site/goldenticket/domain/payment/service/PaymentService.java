@@ -83,7 +83,7 @@ public class PaymentService {
             }
         }
 
-        Order order = Order.of(product.getId(), user.getId(), price);
+        Order order = Order.of(product.getId(), user.getId(), NegotiationStatus.NEGOTIATING,price);
         Order savedOrder = orderRepository.save(order);
 
         iamportRepository.prepare(savedOrder.getId(), BigDecimal.valueOf(savedOrder.getTotalPrice()));

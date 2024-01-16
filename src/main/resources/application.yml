@@ -28,8 +28,3 @@ jwt:
   secret: VTNCeWFXNW5JRk5sWTNWeWFYUjVJRWR2YkdSbGJpQlVhV05yWlhR
   grant-type: Bearer
   token-validate-in-seconds: 3600
-
-iamport:
-  imp-key: 8451788258088746
-  imp-secret: 29wNxnkGy3IcYdQeCjYqleFge5aeKEOVXhOPjHVxplt89Cc1QnWYl7X9ZWBkWiLctBT6GN91mM1xeFca
-

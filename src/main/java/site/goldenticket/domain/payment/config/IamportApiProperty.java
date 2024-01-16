@@ -4,13 +4,13 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 
 @Getter
 @Configuration
+@PropertySource("secret.properties")
 public class IamportApiProperty {
-    @Value("${iamport.imp-key}")
+    @Value("${imp_key}")
     private String impKey;
-    @Value("${iamport.imp-secret}")
+    @Value("${imp_secret}")
     private String impSecret;
 }
