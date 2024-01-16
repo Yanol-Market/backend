@@ -1,9 +1,9 @@
 package site.goldenticket.domain.payment.dto.response;
 
 import lombok.Builder;
-import site.goldenticket.common.constants.ReservationType;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.user.entity.User;
+import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
