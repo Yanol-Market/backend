@@ -49,7 +49,8 @@ public class SecurityConfiguration {
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
             "/favicon.ico",
             "/docs/**",
-            "/users/check/**"
+            "/users/check/**",
+            "/products/**"
     };
 
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
