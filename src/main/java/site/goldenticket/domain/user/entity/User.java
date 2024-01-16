@@ -8,12 +8,16 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
 import site.goldenticket.common.entiy.BaseTimeEntity;
+import site.goldenticket.common.exception.CustomException;
+
+import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
+import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_YANOLJA_ID;
 import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 
 @Getter
@@ -69,5 +73,13 @@ public class User extends BaseTimeEntity {
 
     public void registerAlertSetting(Agreement agreement) {
         this.agreement = agreement;
+    }
+
+    public void registerYanoljaId(Long yanoljaId) {
+        if (!Objects.isNull(this.yanoljaId)) {
+            throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
+        }
+
+        this.yanoljaId = yanoljaId;
     }
 }
