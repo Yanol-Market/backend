@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -25,13 +27,13 @@ public class Nego {
     private Long productId;
 
 
-    //@ManyToOne
-    //@JoinColumn(name = "user_id")
-    //private User user; //유저ID
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user; //유저ID
 
-    //@ManyToOne
-    //@JoinColumn(name = "product_id")
-    //private Product product; // 상품ID
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product; // 상품ID
 
     @Enumerated(EnumType.STRING)
     private NegotiationStatus status; // 네고 상태
@@ -79,4 +81,5 @@ public class Nego {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
 }

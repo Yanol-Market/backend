@@ -30,7 +30,7 @@ public class NegoController {
     }
 
     @PatchMapping("/deny/{negoId}")
-    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId){
+    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId) {
         NegoResponse response = negoService.denyPrice(negoId);
         return CommonResponse.ok("네고가 거절되었습니다", response);
     }
@@ -40,9 +40,11 @@ public class NegoController {
         PayResponse payResponse = negoService.pay(negoId);
         return CommonResponse.ok("결제가 진행됩니다", payResponse);
     }
- /*   @PostMapping("/payOriginPrice/{negoId}")
+
+    @PostMapping("/payOriginPrice/{negoId}")
     public CommonResponse<PayResponse> payOriginPrice(@PathVariable Long negoId) {
         PayResponse payResponse = negoService.payOriginPrice(negoId);
         return CommonResponse.ok("결제가 완료되었습니다", payResponse);
-    }*/
+    }
+
 }

@@ -6,12 +6,15 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
+import site.goldenticket.domain.nego.dto.response.HandoverResponse;
 import site.goldenticket.domain.nego.dto.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.response.PayResponse;
 import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.product.service.ProductService;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -22,6 +25,7 @@ import java.util.Optional;
 public class NegoServiceImpl implements NegoService {
 
     private final NegoRepository negoRepository;
+    private final ProductService productService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId) {
@@ -160,27 +164,50 @@ public class NegoServiceImpl implements NegoService {
     }
 
 
-//    @Override
-//    public PayResponse payOriginPrice(Long negoId) {
-//        Nego nego = negoRepository.findById(negoId)
-//                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
-//
-//        if (nego.getConsent()) {
-//            Integer originPrice = nego.getProduct().getOriginPrice();
-//
-//
-//            // 네고의 가격을 상품의 원래 가격으로 업데이트
-//            nego.setPrice(originPrice);
-//
-//            // 네고 상태를 완료로 변경
-//            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-//            nego.setUpdatedAt(LocalDateTime.now());
-//            negoRepository.save(nego);
-//
-//            return PayResponse.fromEntity(nego);
-//        } else {
-//            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_INVALID_PARAMETER);
-//        }
-//    }
+    @Override
+    public PayResponse payOriginPrice(Long negoId) {
+        Nego nego = negoRepository.findById(negoId)
+                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
+        if (nego.getConsent()) {
+            Integer originPrice = nego.getProduct().getOriginPrice();
+
+
+            // 네고의 가격을 상품의 원래 가격으로 업데이트
+            nego.setPrice(originPrice);
+
+            // 네고 상태를 완료로 변경
+            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+            nego.setUpdatedAt(LocalDateTime.now());
+            negoRepository.save(nego);
+
+            return PayResponse.fromEntity(nego);
+        } else {
+            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_INVALID_PARAMETER);
+        }
+    }
+
+    @Override
+    public HandoverResponse handOverProduct(Long negoId) {
+        // Nego ID로 Nego 정보 가져오기
+        Nego nego = negoRepository.findById(negoId)
+                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
+
+        // Nego의 Product ID로 Product 정보 가져오기
+        Product product = productService.findProductById(nego.getProductId());
+
+        // 상태가 결제 완료인 경우에만 양도 가능
+        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+            // 양도를 위한 작업 수행 (예: 상품 소유자 변경 등)
+
+            // HandoverResponse 생성
+            HandoverResponse handoverResponse = HandoverResponse.fromEntity(product, nego);
+
+            // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
+            return handoverResponse;
+        } else {
+            // 양도 불가능한 상태인 경우 예외 처리
+            throw new CustomException("양도가 불가능한 상태입니다.", ErrorCode.COMMON_CANNOT_HANDOVER);
+        }
+    }
 }
