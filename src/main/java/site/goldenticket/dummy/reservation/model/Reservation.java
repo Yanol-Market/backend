@@ -81,4 +81,8 @@ public class Reservation {
         this.reservationStatus = reservationStatus;
         this.yaUserId = yaUserId;
     }
+
+    public void setReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
+    }
 }
