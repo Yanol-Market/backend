@@ -18,3 +18,7 @@ jwt:
   secret: ${SECRET_KEY}
   grant-type: ${GRANT_TYPE}
   token-validate-in-seconds: ${VALIDATE_TIME}
+
+iamport:
+  imp-key: ${IMP_KEY}
+  imp-secret: ${IMP_SECRET}
