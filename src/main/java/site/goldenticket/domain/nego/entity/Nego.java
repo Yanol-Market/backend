@@ -79,4 +79,8 @@ public class Nego {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public void completed() {
+        status = NegotiationStatus.NEGOTIATION_COMPLETED;
+    }
 }
