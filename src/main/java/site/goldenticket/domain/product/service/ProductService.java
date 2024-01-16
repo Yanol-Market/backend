@@ -14,12 +14,14 @@ import site.goldenticket.domain.product.repository.ProductRepository;
 @RequiredArgsConstructor
 @Slf4j
 public class ProductService {
+
     private final ProductRepository productRepository;
 
     public Product findProduct(Long productId) {
         return productRepository.findById(productId)
             .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
+
     public List<Product> findProductListByUserId(Long userId) {
         return productRepository.findAllByUserId(userId);
     }
