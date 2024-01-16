@@ -22,4 +22,7 @@ public interface NegoRepository extends JpaRepository<Nego, Long> {
     Optional<Nego> findLatestNegoByUserIdOrderByCreatedAtDesc(Long userId, PageRequest of);
 
     Optional<Nego> findLatestNegoByUserIdAndProductIdOrderByCreatedAtDesc(Long userId, Long productId, PageRequest of);
+
+    Optional<Nego> findFirstByUserIdAndProductIdOrderByCreatedAtDesc(Long userId, Long productId);
+
 }
