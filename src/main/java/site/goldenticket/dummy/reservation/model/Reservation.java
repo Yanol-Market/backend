@@ -1,20 +1,23 @@
-package site.goldenticket.domain.reservation.model;
+package site.goldenticket.dummy.reservation.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import site.goldenticket.common.constants.AreaCode;
-import site.goldenticket.common.constants.ReservationStatus;
-import site.goldenticket.common.constants.ReservationType;
+import lombok.NoArgsConstructor;
+import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.dummy.reservation.constants.ReservationStatus;
+import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Getter
+@NoArgsConstructor(access = PROTECTED)
 public class Reservation {
     @Id
-    @Column(name = "reservation_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -38,7 +41,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    private Long yaMemberId;
+    private Long yaUserId;
 
     @Builder
     private Reservation(
@@ -57,7 +60,8 @@ public class Reservation {
             LocalDate reservationDate,
             int originPrice,
             int yanoljaPrice,
-            ReservationStatus reservationStatus
+            ReservationStatus reservationStatus,
+            Long yaUserId
     ) {
         this.areaCode = areaCode;
         this.accommodationImage = accommodationImage;
@@ -75,5 +79,6 @@ public class Reservation {
         this.originPrice = originPrice;
         this.yanoljaPrice = yanoljaPrice;
         this.reservationStatus = reservationStatus;
+        this.yaUserId = yaUserId;
     }
 }
