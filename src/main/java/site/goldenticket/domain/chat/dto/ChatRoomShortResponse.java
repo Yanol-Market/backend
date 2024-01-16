@@ -10,7 +10,6 @@ public record ChatRoomShortResponse(
     String receiverProfileImage,
     String accommodationName,
     String roomName,
-    Integer price,
     String lastMessage,
     LocalDateTime lastMessageCreatedAt
 ) {

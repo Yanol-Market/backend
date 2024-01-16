@@ -39,7 +39,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
         Product product = productService.findProduct(chatRoom.getProductId());
-        Long sellerId = 1L;  //판매자 ID 추후 수정 예정
+        Long sellerId = product.getUserId();
         Long buyerId = chatRoom.getUserId();
         Long receiverId = (sellerId.equals(userId)) ? buyerId : sellerId; //채팅 상대 ID
         User receiver = userService.findUser(receiverId);
@@ -50,21 +50,15 @@ public class ChatService {
             .roomName(product.getRoomName())
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
-            .price(product.getGoldenPrice()) //네고 승인 시, 네고가격으로 수정하는 로직 추가 예정
+            .price(product.getGoldenPrice()) // *네고 승인 시, 네고가격으로 수정하는 로직 추가 예정
             .productId(product.getId())
             .productStatus(product.getProductStatus())
             .build();
 
-        List<Chat> chatList = chatRepository.findAllByChatRoomId(chatRoomId);
+        List<Chat> chatList = getChatList(chatRoomId, userId);
         List<ChatResponse> chatResponseList = new ArrayList<>();
 
         for (Chat chat : chatList) {
-
-            // 시스템 메세지 필터
-            if (chat.getSenderType().equals(SenderType.SYSTEM) && chat.getUserId() != userId) {
-                continue;
-            }
-
             ChatResponse chatResponse = ChatResponse.builder()
                 .chatId(chat.getId())
                 .senderType(chat.getSenderType())
@@ -110,14 +104,14 @@ public class ChatService {
             for (ChatRoom chatRoom : chatRoomList) {
                 Product product = productService.findProduct(chatRoom.getProductId());
                 User receiver = userService.findUser(product.getUserId());
-                Chat lastChat = getLastChat(chatRoom.getId(), userId);
+                // *채팅 내역이 비어 있을 경우 예외 처리 추가 예정
+                Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .receiverNickname(receiver.getNickname())
                     .receiverProfileImage(receiver.getImageUrl())
                     .accommodationName(product.getAccommodationName())
                     .roomName(product.getRoomName())
-                    .price(product.getGoldenPrice())
                     .lastMessage(lastChat.getContent())
                     .lastMessageCreatedAt(lastChat.getCreatedAt())
                     .build());
@@ -132,33 +126,28 @@ public class ChatService {
             for (ChatRoom chatRoom : chatRoomList) {
                 User receiver = userService.findUser(chatRoom.getUserId());
                 Product product = productService.findProduct(chatRoom.getProductId());
-                Chat chat = getLastChat(chatRoom.getId(), userId);
+                Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .receiverNickname(receiver.getNickname())
                     .receiverProfileImage(receiver.getImageUrl())
                     .accommodationName(product.getAccommodationName())
                     .roomName(product.getRoomName())
-                    .price(product.getGoldenPrice())
-                    .lastMessage(chat.getContent())
-                    .lastMessageCreatedAt(chat.getCreatedAt())
+                    .lastMessage(lastChat.getContent())
+                    .lastMessageCreatedAt(lastChat.getCreatedAt())
                     .build());
             }
         }
         return chatRoomShortResponseList;
     }
 
-    private Chat getLastChat(Long chatRoomId, Long userId) {
+    private List<Chat> getChatList(Long chatRoomId, Long userId) {
         List<Chat> chatList = chatRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
         //SenderType이 SYSTEM인 경우 userId와 일치하지 않는 chat은 삭제
         chatList.removeIf(
             chat -> chat.getSenderType().equals(SenderType.SYSTEM) && !chat.getUserId()
                 .equals(userId));
-        //가장 최신 chat 추출
-        if (!chatList.isEmpty()) {
-            return chatList.get(0);
-        } else {
-            return null;
-        }
+
+        return chatList;
     }
 }
