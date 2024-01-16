@@ -17,13 +17,13 @@ import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
 import site.goldenticket.domain.product.dto.ProductDetailResponse;
 import site.goldenticket.domain.product.dto.ProductRequest;
-import site.goldenticket.domain.product.dto.ReservationResponse;
 import site.goldenticket.domain.product.dto.ProductResponse;
 import site.goldenticket.domain.product.dto.RegionProductResponse;
 import site.goldenticket.domain.product.dto.SearchProductResponse;
 import site.goldenticket.domain.product.search.service.SearchService;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
+import site.goldenticket.dummy.reservation.dto.ReservationResponse;
 
 import java.time.LocalDate;
 import java.util.List;
