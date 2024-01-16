@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.domain.nego.service.NegoService;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
@@ -17,6 +18,7 @@ import site.goldenticket.domain.payment.repository.PaymentCancelDetailRepository
 import site.goldenticket.domain.payment.repository.PaymentRepository;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
 
@@ -32,18 +34,19 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentCancelDetailRepository paymentCancelDetailRepository;
     private final UserService userService;
-    //    private final NegoService negoService;
+    private final NegoService negoService;
     private final ProductService productService;
 
-    public PaymentDetailResponse getPaymentDetail(Long productId) {
-        //TODO: 유저 id 가져오기, 해당 유저 유효성 검사
-        User user = User.builder().build();
+    public PaymentDetailResponse getPaymentDetail(Long productId, PrincipalDetails principalDetails) {
+        User user = userService.getUser(principalDetails.getUserId());
 
         //TODO: productId,userId 이용하여 해당 유저가 네고를 진행 하였는지 확인, 진행하였다면 상품 가격 바꾸기
         int price = 1000;
 
+
         //TODO: productId로 상품 테이블에서 상품 가져오기
         Product product = Product.builder().build();
+        productService.getProduct(productId);
         if (product.isNotOnSale()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
@@ -52,7 +55,7 @@ public class PaymentService {
     }
 
     //    결제 테이블에 결제 정보 검증하고 사전에 결제 정보 저장
-    public PaymentReadyResponse preparePayment(Long productId) {
+    public PaymentReadyResponse preparePayment(Long productId, PrincipalDetails principalDetails) {
         //TODO: 유저 id 가져오기, 해당 유저 유효성 검사
         User user = User.builder().build();
 
@@ -72,7 +75,7 @@ public class PaymentService {
         return PaymentReadyResponse.create(user, product, savedOrder);
     }
 
-    public PaymentResponse savePayment(PaymentRequest request) {
+    public PaymentResponse savePayment(PaymentRequest request, PrincipalDetails principalDetails) {
         Payment payment = iamportRepository.findPaymentByImpUid(request.getImpUid())
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
         Order order = orderRepository.findById(request.getOrderId())
