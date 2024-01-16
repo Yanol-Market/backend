@@ -48,11 +48,13 @@ public class SecurityConfiguration {
             "/favicon.ico",
             "/docs/**",
             "/users/check/**",
-            "/products/**"
+            "/products/**",
+            "/home"
     };
 
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
             "/users",
+            "/reissue",
             "/yanolja-login"
     };
 

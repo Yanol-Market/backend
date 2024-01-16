@@ -10,11 +10,13 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import site.goldenticket.common.exception.CustomException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static site.goldenticket.common.response.ErrorCode.COMMON_INVALID_PARAMETER;
 import static site.goldenticket.common.response.ErrorCode.COMMON_SYSTEM_ERROR;
 
 @Slf4j

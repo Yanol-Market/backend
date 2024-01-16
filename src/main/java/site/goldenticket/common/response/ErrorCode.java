@@ -36,10 +36,13 @@ public enum ErrorCode {
     EMPTY_REFRESH_TOKEN(BAD_REQUEST, "Refresh Token은 필수 값 입니다."),
     EMPTY_ACCESS_TOKEN(BAD_REQUEST, "Access Token은 필수 값 입니다."),
     LOGOUT_ACCESS_TOKEN(UNAUTHORIZED, "로그아웃 된 토큰입니다."),
+    EXPIRED_TOKEN(UNAUTHORIZED, "만료된 토큰 입니다."),
 
     // User
     ALREADY_EXIST_EMAIL(BAD_REQUEST, "이미 사용중인 이메일입니다. 이미 가입하신 적이 있다면 로그인을 시도해주세요"),
     ALREADY_EXIST_NICKNAME(BAD_REQUEST, "이미 사용중인 아이디입니다."),
+    NOT_FOUND_USER(BAD_REQUEST, "존재하지 않는 사용자입니다."),
+    ALREADY_REGISTER_YANOLJA_ID(BAD_REQUEST, "이미 등록된 야놀자 아이디가 존재합니다."),
 
     // Reservation
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
