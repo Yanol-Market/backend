@@ -66,7 +66,7 @@ public class UserService {
     }
 
     private YanoljaUserResponse getYanoljaUser(LoginRequest loginRequest) {
-        return restTemplateService.get(
+        return restTemplateService.post(
                 "http://localhost:8080/dummy/yauser",
                 loginRequest,
                 YanoljaUserResponse.class
