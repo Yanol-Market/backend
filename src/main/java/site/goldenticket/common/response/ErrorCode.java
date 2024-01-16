@@ -13,13 +13,7 @@ public enum ErrorCode {
     COMMON_INVALID_PARAMETER(BAD_REQUEST, "요청한 값이 올바르지 않습니다."),
     COMMON_RESOURCE_NOT_FOUND(NOT_FOUND, "존재하지 않는 리소스입니다."),
     COMMON_ENTITY_NOT_FOUND(BAD_REQUEST, "존재하지 않는 엔티티입니다."),
-
-    // Reservation
-    RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
-
-    // Product
-    PRODUCT_ALREADY_EXISTS(CONFLICT, "이미 등록된 상품이 존재합니다."),
-    PRODUCT_NOT_FOUND(NOT_FOUND, "상품 정보가 존재하지 않습니다.");
+    COMMON_JSON_PROCESSING_ERROR(BAD_REQUEST, "Json 변환 중 오류"),
 
     COMMON_CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
     COMMON_NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
@@ -41,6 +35,17 @@ public enum ErrorCode {
     // User
     ALREADY_EXIST_EMAIL(BAD_REQUEST, "이미 사용중인 이메일입니다. 이미 가입하신 적이 있다면 로그인을 시도해주세요"),
     ALREADY_EXIST_NICKNAME(BAD_REQUEST, "이미 사용중인 아이디입니다."),
+
+    // Reservation
+    RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
+    RESERVATION_INTERNAL_SERVER_ERROR(INTERNAL_SERVER_ERROR, "예약 서버에서 오류가 발생했습니다."),
+
+    // Product
+    PRODUCT_ALREADY_EXISTS(CONFLICT, "이미 등록된 상품이 존재합니다."),
+    PRODUCT_NOT_FOUND(NOT_FOUND, "상품 정보가 존재하지 않습니다."),
+
+    // Search
+    SEARCH_HISTORY_NOT_FOUND(NOT_FOUND, "검색 이력이 존재하지 않습니다.")
     ;
 
     private final HttpStatus httpStatus;
