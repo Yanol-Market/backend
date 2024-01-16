@@ -13,6 +13,7 @@ import site.goldenticket.domain.user.repository.UserRepository;
 
 import static site.goldenticket.common.response.ErrorCode.ALREADY_EXIST_EMAIL;
 import static site.goldenticket.common.response.ErrorCode.ALREADY_EXIST_NICKNAME;
+import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -52,5 +53,10 @@ public class UserService {
         if (isExistNickname(joinRequest.nickname())) {
             throw new CustomException(ALREADY_EXIST_NICKNAME);
         }
+    }
+
+    public User findUser(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 }
