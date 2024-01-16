@@ -15,6 +15,7 @@ import site.goldenticket.common.security.authentication.dto.AuthenticationToken;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.domain.security.PrincipalDetails;
+import site.goldenticket.domain.security.dto.ReissueRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
@@ -39,6 +40,10 @@ public class SecurityService implements UserDetailsService {
 
         log.info("LoadUser User = {}", user);
         return new PrincipalDetails(user);
+    }
+
+    public AuthenticationToken reissue(ReissueRequest reissueRequest) {
+        return tokenService.reissueToken(reissueRequest.refreshToken());
     }
 
     public YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
