@@ -28,9 +28,9 @@ public class PaymentController {
         return ResponseEntity.ok(CommonResponse.ok("Payment details retrieved successfully", paymentDetail));
     }
 
-    @PostMapping("/{productId}/prepare")
+    @PostMapping("/{orderId}/prepare")
     public ResponseEntity<CommonResponse<PaymentReadyResponse>> preparePayment(
-            @PathVariable(name = "productId") final Long productId,
+            @PathVariable(name = "orderId") final Long productId,
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
         PaymentReadyResponse paymentReadyResponse = paymentService.preparePayment(productId, principalDetails);
         return ResponseEntity.ok(CommonResponse.ok("Payment ready successfully", paymentReadyResponse));
