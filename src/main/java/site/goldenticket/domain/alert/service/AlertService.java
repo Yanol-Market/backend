@@ -1,6 +1,8 @@
 package site.goldenticket.domain.alert.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,9 @@ public class AlertService {
                 alertRepository.save(alert);
             }
         }
+
+        Collections.sort(alertResponses,
+            Comparator.comparing(AlertResponse::createdAt).reversed());
         return AlertListResponse.builder().alertResponses(alertResponses).build();
     }
 }
