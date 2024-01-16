@@ -163,7 +163,13 @@ public class NegoServiceImpl implements NegoService {
         newNego.setCount(newCount);
     }
 
-    public void changeStatus() {
+    @Override
+    public Optional<Nego> getNego(Long userId, Long productId) {
+        return negoRepository.findFirstByUserIdAndProductIdOrderByCreatedAtDesc(userId, productId);
+    }
+
+
+    public void changeStatusTimeOut() {
         LocalDateTime currentTime = LocalDateTime.now();
 
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
