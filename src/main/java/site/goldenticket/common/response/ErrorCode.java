@@ -46,7 +46,6 @@ public enum ErrorCode {
 
     // Reservation
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
-    RESERVATION_INTERNAL_SERVER_ERROR(INTERNAL_SERVER_ERROR, "예약 서버에서 오류가 발생했습니다."),
 
     // Product
     PRODUCT_ALREADY_EXISTS(CONFLICT, "이미 등록된 상품이 존재합니다."),
