@@ -1,10 +1,7 @@
 package site.goldenticket.domain.nego.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.security.SecurityUtil;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
@@ -18,10 +15,10 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
-import java.security.Security;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,9 +32,9 @@ public class NegoServiceImpl implements NegoService {
     private final UserRepository userRepository;
 
     @Override
-    public NegoResponse confirmPrice(Long negoId) {
+    public NegoResponse confirmPrice(Long negoId,PrincipalDetails principalDetails) {
 
-        Long userId = getCurrentUserId();
+        Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
@@ -65,8 +62,8 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public NegoResponse denyPrice(Long negoId) {
-        Long userId = getCurrentUserId();
+    public NegoResponse denyPrice(Long negoId,PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
@@ -94,9 +91,9 @@ public class NegoServiceImpl implements NegoService {
 
     // 가격제안은 productId를 받아서 사용할 예정 아래는 임시!
     @Override
-    public PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request) {
+    public PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request, PrincipalDetails principalDetails) {
 
-        Long userId = getCurrentUserId();
+        Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
         // productId 활용 추가
@@ -153,9 +150,9 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public PayResponse pay(Long negoId) {
+    public PayResponse pay(Long negoId,PrincipalDetails principalDetails) {
 
-        Long userId = getCurrentUserId();
+        Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
         Nego nego = negoRepository.findById(negoId)
@@ -192,9 +189,9 @@ public class NegoServiceImpl implements NegoService {
 
 
     @Override
-    public PayResponse payOriginPrice(Long negoId) {
+    public PayResponse payOriginPrice(Long negoId,PrincipalDetails principalDetails) {
 
-        Long userId = getCurrentUserId();
+        Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
         Nego nego = negoRepository.findById(negoId)
@@ -219,8 +216,10 @@ public class NegoServiceImpl implements NegoService {
     }
 
     @Override
-    public HandoverResponse handOverProduct(Long negoId) {
+    public HandoverResponse handOverProduct(Long negoId,PrincipalDetails principalDetails) {
         // Nego ID로 Nego 정보 가져오기
+
+        Long userId = principalDetails.getUserId();
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -238,13 +237,4 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
-    public static Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getName() == null) {
-            throw new IllegalArgumentException("Security Context에 인증 정보가 없습니다.");
-        }
-
-        return Long.parseLong(authentication.getName());
-    }
 }

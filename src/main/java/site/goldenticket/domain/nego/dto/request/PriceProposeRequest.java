@@ -3,13 +3,13 @@ package site.goldenticket.domain.nego.dto.request;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.goldenticket.domain.nego.entity.Nego;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
-
+@NoArgsConstructor
 public class PriceProposeRequest {
 
     @NotNull
