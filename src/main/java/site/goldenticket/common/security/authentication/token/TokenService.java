@@ -4,6 +4,8 @@ import site.goldenticket.common.security.authentication.dto.AuthenticationToken;
 
 public interface TokenService {
 
+    AuthenticationToken reissueToken(String refreshToken);
+
     AuthenticationToken generatedToken(String randomToken, String username);
 
     String getUsername(String token);
