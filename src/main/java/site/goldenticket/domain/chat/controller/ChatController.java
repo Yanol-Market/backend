@@ -1,13 +1,18 @@
 package site.goldenticket.domain.chat.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.domain.chat.dto.ChatRequest;
+import site.goldenticket.domain.chat.dto.ChatResponse;
 import site.goldenticket.domain.chat.dto.ChatRoomDetailResponse;
 import site.goldenticket.domain.chat.dto.ChatRoomListResponse;
 import site.goldenticket.domain.chat.service.ChatService;
@@ -18,6 +23,15 @@ import site.goldenticket.domain.chat.service.ChatService;
 public class ChatController {
 
     private final ChatService chatService;
+
+    @PostMapping()
+    public ResponseEntity<CommonResponse<ChatResponse>> createChat(
+        @Valid @RequestBody ChatRequest chatRequest
+    ) {
+        Long userId = 1L; //시큐리티 적용 후 수정 예정
+        return ResponseEntity.ok(
+            CommonResponse.ok("새로운 채팅이 저장되었습니다.", chatService.createChat(userId, chatRequest)));
+    }
 
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<CommonResponse<ChatRoomDetailResponse>> getChatRoom(

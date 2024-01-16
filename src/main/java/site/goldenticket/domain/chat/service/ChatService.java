@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.domain.chat.dto.ChatRequest;
 import site.goldenticket.domain.chat.dto.ChatResponse;
 import site.goldenticket.domain.chat.dto.ChatRoomDetailResponse;
 import site.goldenticket.domain.chat.dto.ChatRoomInfoResponse;
@@ -34,6 +35,24 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ProductService productService;
     private final UserService userService;
+
+    public ChatResponse createChat(Long userId, ChatRequest chatRequest) {
+        Chat chat = Chat.builder()
+            .chatRoomId(chatRequest.chatRoomId())
+            .senderType(chatRequest.senderType())
+            .userId(chatRequest.userId())
+            .content(chatRequest.content())
+            .build();
+        chatRepository.save(chat);
+
+        return ChatResponse.builder()
+            .chatId(chat.getId())
+            .senderType(chat.getSenderType())
+            .userId(chat.getUserId())
+            .content(chat.getContent())
+            .createdAt(chat.getCreatedAt())
+            .build();
+    }
 
     public ChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
