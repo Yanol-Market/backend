@@ -23,11 +23,10 @@ public class PriceProposeResponse {
 
     private LocalDateTime expirationTime; // 만료 일시
 
-
     public static PriceProposeResponse fromEntity(Nego nego) {
         return PriceProposeResponse.builder()
                 .id(nego.getId())
-                .productId(nego.getProductId())
+                .productId(nego.getProductId())  // 변경된 부분
                 .count(nego.getCount())
                 .price(nego.getPrice())
                 .status(nego.getStatus())
