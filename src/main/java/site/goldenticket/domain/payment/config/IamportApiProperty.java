@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Getter
 @Configuration
-@PropertySource("secret.properties")
+@PropertySource("classpath:/secret.properties")
 public class IamportApiProperty {
     @Value("${imp_key}")
     private String impKey;
