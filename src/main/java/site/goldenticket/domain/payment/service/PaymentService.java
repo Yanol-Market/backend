@@ -49,16 +49,18 @@ public class PaymentService {
         }
 
         int price = product.getGoldenPrice();
-        String status = "네고 안함";
 
         Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
 
         if (nego.isPresent()) {
             if (nego.get().getConsent()) {
                 price = nego.get().getPrice();
-                status = nego.get().getStatus().toString();
             }
         }
+
+        Order order = Order.of(product.getId(), user.getId(), nego.get().getStatus(),price);
+        Order savedOrder = orderRepository.save(order);
+
         return PaymentDetailResponse.of(user, product, price);
     }
 

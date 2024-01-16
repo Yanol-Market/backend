@@ -1,9 +1,12 @@
 package site.goldenticket.domain.payment.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.entiy.BaseTimeEntity;
+import site.goldenticket.domain.nego.status.NegotiationStatus;
 
 @Entity
 @Getter
@@ -20,22 +23,25 @@ public class Order extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    private NegotiationStatus negoStatus;
     private Integer price;
     private Boolean buyerViewCheck;
 
-    private Order(Long productId, Long userId, OrderStatus status, Integer price) {
+    private Order(Long productId, Long userId, OrderStatus status, NegotiationStatus negoStatus, Integer price) {
         this.productId = productId;
         this.userId = userId;
         this.status = status;
+        this.negoStatus = negoStatus;
         this.price = price;
     }
 
-    public static Order of(Long productId, Long userId, Integer price) {
-        return new Order(productId, userId, OrderStatus.REQUEST_PAYMENT, price);
+    public static Order of(Long productId, Long userId, NegotiationStatus negoStatus, Integer price) {
+        return new Order(productId, userId, OrderStatus.REQUEST_PAYMENT, negoStatus, price);
     }
 
     public Integer getTotalPrice() {
-        return (int) (this.price*1.05);
+        return (int) (this.price * 1.05);
     }
 
     public void waitTransfer() {
