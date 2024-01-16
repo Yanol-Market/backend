@@ -59,11 +59,11 @@ public class ChatService {
     public ChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
-        Product product = productService.findProduct(chatRoom.getProductId());
+        Product product = productService.getProduct(chatRoom.getProductId());
         Long sellerId = product.getUserId();
         Long buyerId = chatRoom.getUserId();
         Long receiverId = (sellerId.equals(userId)) ? buyerId : sellerId; //채팅 상대 ID
-        User receiver = userService.findUser(receiverId);
+        User receiver = userService.findById(receiverId);
 
         ChatRoomInfoResponse chatRoomInfoResponse = ChatRoomInfoResponse.builder()
             .chatRoomId(chatRoomId)
@@ -125,8 +125,8 @@ public class ChatService {
             //내가 구매자. 상대가 판매자.
             chatRoomList = chatRoomRepository.findAllByUserId(userId);
             for (ChatRoom chatRoom : chatRoomList) {
-                Product product = productService.findProduct(chatRoom.getProductId());
-                User receiver = userService.findUser(product.getUserId());
+                Product product = productService.getProduct(chatRoom.getProductId());
+                User receiver = userService.findById(product.getUserId());
                 // *채팅 내역이 비어 있을 경우 예외 처리 추가 예정
                 Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
@@ -148,8 +148,8 @@ public class ChatService {
             chatRoomList = chatRoomRepository.findAllByUserId(userId);
 
             for (ChatRoom chatRoom : chatRoomList) {
-                User receiver = userService.findUser(chatRoom.getUserId());
-                Product product = productService.findProduct(chatRoom.getProductId());
+                User receiver = userService.findById(chatRoom.getUserId());
+                Product product = productService.getProduct(chatRoom.getProductId());
                 Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
