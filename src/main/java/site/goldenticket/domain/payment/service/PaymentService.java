@@ -6,7 +6,6 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.service.NegoService;
-import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
@@ -18,6 +17,7 @@ import site.goldenticket.domain.payment.repository.IamportRepository;
 import site.goldenticket.domain.payment.repository.OrderRepository;
 import site.goldenticket.domain.payment.repository.PaymentCancelDetailRepository;
 import site.goldenticket.domain.payment.repository.PaymentRepository;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
@@ -52,49 +52,51 @@ public class PaymentService {
 
         Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
 
+        Order order = Order.of(product.getId(), user.getId(), null, price);
+
         if (nego.isPresent()) {
             if (nego.get().getConsent()) {
                 price = nego.get().getPrice();
+                order = Order.of(product.getId(), user.getId(), nego.get().getStatus(), price);
             }
         }
 
-        Order order = Order.of(product.getId(), user.getId(), nego.get().getStatus(),price);
         Order savedOrder = orderRepository.save(order);
 
-        return PaymentDetailResponse.of(user, product, price);
+        return PaymentDetailResponse.of(savedOrder.getId(), user, product, price);
     }
 
-    //    결제 테이블에 결제 정보 검증하고 사전에 결제 정보 저장
-    public PaymentReadyResponse preparePayment(Long productId, PrincipalDetails principalDetails) {
+    public PaymentReadyResponse preparePayment(Long orderId, PrincipalDetails principalDetails) {
+
         User user = userService.getUser(principalDetails.getUserId());
 
-        Product product = productService.getProduct(productId);
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+
+        Product product = productService.getProduct(order.getProductId());
         if (product.isNotOnSale()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
-        int price = product.getGoldenPrice();
-
-        Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
-
-        if (nego.isPresent()) {
-            if (nego.get().getConsent()) {
-                price = nego.get().getPrice();
-            }
-        }
-
-        Order order = Order.of(product.getId(), user.getId(), NegotiationStatus.NEGOTIATING,price);
+        order.requestPayment();
         Order savedOrder = orderRepository.save(order);
 
         iamportRepository.prepare(savedOrder.getId(), BigDecimal.valueOf(savedOrder.getTotalPrice()));
-        return PaymentReadyResponse.create(user, product, savedOrder);
+        return PaymentReadyResponse.create(user, product, order);
     }
 
     public PaymentResponse savePayment(PaymentRequest request, PrincipalDetails principalDetails) {
+
+        Long userId = principalDetails.getUserId();
+
         Payment payment = iamportRepository.findPaymentByImpUid(request.getImpUid())
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        Product product = productService.getProduct(order.getProductId());
 
         if (payment.isDifferentAmount(order.getPrice())) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
@@ -103,18 +105,29 @@ public class PaymentService {
         Payment saved = paymentRepository.save(payment);
 
         if (payment.isNotPaid()) {
-            //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
-            //만약 만료시간이 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 결제 실패
+            order.paymentFailed();
+            orderRepository.save(order);
             return PaymentResponse.failed();
         }
 
-        //TODO: 네고한 사람인지 확인, 만료시간&결제완료 시각 확인
-        //만약 만료시간 지낫다면, 상품상태: 예약중 -> 판매중, 네고상태: 결제 대기중 -> 시간초과, 주문 상태: 결제 요청 -> 주문 실패, 결제 취소 로직 필요
-        List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(request.getImpUid());
-        paymentCancelDetailRepository.saveAll(paymentCancelDetails);
-        //TODO: 네고 상태값 네고 종료로 변경
+        if (order.getNegoStatus()!=null) {
+            Nego nego = negoService.getNego(userId, order.getProductId()).orElseThrow(
+                    () -> new CustomException(ErrorCode.NEGO_NOT_FOUND)
+            );
+            if (nego.getStatus() != order.getNegoStatus()) {
+                List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(request.getImpUid());
+                paymentCancelDetailRepository.saveAll(paymentCancelDetails);
+                return PaymentResponse.timeOver();
+            }
+            nego.completed();
+            negoService.save(nego);
+        }
+
         order.waitTransfer();
-        //TODO: 상품 상태를 예약중으로 업데이트(ProductService 사용 예정)
+        orderRepository.save(order);
+
+        product.setProductStatus(ProductStatus.RESERVED);
+        productService.save(product);
         return PaymentResponse.success();
     }
 }

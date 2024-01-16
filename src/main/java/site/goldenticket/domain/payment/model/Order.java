@@ -37,14 +37,22 @@ public class Order extends BaseTimeEntity {
     }
 
     public static Order of(Long productId, Long userId, NegotiationStatus negoStatus, Integer price) {
-        return new Order(productId, userId, OrderStatus.REQUEST_PAYMENT, negoStatus, price);
+        return new Order(productId, userId, OrderStatus.REQUEST_ORDER, negoStatus, price);
     }
 
     public Integer getTotalPrice() {
         return (int) (this.price * 1.05);
     }
 
+    public void requestPayment() {
+        status = OrderStatus.REQUEST_PAYMENT;
+    }
+
     public void waitTransfer() {
         status = OrderStatus.WAITING_TRANSFER;
+    }
+
+    public void paymentFailed() {
+        status = OrderStatus.PAYMENT_FAILED;
     }
 }

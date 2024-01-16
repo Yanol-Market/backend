@@ -19,4 +19,6 @@ public interface NegoService {
     PayResponse pay(Long negoId); // 결제하기
 
     Optional<Nego> getNego(Long userId, Long productId);
+
+    Nego save(Nego nego);
 }
