@@ -1,8 +1,5 @@
 package site.goldenticket.domain.product.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,29 +9,29 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.constants.PaginationConstants;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
 import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.repository.CustomSlice;
-import site.goldenticket.dummy.reservation.constants.ReservationStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.security.PrincipalDetails;
+import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
+import site.goldenticket.dummy.reservation.dto.ReservationResponse;
+import site.goldenticket.dummy.reservation.dto.UpdateReservationStatusRequest;
 
-import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static site.goldenticket.common.redis.constants.RedisConstants.*;
 import static site.goldenticket.common.response.ErrorCode.*;
 import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
@@ -44,10 +41,8 @@ import static site.goldenticket.dummy.reservation.constants.ReservationStatus.*;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-    private static final String ANONYMOUS_KEY_COOKIE_NAME = "AnonymousKey";
 
-    private final ObjectMapper objectMapper;
-    private final RestTemplate restTemplate;
+    private final RestTemplateService restTemplateService;
 
     private final RedisService redisService;
     private final ProductRepository productRepository;
@@ -95,43 +90,12 @@ public class ProductService {
     // 2. 야놀자 예약 정보 조회 메서드
     @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations(Long yaUserId) {
-        URI targetUrl = UriComponentsBuilder
-                .fromUriString(LOCAL_BASE_URL)
-                .path(RESERVATIONS_ENDPOINT)
-                .buildAndExpand(yaUserId)
-                .encode(UTF_8)
-                .toUri();
+        String getUrl = buildReservationUrl(RESERVATIONS_ENDPOINT, yaUserId);
 
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(targetUrl, String.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            String responseBody = responseEntity.getBody();
-            try {
-                JsonNode dataNode = objectMapper.readTree(responseBody).get("data");
-
-                List<ReservationResponse> reservationProductResponseList = new ArrayList<>();
-                if (dataNode.isArray() && !dataNode.isEmpty()) {
-                    for (JsonNode reservationNode : dataNode) {
-                        ReservationResponse reservationProductResponse = objectMapper.treeToValue(reservationNode, ReservationResponse.class);
-
-                        Long reservationId = reservationProductResponse.getReservationId();
-                        ReservationStatus reservationStatus = productRepository.existsByReservationId(reservationId) ? REGISTERED : NOT_REGISTERED;
-
-                        ReservationResponse updatedReservationProductResponse = reservationProductResponse.toBuilder()
-                                .reservationStatus(reservationStatus)
-                                .build();
-
-                        reservationProductResponseList.add(updatedReservationProductResponse);
-                    }
-                } else {
-                    return Collections.emptyList();
-                }
-                return reservationProductResponseList;
-            } catch (JsonProcessingException e) {
-                throw new CustomException(COMMON_JSON_PROCESSING_ERROR);
-            }
-        } else {
-            throw new CustomException(RESERVATION_INTERNAL_SERVER_ERROR);
-        }
+        return restTemplateService.getList(
+                getUrl,
+                ReservationResponse[].class
+        );
     }
 
     // 3. 상품 생성, 조회, 수정, 삭제 관련 메서드
@@ -143,31 +107,21 @@ public class ProductService {
             throw new CustomException(PRODUCT_ALREADY_EXISTS);
         }
 
-        URI targetUrl = UriComponentsBuilder
-                .fromUriString(LOCAL_BASE_URL)
-                .path(RESERVATION_ENDPOINT)
-                .buildAndExpand(reservationId)
-                .encode(UTF_8)
-                .toUri();
+        String getUrl = buildReservationUrl(RESERVATION_ENDPOINT, reservationId);
 
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(targetUrl, String.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            String responseBody = responseEntity.getBody();
-            try {
-                JsonNode reservationNode = objectMapper.readTree(responseBody).get("data");
+        ReservationDetailsResponse reservationDetailsResponse = restTemplateService.get(
+                getUrl,
+                ReservationDetailsResponse.class
+        ).orElseThrow(() -> new CustomException(RESERVATION_NOT_FOUND));
 
-                ReservationDetailsResponse reservationDetailsResponse = objectMapper.treeToValue(reservationNode, ReservationDetailsResponse.class);
+        Product product = productRequest.toEntity(reservationDetailsResponse, principalDetails.getUserId());
+        Product savedProduct = productRepository.save(product);
 
-                Product product = productRequest.toEntity(reservationDetailsResponse, principalDetails.getUserId());
-                Product savedProduct = productRepository.save(product);
+        String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, reservationId);
 
-                return ProductResponse.fromEntity(savedProduct);
-            } catch (JsonProcessingException e) {
-                throw new CustomException(COMMON_JSON_PROCESSING_ERROR);
-            }
-        } else {
-            throw new CustomException(RESERVATION_INTERNAL_SERVER_ERROR);
-        }
+        restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
+
+        return ProductResponse.fromEntity(savedProduct);
     }
 
     @Transactional(readOnly = true)
@@ -198,6 +152,10 @@ public class ProductService {
         Product product = getProduct(productId);
         productRepository.delete(product);
 
+        String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, product.getReservationId());
+
+        restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
+
         return ProductResponse.fromEntity(product);
     }
 
@@ -207,10 +165,19 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
+    private String buildReservationUrl(String endpoint, Long pathVariable) {
+        return UriComponentsBuilder
+                .fromUriString(DISTRIBUTE_BAE_URL)
+                .path(endpoint)
+                .buildAndExpand(pathVariable)
+                .encode(StandardCharsets.UTF_8)
+                .toUriString();
+    }
+
     private String generateOrRetrieveAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
         String anonymousKey = Arrays.stream(request.getCookies())
                 .filter(
-                        cookie -> ANONYMOUS_KEY_COOKIE_NAME.equals(cookie.getName())
+                        cookie -> "AnonymousKey".equals(cookie.getName())
                 )
                 .map(
                         cookie -> cookie.getValue()
@@ -219,7 +186,7 @@ public class ProductService {
                 .orElse(null);
 
         if (anonymousKey == null) {
-            ResponseCookie cookie = ResponseCookie.from(ANONYMOUS_KEY_COOKIE_NAME, UUID.randomUUID().toString())
+            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", UUID.randomUUID().toString())
                     .domain(".golden-ticket.site")
                     .httpOnly(false)
                     .secure(true)
