@@ -10,6 +10,7 @@ import java.time.LocalTime;
 
 @Builder
 public record PaymentDetailResponse(
+        Long orderId,
         Long productId,
         String imageUrl,
         String accommodationName,
@@ -28,9 +29,10 @@ public record PaymentDetailResponse(
         Integer fee,
         Integer totalPrice
 ) {
-    public static PaymentDetailResponse of(User user, Product product, int price) {
+    public static PaymentDetailResponse of(Long orderId, User user, Product product, int price) {
 
         return new PaymentDetailResponse(
+                orderId,
                 product.getId(),
                 product.getAccommodationImage(),
                 product.getAccommodationName(),
