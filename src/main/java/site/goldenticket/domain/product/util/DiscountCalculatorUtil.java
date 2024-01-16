@@ -1,4 +1,4 @@
-package site.goldenticket.common.util;
+package site.goldenticket.domain.product.util;
 
 public class DiscountCalculatorUtil {
     private DiscountCalculatorUtil() {}
