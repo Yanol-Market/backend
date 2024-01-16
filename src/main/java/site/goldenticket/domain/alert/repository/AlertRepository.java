@@ -6,5 +6,6 @@ import site.goldenticket.domain.alert.entity.Alert;
 
 public interface AlertRepository extends JpaRepository<Alert, Long> {
 
+    Boolean existsByUserIdAndViewed(Long userId, Boolean viewed);
     List<Alert> findAllByUserId(Long userId);
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.domain.alert.dto.AlertListResponse;
 import site.goldenticket.domain.alert.dto.AlertResponse;
+import site.goldenticket.domain.alert.dto.AlertUnSeenResponse;
 import site.goldenticket.domain.alert.entity.Alert;
 import site.goldenticket.domain.alert.repository.AlertRepository;
 
@@ -16,6 +17,12 @@ import site.goldenticket.domain.alert.repository.AlertRepository;
 public class AlertService {
 
     private final AlertRepository alertRepository;
+
+    public AlertUnSeenResponse getExistsNewAlert(Long userId) {
+        return AlertUnSeenResponse.builder()
+            .existsNewAlert(alertRepository.existsByUserIdAndViewed(userId, false))
+            .build();
+    }
 
     public AlertListResponse getAlertListByUserId(Long userId) {
         List<Alert> alerts = alertRepository.findAllByUserId(userId);
