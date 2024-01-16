@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.common.security.authentication.dto.AuthenticationToken;
 import site.goldenticket.common.security.authentication.token.dto.Token;
@@ -15,8 +16,7 @@ import site.goldenticket.common.security.exception.SaveTokenException;
 
 import java.time.Instant;
 
-import static site.goldenticket.common.response.ErrorCode.INVALID_TOKEN;
-import static site.goldenticket.common.response.ErrorCode.SAVE_REFRESH_TOKEN_FAILED;
+import static site.goldenticket.common.response.ErrorCode.*;
 
 @Slf4j
 @Component
@@ -28,6 +28,25 @@ public class TokenServiceImpl implements TokenService {
 
     private final TokenProvider tokenProvider;
     private final RedisService redisService;
+
+    @Override
+    public AuthenticationToken reissueToken(String refreshToken) {
+        try {
+            String randomToken = tokenProvider.getSubject(refreshToken);
+            log.info("Fetch randomToken = [{}]", randomToken);
+
+            String email = redisService.get(REDIS_REFERS_TOKEN_PREFIX + randomToken, String.class)
+                    .orElseThrow(() -> new CustomException(INVALID_TOKEN));
+            log.info("Fetch Email = [{}]", email);
+
+            return generatedToken(randomToken, email);
+        } catch (ExpiredJwtException e) {
+            log.info("[{}] 이미 만료된 토큰입니다.", refreshToken);
+            throw new CustomException(EXPIRED_TOKEN);
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            throw new CustomException(INVALID_TOKEN);
+        }
+    }
 
     @Override
     public AuthenticationToken generatedToken(String randomToken, String email) {
