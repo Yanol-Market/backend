@@ -18,11 +18,11 @@ public class PayResponse {
     private LocalDateTime createdAt; // 생성 일시
     private LocalDateTime updatedAt; // 생성 일시
 
-
-
     public static PayResponse fromEntity(Nego nego) {
         return PayResponse.builder()
                 .id(nego.getId())
+                .productId(nego.getProductId())  // productId 설정 추가
+                .userId(nego.getUser().getId())  // userId 설정 추가
                 .price(nego.getPrice())
                 .status(nego.getStatus())
                 .createdAt(nego.getCreatedAt())

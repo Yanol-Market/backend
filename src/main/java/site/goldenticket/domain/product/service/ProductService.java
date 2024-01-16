@@ -208,7 +208,7 @@ public class ProductService {
     }
 
     // 4. 기타 유틸 메서드
-    private Product getProduct(Long productId) {
+    public Product getProduct(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
