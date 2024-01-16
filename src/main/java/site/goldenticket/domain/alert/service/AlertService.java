@@ -35,6 +35,10 @@ public class AlertService {
                     .createdAt(alert.getCreatedAt())
                     .build()
             );
+            if (!alert.getViewed()) {
+                alert.updateAlertViewed();
+                alertRepository.save(alert);
+            }
         }
         return AlertListResponse.builder().alertResponses(alertResponses).build();
     }

@@ -33,4 +33,8 @@ public class Alert extends BaseTimeEntity {
         this.content = content;
         this.viewed = viewed;
     }
+
+    public void updateAlertViewed() {
+        this.viewed = true;
+    }
 }
