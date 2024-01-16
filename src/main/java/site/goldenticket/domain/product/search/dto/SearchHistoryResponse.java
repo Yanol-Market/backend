@@ -1,31 +1,27 @@
 package site.goldenticket.domain.product.search.dto;
 
-import lombok.Builder;
-import lombok.Getter;
 import site.goldenticket.domain.product.search.model.SearchHistory;
 
 import java.time.LocalDate;
 
-@Getter
-@Builder
-public class SearchHistoryResponse {
-
-    private Long searchHistoryId;
-    private String areaName;
-    private String keyword;
-    private LocalDate checkInDate;
-    private LocalDate checkOutDate;
-    private String priceRange;
+public record SearchHistoryResponse(
+        Long searchHistoryId,
+        String areaName,
+        String keyword,
+        LocalDate checkInDate,
+        LocalDate checkOutDate,
+        String priceRange
+) {
 
     public static SearchHistoryResponse fromEntity(SearchHistory searchHistory) {
 
-        return SearchHistoryResponse.builder()
-                .searchHistoryId(searchHistory.getId())
-                .areaName(searchHistory.getAreaName())
-                .keyword(searchHistory.getKeyword())
-                .checkInDate(searchHistory.getCheckInDate())
-                .checkOutDate(searchHistory.getCheckOutDate())
-                .priceRange(searchHistory.getPriceRange())
-                .build();
+        return new SearchHistoryResponse(
+                searchHistory.getId(),
+                searchHistory.getAreaName(),
+                searchHistory.getKeyword(),
+                searchHistory.getCheckInDate(),
+                searchHistory.getCheckOutDate(),
+                searchHistory.getPriceRange()
+        );
     }
 }
