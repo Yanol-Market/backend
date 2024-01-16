@@ -1,17 +1,18 @@
 package site.goldenticket.common.redis.service;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import site.goldenticket.common.exception.CustomException;
 
-
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static site.goldenticket.common.response.ErrorCode.COMMON_INVALID_PARAMETER;
 import static site.goldenticket.common.response.ErrorCode.COMMON_SYSTEM_ERROR;
@@ -28,11 +29,6 @@ public class RedisServiceImpl implements RedisService {
     public <T> Optional<T> get(String key, Class<T> type) {
         log.info("Find Redis Key = [{}], Type = [{}]", key, type.getName());
         String serializedValue = redisTemplate.opsForValue().get(key);
-
-        if (serializedValue == null) {
-            log.error("Serialized value is null for key: {}", key);
-            return Optional.empty();
-        }
 
         try {
             return Optional.of(objectMapper.readValue(serializedValue, type));
@@ -74,51 +70,83 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public <T> Map<String, List<T>> getMap(String key, Class<T> type) {
-        log.info("Get Map from Redis Key = [{}]", key);
-        Map<Object, Object> serializedMap = redisTemplate.opsForHash().entries(key);
-        Map<String, List<T>> deserializedMap = new HashMap<>();
-
-        for (Map.Entry<Object, Object> mapEntry : serializedMap.entrySet()) {
-            String mapKey = mapEntry.getKey().toString();
-            String mapValue = mapEntry.getValue().toString();
-
-            try {
-                JavaType valueType = objectMapper.getTypeFactory().constructCollectionType(List.class, type);
-                List<T> deserializedList = objectMapper.readValue(mapValue, valueType);
-                deserializedMap.put(mapKey, deserializedList);
-                log.info("Get Map Entry - Key: [{}], Values: [{}]", mapKey, deserializedList);
-            } catch (IllegalArgumentException | InvalidFormatException e) {
-                throw new CustomException(COMMON_INVALID_PARAMETER);
-            } catch (Exception e) {
-                log.error("Redis Get Map Exception", e);
-                throw new CustomException("Redis get() Error", COMMON_SYSTEM_ERROR);
-            }
-        }
-        return deserializedMap;
-    }
-
-    @Override
-    public void setMap(String key, Map<String, List<String>> value) {
-        log.info("Save Map to Redis Key = [{}], Value = [{}]", key, value);
-
-        for (Map.Entry<String, List<String>> valueEntry : value.entrySet()) {
-            String entryKey = valueEntry.getKey();
-            List<String> entryValue = valueEntry.getValue();
-
-            try {
-                String serializedValue = objectMapper.writeValueAsString(entryValue);
-                redisTemplate.opsForHash().put(key, entryKey, serializedValue);
-            } catch (Exception e) {
-                log.error("Redis Set Map with List Values Exception", e);
-                throw new CustomException("Redis setMapWithListValues() Error", COMMON_SYSTEM_ERROR);
-            }
-        }
-    }
-
-    @Override
     public boolean delete(String key) {
         log.info("Delete Redis Key = [{}]", key);
         return Boolean.TRUE.equals(redisTemplate.delete(key));
+    }
+
+    @Override
+    public <T> List<T> getList(String key, Class<T> type) {
+        log.info("Get Range from Redis List - Key: [{}], Type: [{}]", key, type.getName());
+        try {
+            List<String> serializedList = redisTemplate.opsForList().range(key, 0, -1);
+            List<T> deserializedList = new ArrayList<>();
+
+            for (String serializedValue : serializedList) {
+                T deserializedValue = objectMapper.readValue(serializedValue, type);
+                deserializedList.add(deserializedValue);
+            }
+
+            return deserializedList;
+        } catch (Exception e) {
+            log.error("Redis Get List Range Exception", e);
+            throw new CustomException("Redis getList() Error", COMMON_SYSTEM_ERROR);
+        }
+    }
+
+    @Override
+    public void leftPush(String key, Object value) {
+        try {
+            log.info("Left Push to List - Key: [{}]", key);
+            String serializedValue = objectMapper.writeValueAsString(value);
+            redisTemplate.opsForList().leftPush(key, serializedValue);
+        } catch (Exception e) {
+            log.error("Redis Left Push Exception", e);
+            throw new CustomException("Redis getLeftPush() Error", COMMON_SYSTEM_ERROR);
+        }
+    }
+
+    @Override
+    public void rightPop(String key) {
+        log.info("Right Pop from List - Key: [{}]", key);
+        redisTemplate.opsForList().rightPop(key);
+    }
+
+    @Override
+    public void removeList(String key, Object value) {
+        log.info("Remove from Redis List - Key: [{}], Old Value: [{}]", key, value);
+        try {
+            String serializedValue = objectMapper.writeValueAsString(value);
+            redisTemplate.opsForList().remove(key, 0, serializedValue);
+        } catch (Exception e) {
+            log.error("Redis Remove List Exception", e);
+            throw new CustomException("Redis removeList() Error", COMMON_SYSTEM_ERROR);
+        }
+    }
+
+    @Override
+    public Double getZScore(String key, String keyword) {
+        log.info("Get ZScore - Ranking Key: [{}], Keyword: [{}]", key, keyword);
+        return redisTemplate.opsForZSet().score(key, keyword);
+    }
+
+    @Override
+    public void addZScore(String key, String keyword, Double score) {
+        log.info("Add ZScore - Ranking Key: [{}], Keyword: [{}], Score: [{}]", key, keyword, score);
+        redisTemplate.opsForZSet().add(key, keyword, score);
+    }
+
+    @Override
+    public Set<ZSetOperations.TypedTuple<String>> getZRank(String key, long start, long end) {
+        log.info("Get ZRanking - Ranking Key: [{}], Start: [{}], End: [{}]", key, start, end);
+        return redisTemplate.opsForZSet().reverseRangeWithScores(key, start, end);
+    }
+
+    @Override
+    public Set<String> getZRangeByLex(String key, String prefix, int limit) {
+        log.info("Get ZRangeByLex - Key: [{}], Prefix: [{}], Limit: [{}]", key, prefix, limit);
+        RedisZSetCommands.Range range = RedisZSetCommands.Range.range().gte(prefix).lte(prefix + Character.MAX_VALUE);
+        Set<String> autoCompletedWords = redisTemplate.opsForZSet().rangeByLex(key, range.toRange());
+        return autoCompletedWords.stream().limit(limit).collect(Collectors.toSet());
     }
 }
