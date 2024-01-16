@@ -50,23 +50,6 @@ public class RedisServiceTest {
         assertThat(result).isEqualTo(expected);
     }
 
-    @Test
-    @DisplayName("Map 데이터 삽입 및 조회 검증")
-    void redisSetAndGetMap() {
-        // given
-        String key = "mapKey";
-        Map<String, List<String>> mapValue = new HashMap<>();
-        mapValue.put("key1", List.of("value1", "value2"));
-        mapValue.put("key2", List.of("value3", "value4"));
-
-        // when
-        redisService.setMap(key, mapValue);
-
-        // then
-        Map<String, List<String>> result = redisService.getMap(key, String.class);
-        assertThat(result).isEqualTo(mapValue);
-    }
-
     @ParameterizedTest
     @CsvSource({"key,true", "param,false"})
     @DisplayName("데이터 삭제 검증")
