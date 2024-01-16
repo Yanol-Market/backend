@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.JoinResponse;
 import site.goldenticket.domain.user.entity.User;
@@ -31,6 +32,12 @@ public class UserService {
     public boolean isExistNickname(String nickname) {
         log.info("Duplicated Check Nickname = {}", nickname);
         return userRepository.existsByNickname(nickname);
+    }
+
+    public User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
     }
 
     @Transactional
