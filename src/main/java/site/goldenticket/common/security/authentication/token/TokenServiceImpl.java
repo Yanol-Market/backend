@@ -26,6 +26,8 @@ public class TokenServiceImpl implements TokenService {
 
     public static final String REDIS_REFERS_TOKEN_PREFIX = "RefreshToken:";
     public static final String REDIS_BLACK_LIST_PREFIX = "BlackList:";
+    public static final String BLACK_LIST_DEFAULT_VALUE = "Logout";
+    public static final int VALID_MINIMUM_TIME = 0;
 
     private final TokenProvider tokenProvider;
     private final RedisService redisService;
@@ -97,8 +99,8 @@ public class TokenServiceImpl implements TokenService {
             long validTime = expiredIn - Instant.now().getEpochSecond();
 
             log.info("[{}] AccessToken의 남은 만료 시간은 {}초 입니다.", tokenProvider.getUsername(accessToken), validTime);
-            if (validTime > 0) {
-                redisService.set(REDIS_BLACK_LIST_PREFIX + accessToken, "Logout", validTime);
+            if (validTime > VALID_MINIMUM_TIME) {
+                redisService.set(REDIS_BLACK_LIST_PREFIX + accessToken, BLACK_LIST_DEFAULT_VALUE, validTime);
             }
         } catch (ExpiredJwtException e) {
             log.info("[{}] 이미 만료된 토큰입니다.", accessToken);
