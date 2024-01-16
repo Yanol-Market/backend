@@ -137,6 +137,7 @@ CREATE TABLE `orders`
     product_id          BIGINT      NOT NULL COMMENT '상품 ID',
     user_id             BIGINT      NOT NULL COMMENT '구매자 ID',
     `status`            VARCHAR(50) NOT NULL COMMENT '주문 상태',
+    nego_status         VARCHAR(50) COMMENT '네고 상태',
     price               INT         NOT NULL COMMENT '주문 가격',
     customer_view_check BOOLEAN     NOT NULL COMMENT '구매자 VIEW',
     created_at          DATETIME COMMENT '생성 일시',
@@ -199,7 +200,7 @@ CREATE TABLE `chat`
     `id`           BIGINT       NOT NULL COMMENT '채팅 ID',
     `chat_room_id` BIGINT       NOT NULL COMMENT '채팅 방 ID',
     `sender_type`  VARCHAR(50)  NOT NULL COMMENT '작성자 타입',
-    `user_id`      BIGINT       NULL COMMENT '사용자 ID',
+    `user_id`      BIGINT NULL COMMENT '사용자 ID',
     `content`      VARCHAR(500) NOT NULL COMMENT '채팅 내용',
     `created_at`   DATETIME     NOT NULL COMMENT '생성 일시',
     `updated_at`   DATETIME     NOT NULL COMMENT '수정 일시'
