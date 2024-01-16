@@ -38,6 +38,12 @@ public class Nego {
     private LocalDateTime createdAt; // 생성일시
     private LocalDateTime updatedAt; // 수정일시
 
+
+    public Nego(User user, Product product) {
+        this.user = user;
+        this.product = product;
+    }
+
     public void setStatus(NegotiationStatus status) {
         this.status = status;
     }
@@ -57,11 +63,25 @@ public class Nego {
         this.consent = consent;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public void setPrice(Integer price) {
         this.price = price;
     }
     public Long getProductId() {
         return (product != null) ? product.getId() : null;
+    }
+    public Integer getCount() {
+        return (count != null) ? count : 0;
+    }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Builder

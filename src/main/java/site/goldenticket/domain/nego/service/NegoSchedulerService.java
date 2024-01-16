@@ -16,7 +16,7 @@ import static site.goldenticket.domain.nego.status.NegotiationStatus.*;
 public class NegoSchedulerService {
     private final NegoRepository negoRepository;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 100000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
 

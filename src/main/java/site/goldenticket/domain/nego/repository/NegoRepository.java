@@ -20,9 +20,6 @@ public interface NegoRepository extends JpaRepository<Nego, Long> {
 
     List<Nego> findByStatus(NegotiationStatus status);
 
-    Optional<Nego> findLatestNegoByUserIdOrderByCreatedAtDesc(Long userId, PageRequest of);
 
-    Optional<Nego> findLatestNegoByUserIdAndProductIdOrderByCreatedAtDesc(User userId, Long productId, PageRequest of);
-
-    Optional<Nego> findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(Product product, User user, PageRequest of);
+    Optional<Nego> findByUserAndProduct(User user, Product product);
 }

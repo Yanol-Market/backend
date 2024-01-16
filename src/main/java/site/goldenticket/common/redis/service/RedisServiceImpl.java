@@ -33,7 +33,7 @@ public class RedisServiceImpl implements RedisService {
         try {
             return Optional.of(objectMapper.readValue(serializedValue, type));
         } catch (IllegalArgumentException | InvalidFormatException e) {
-            throw new CustomException(COMMON_INVALID_PARAMETER);
+            return Optional.empty();
         } catch (Exception e) {
             log.error("Redis Get Exception", e);
             throw new CustomException("Redis get() Error", COMMON_SYSTEM_ERROR);
