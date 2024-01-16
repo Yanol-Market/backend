@@ -32,6 +32,7 @@ public class AlertService {
                 AlertResponse.builder()
                     .alertId(alert.getId())
                     .content(alert.getContent())
+                    .viewed(alert.getViewed())
                     .createdAt(alert.getCreatedAt())
                     .build()
             );
