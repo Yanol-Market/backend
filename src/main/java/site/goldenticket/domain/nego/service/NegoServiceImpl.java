@@ -12,6 +12,7 @@ import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
@@ -180,6 +181,9 @@ public class NegoServiceImpl implements NegoService {
         // Nego ID로 Nego 정보 가져오기
 
         Long userId = principalDetails.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -188,6 +192,8 @@ public class NegoServiceImpl implements NegoService {
 
         // 상태가 결제 완료인 경우에만 양도 가능
         if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+
+            product.setProductStatus(ProductStatus.SOLD_OUT);
 
             // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
             return HandoverResponse.fromEntity(product, nego);
