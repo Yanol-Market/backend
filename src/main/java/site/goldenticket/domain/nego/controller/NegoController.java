@@ -2,6 +2,7 @@ package site.goldenticket.domain.nego.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
@@ -10,6 +11,7 @@ import site.goldenticket.domain.nego.dto.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.response.PayResponse;
 import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.service.NegoService;
+import site.goldenticket.domain.security.PrincipalDetails;
 
 @RestController
 @RequestMapping("/nego")
@@ -47,9 +49,11 @@ public class NegoController {
 
     @GetMapping("/available")
     public ResponseEntity<CommonResponse<NegoAvailableResponse>> getNegoAvailable(
-        @RequestParam Long productId) {
-        Long userId = 1L; //시큐리티 적용 후 수정 예정
-        return ResponseEntity.ok(CommonResponse.ok(negoService.isAvailableNego(userId, productId)));
+        @RequestParam Long productId,
+        @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok(
+            negoService.isAvailableNego(principalDetails.getUserId(), productId)));
     }
 
  /*   @PostMapping("/payOriginPrice/{negoId}")

@@ -17,12 +17,16 @@ import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.product.constants.ProductStatus;
+import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.product.service.ProductService;
 
 @Service
 @RequiredArgsConstructor
 public class NegoServiceImpl implements NegoService {
 
     private final NegoRepository negoRepository;
+    private final ProductService productService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId) {
@@ -133,19 +137,24 @@ public class NegoServiceImpl implements NegoService {
 
     public NegoAvailableResponse isAvailableNego(Long userId, Long productId) {
         Boolean negoAvailable = true;
-        //*판매중인지 확인하는 로직 추가 예정
-        if (!negoRepository.existsByUserIdAndProductId(userId, productId)) {
-            //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
-            //채팅방 생성
-            negoAvailable = true;
+        Product product = productService.getProduct(productId);
+        if (!product.getProductStatus().equals(ProductStatus.SELLING)) {
+            negoAvailable = false;
+
         } else {
-            //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
-            List<Nego> negoList = negoRepository.findAllByUserIdAndProductId(userId, productId);
-            for (Nego nego : negoList) {
-                if (nego.getCount().equals(2) || nego.getStatus()
-                    .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
-                    negoAvailable = false;
-                    break;
+            if (!negoRepository.existsByUserIdAndProductId(userId, productId)) {
+                //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
+                //*채팅방 생성 로직 추가
+                negoAvailable = true;
+            } else {
+                //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
+                List<Nego> negoList = negoRepository.findAllByUserIdAndProductId(userId, productId);
+                for (Nego nego : negoList) {
+                    if (nego.getCount().equals(2) || nego.getStatus()
+                        .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
+                        negoAvailable = false;
+                        break;
+                    }
                 }
             }
         }
