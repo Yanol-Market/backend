@@ -1,7 +1,10 @@
 package site.goldenticket.domain.nego.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.security.SecurityUtil;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
@@ -15,7 +18,10 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.user.entity.User;
+import site.goldenticket.domain.user.repository.UserRepository;
 
+import java.security.Security;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -26,11 +32,19 @@ public class NegoServiceImpl implements NegoService {
 
     private final NegoRepository negoRepository;
     private final ProductService productService;
+    private final UserRepository userRepository;
 
     @Override
     public NegoResponse confirmPrice(Long negoId) {
+
+        Long userId = getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
+
+
 
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.setUpdatedAt(LocalDateTime.now());
@@ -52,6 +66,10 @@ public class NegoServiceImpl implements NegoService {
 
     @Override
     public NegoResponse denyPrice(Long negoId) {
+        Long userId = getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -77,10 +95,15 @@ public class NegoServiceImpl implements NegoService {
     // 가격제안은 productId를 받아서 사용할 예정 아래는 임시!
     @Override
     public PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request) {
+
+        Long userId = getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
         // productId 활용 추가
         Nego nego = request.toEntity();
         updateCountForNewNego(nego);
         nego.setUpdatedAt(LocalDateTime.now());
+
 
         // 네고 상태가 TIMEOUT이면 가격 제안 불가능 예외 처리
         if (NegotiationStatus.NEGOTIATION_TIMEOUT.equals(nego.getStatus())) {
@@ -93,7 +116,7 @@ public class NegoServiceImpl implements NegoService {
 
         // 네고를 한 사용자의 ID로 네고를 찾음
         Optional<Nego> userNegoOptional = negoRepository.findLatestNegoByUserIdAndProductIdOrderByCreatedAtDesc(
-                        nego.getUserId(), productId, PageRequest.of(0, 1))
+                        nego.getUser(), productId, PageRequest.of(0, 1))
                 .stream()
                 .findFirst();
 
@@ -129,9 +152,12 @@ public class NegoServiceImpl implements NegoService {
     }
 
 
-
     @Override
     public PayResponse pay(Long negoId) {
+
+        Long userId = getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -147,8 +173,9 @@ public class NegoServiceImpl implements NegoService {
     }
 
     private void updateCountForNewNego(Nego newNego) {
+
         // productId와 userId에 해당하는 네고 중 가장 최근의 것을 가져옴
-        Optional<Nego> latestNegoOptional = negoRepository.findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(newNego.getProductId(), newNego.getUserId(), PageRequest.of(0, 1))
+        Optional<Nego> latestNegoOptional = negoRepository.findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(newNego.getProduct(), newNego.getUser(), PageRequest.of(0, 1))
                 .stream()
                 .findFirst();
 
@@ -166,6 +193,10 @@ public class NegoServiceImpl implements NegoService {
 
     @Override
     public PayResponse payOriginPrice(Long negoId) {
+
+        Long userId = getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
@@ -194,20 +225,26 @@ public class NegoServiceImpl implements NegoService {
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
         // Nego의 Product ID로 Product 정보 가져오기
-        Product product = productService.findProductById(nego.getProductId());
+        Product product = productService.getProduct(nego.getProductId());
 
         // 상태가 결제 완료인 경우에만 양도 가능
         if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-            // 양도를 위한 작업 수행 (예: 상품 소유자 변경 등)
-
-            // HandoverResponse 생성
-            HandoverResponse handoverResponse = HandoverResponse.fromEntity(product, nego);
 
             // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
-            return handoverResponse;
+            return HandoverResponse.fromEntity(product, nego);
         } else {
             // 양도 불가능한 상태인 경우 예외 처리
             throw new CustomException("양도가 불가능한 상태입니다.", ErrorCode.COMMON_CANNOT_HANDOVER);
         }
+    }
+
+    public static Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw new IllegalArgumentException("Security Context에 인증 정보가 없습니다.");
+        }
+
+        return Long.parseLong(authentication.getName());
     }
 }

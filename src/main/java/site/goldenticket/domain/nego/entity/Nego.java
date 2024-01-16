@@ -22,11 +22,6 @@ public class Nego {
     private Integer price; // 네고가격
     private Integer count; // 네고횟수
 
-    //임시
-    private Long userId;
-    private Long productId;
-
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user; //유저ID
@@ -65,6 +60,9 @@ public class Nego {
     public void setPrice(Integer price) {
         this.price = price;
     }
+    public Long getProductId() {
+        return (product != null) ? product.getId() : null;
+    }
 
     @Builder
     public Nego(Long id, Integer price, Integer count, Long userId, Long productId,
@@ -73,8 +71,6 @@ public class Nego {
         this.id = id;
         this.price = price;
         this.count = (count != null) ? count : 0;
-        this.userId = userId;
-        this.productId = productId;
         this.status = (status != null) ? status : NegotiationStatus.PAYMENT_PENDING;
         this.consent = consent;
         this.expirationTime = expirationTime;
