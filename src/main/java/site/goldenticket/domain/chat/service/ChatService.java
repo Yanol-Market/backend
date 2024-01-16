@@ -42,6 +42,7 @@ public class ChatService {
             .senderType(chatRequest.senderType())
             .userId(chatRequest.userId())
             .content(chatRequest.content())
+            .viewed(false)
             .build();
         chatRepository.save(chat);
 
@@ -50,6 +51,7 @@ public class ChatService {
             .senderType(chat.getSenderType())
             .userId(chat.getUserId())
             .content(chat.getContent())
+            .viewed(chat.getViewed())
             .createdAt(chat.getCreatedAt())
             .build();
     }
@@ -78,12 +80,15 @@ public class ChatService {
         List<ChatResponse> chatResponseList = new ArrayList<>();
 
         for (Chat chat : chatList) {
+            chat.setViewed(true);
+            chatRepository.save(chat); // *확인 필요
             ChatResponse chatResponse = ChatResponse.builder()
                 .chatId(chat.getId())
                 .senderType(chat.getSenderType())
                 .userId(chat.getUserId())
                 .content(chat.getContent())
                 .createdAt(chat.getCreatedAt())
+                .viewed(chat.getViewed())
                 .build();
             chatResponseList.add(chatResponse);
         }
@@ -105,7 +110,6 @@ public class ChatService {
         if (userType.equals("seller") || userType.equals("buyer")) {
             chatRoomShortResponseList = getChatRoomListByUserType(userId, userType);
         }
-
         Collections.sort(chatRoomShortResponseList,
             Comparator.comparing(ChatRoomShortResponse::lastMessageCreatedAt).reversed());
         return ChatRoomListResponse.builder().
@@ -133,6 +137,7 @@ public class ChatService {
                     .roomName(product.getRoomName())
                     .lastMessage(lastChat.getContent())
                     .lastMessageCreatedAt(lastChat.getCreatedAt())
+                    .viewed(lastChat.getViewed())
                     .build());
             }
         }
@@ -154,6 +159,7 @@ public class ChatService {
                     .roomName(product.getRoomName())
                     .lastMessage(lastChat.getContent())
                     .lastMessageCreatedAt(lastChat.getCreatedAt())
+                    .viewed(lastChat.getViewed())
                     .build());
             }
         }

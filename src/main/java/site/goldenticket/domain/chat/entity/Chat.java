@@ -28,14 +28,21 @@ public class Chat extends BaseTimeEntity {
 
     private Long userId;
 
+    private Boolean viewed;
+
     private String content;
 
     @Builder
-    public Chat(Long id, Long chatRoomId, SenderType senderType, Long userId, String content) {
+    public Chat(Long id, Long chatRoomId, SenderType senderType, Long userId, String content, Boolean viewed) {
         this.id = id;
         this.ChatRoomId = chatRoomId;
         this.senderType = senderType;
         this.userId = userId;
         this.content = content;
+        this.viewed = viewed;
+    }
+
+    public void setViewed(Boolean viewed) {
+        this.viewed = viewed;
     }
 }

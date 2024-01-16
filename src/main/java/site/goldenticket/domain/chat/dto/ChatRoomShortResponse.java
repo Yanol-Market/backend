@@ -11,7 +11,8 @@ public record ChatRoomShortResponse(
     String accommodationName,
     String roomName,
     String lastMessage,
-    LocalDateTime lastMessageCreatedAt
+    LocalDateTime lastMessageCreatedAt,
+    Boolean viewed
 ) {
 
 }

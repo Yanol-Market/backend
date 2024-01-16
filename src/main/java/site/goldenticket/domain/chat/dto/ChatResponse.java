@@ -10,6 +10,7 @@ public record ChatResponse(
     SenderType senderType,
     Long userId,
     String content,
+    Boolean viewed,
     LocalDateTime createdAt
 ) {
 
