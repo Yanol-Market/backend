@@ -1,4 +1,4 @@
-package site.goldenticket.domain.yauser.model;
+package site.goldenticket.dummy.yauser.model;
 
 import jakarta.persistence.*;
 import lombok.Builder;
