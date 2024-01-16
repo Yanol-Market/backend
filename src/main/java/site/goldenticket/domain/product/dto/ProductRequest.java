@@ -1,14 +1,12 @@
 package site.goldenticket.domain.product.dto;
 
-import lombok.Getter;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 
-@Getter
-public class ProductRequest {
-
-    private Integer goldenPrice;
-    private String content;
+public record ProductRequest(
+        Integer goldenPrice,
+        String content
+) {
 
     public Product toEntity(ReservationDetailsResponse reservationDetailsResponse, Long userId) {
 
@@ -21,10 +19,8 @@ public class ProductRequest {
                 .roomName(reservationDetailsResponse.getRoomName())
                 .standardNumber(reservationDetailsResponse.getStandardNumber())
                 .maximumNumber(reservationDetailsResponse.getMaximumNumber())
-                .checkInTime(reservationDetailsResponse.getCheckInTime())
-                .checkOutDate(reservationDetailsResponse.getCheckOutDate())
                 .checkInDate(reservationDetailsResponse.getCheckInDate())
-                .checkOutTime(reservationDetailsResponse.getCheckOutTime())
+                .checkOutDate(reservationDetailsResponse.getCheckOutDate())
                 .reservationDate(reservationDetailsResponse.getReservationDate())
                 .originPrice(reservationDetailsResponse.getOriginPrice())
                 .yanoljaPrice(reservationDetailsResponse.getYanoljaPrice())
@@ -34,7 +30,7 @@ public class ProductRequest {
                 .productStatus(ProductStatus.SELLING)
                 .reservationId(reservationDetailsResponse.getReservationId())
                 .userId(userId)
-
+                .sellerViewCheck(false)
                 .build();
     }
 }
