@@ -13,7 +13,7 @@ import static site.goldenticket.domain.nego.status.NegotiationStatus.*;
 
 @Service
 @RequiredArgsConstructor
-public class SchedulerService {
+public class NegoSchedulerService {
     private final NegoRepository negoRepository;
 
     @Scheduled(fixedDelay = 1000)
