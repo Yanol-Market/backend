@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.service.NegoService;
+import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
@@ -24,6 +26,7 @@ import site.goldenticket.domain.user.service.UserService;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,14 +43,22 @@ public class PaymentService {
     public PaymentDetailResponse getPaymentDetail(Long productId, PrincipalDetails principalDetails) {
         User user = userService.getUser(principalDetails.getUserId());
 
-        //TODO: productId,userId 이용하여 해당 유저가 네고를 진행 하였는지 확인, 진행하였다면 상품 가격 바꾸기
-        int price = 1000;
-
         Product product = productService.getProduct(productId);
         if (product.isNotOnSale()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
+        int price = product.getGoldenPrice();
+        String status = "네고 안함";
+
+        Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
+
+        if (nego.isPresent()) {
+            if (nego.get().getConsent()) {
+                price = nego.get().getPrice();
+                status = nego.get().getStatus().toString();
+            }
+        }
         return PaymentDetailResponse.of(user, product, price);
     }
 
@@ -55,12 +66,19 @@ public class PaymentService {
     public PaymentReadyResponse preparePayment(Long productId, PrincipalDetails principalDetails) {
         User user = userService.getUser(principalDetails.getUserId());
 
-        //TODO: productId,userId 이용하여 해당 유저가 네고를 진행 하였는지 확인, 진행하였다면 상품 가격 바꾸기
-        int price = 1000;
-
         Product product = productService.getProduct(productId);
         if (product.isNotOnSale()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
+        int price = product.getGoldenPrice();
+
+        Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
+
+        if (nego.isPresent()) {
+            if (nego.get().getConsent()) {
+                price = nego.get().getPrice();
+            }
         }
 
         Order order = Order.of(product.getId(), user.getId(), price);
