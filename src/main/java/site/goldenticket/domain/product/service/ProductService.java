@@ -1,144 +1,281 @@
 package site.goldenticket.domain.product.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.goldenticket.common.constants.ProductStatus;
-import site.goldenticket.common.constants.ReservationStatus;
-import site.goldenticket.common.exception.CustomException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import site.goldenticket.common.constants.PaginationConstants;
 import site.goldenticket.common.redis.service.RedisService;
-import site.goldenticket.domain.product.dto.ProductDetailResponse;
-import site.goldenticket.domain.product.dto.ProductRequest;
+import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.domain.product.constants.PriceRange;
+import site.goldenticket.domain.product.constants.UserType;
+import site.goldenticket.domain.product.dto.*;
+import site.goldenticket.domain.product.repository.CustomSlice;
+import site.goldenticket.dummy.reservation.constants.ReservationStatus;
+import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.ProductRepository;
-import site.goldenticket.domain.reservation.model.Reservation;
-import site.goldenticket.domain.reservation.service.ReservationService;
+import site.goldenticket.domain.security.PrincipalDetails;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
-import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
+import static site.goldenticket.common.redis.constants.RedisConstants.*;
+import static site.goldenticket.common.response.ErrorCode.*;
+import static site.goldenticket.domain.product.constants.ApiEndpoints.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ProductService {
 
-    private final ProductRepository productRepository;
-    private final ReservationService reservationService;
+    private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
+
     private final RedisService redisService;
+    private final ProductRepository productRepository;
+
+    // 1. 상품 검색 관련 메서드
+    @Transactional(readOnly = true)
+    public Slice<SearchProductResponse> getProductsBySearch(
+            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
+            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+    ) {
+        CustomSlice<Product> productSlice = productRepository.getProductsBySearch(
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+        );
+
+        SearchProductResponse searchProductResponse = SearchProductResponse.fromEntity(
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice.getTotalElements(), productSlice
+        );
+
+        return new SliceImpl<>(
+                Collections.singletonList(searchProductResponse),
+                pageable,
+                productSlice.hasNext()
+        );
+    }
 
     @Transactional(readOnly = true)
-    public ProductDetailResponse getProductDetails(Long productId) {
-        Product product = getProduct(productId);
+    public Slice<RegionProductResponse> getProductsByAreaCode(
+            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+    ) {
+        CustomSlice<Product> productSlice = productRepository.getProductsByAreaCode(
+                areaCode, cursorCheckInDate, cursorId, pageable
+        );
 
-        // TODO: 적절한 사용자 이메일 값을 얻어와서 사용
-        String userEmail = "test@email.com";
-        updateProductViews(userEmail, productId.toString());
+        RegionProductResponse regionProductResponse = RegionProductResponse.fromEntity(
+                productSlice.getTotalElements(), productSlice
+        );
 
-        return ProductDetailResponse.fromEntity(product);
+        return new SliceImpl<>(
+                Collections.singletonList(regionProductResponse),
+                pageable,
+                productSlice.hasNext()
+        );
     }
 
-    @Transactional
-    public Long createProduct(ProductRequest productRequest, Long reservationId) {
-        Reservation reservation = reservationService.getReservation(reservationId);
-        checkReservationStatus(reservation.getReservationStatus());
+    // 2. 예약 상품 조회 관련 메서드
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getAllReservations(Long yaUserId) {
+        URI targetUrl = UriComponentsBuilder
+                .fromUriString(DISTRIBUTE_BAE_URL)
+                .path(RESERVATIONS_ENDPOINT)
+                .buildAndExpand(yaUserId)
+                .encode(StandardCharsets.UTF_8)
+                .toUri();
 
-        reservation.setReservationStatus(ReservationStatus.REGISTERED);
-        reservationService.saveReservation(reservation);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(targetUrl, String.class);
 
-        return productRepository.save(productRequest.toEntity(reservation, reservationId)).getId();
-    }
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            String responseBody = responseEntity.getBody();
 
-    @Transactional
-    public Long updateProduct(ProductRequest productRequest, Long productId) {
-        Product product = getProduct(productId);
-        product.update(productRequest.getGoldenPrice(), productRequest.getContent());
-        return productRepository.save(product).getId();
-    }
+            try {
+                JsonNode dataNode = objectMapper.readTree(responseBody).get("data");
 
-    @Transactional
-    public Long deleteProduct(Long productId) {
-        Product product = getProduct(productId);
-        productRepository.delete(product);
+                List<ReservationResponse> reservationProductResponseList = new ArrayList<>();
 
-        Reservation reservation = reservationService.getReservation(product.getReservationId());
-        reservation.setReservationStatus(ReservationStatus.NOT_REGISTERED);
-        reservationService.saveReservation(reservation);
+                if (dataNode.isArray() && !dataNode.isEmpty()) {
+                    for (JsonNode reservationNode : dataNode) {
+                        ReservationResponse reservationProductResponse = objectMapper.treeToValue(reservationNode, ReservationResponse.class);
 
-        return productId;
-    }
+                        ReservationStatus reservationStatus = productRepository.existsByReservationId(reservationProductResponse.getReservationId())
+                                ? ReservationStatus.REGISTERED : ReservationStatus.NOT_REGISTERED;
 
-    private void checkReservationStatus(ReservationStatus reservationStatus) {
-        if (ReservationStatus.REGISTERED.equals(reservationStatus)) {
-            throw new CustomException(PRODUCT_ALREADY_EXISTS);
+                        reservationProductResponse = reservationProductResponse.toBuilder()
+                                .reservationStatus(reservationStatus)
+                                .build();
+
+                        reservationProductResponseList.add(reservationProductResponse);
+                    }
+                } else {
+                    return Collections.emptyList();
+                }
+
+                return reservationProductResponseList;
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                throw new CustomException(ErrorCode.COMMON_JSON_PROCESSING_ERROR);
+            }
+        } else {
+            throw new CustomException(ErrorCode.RESERVATION_INTERNAL_SERVER_ERROR);
         }
     }
 
+    // 3. 상품 생성, 조회, 수정, 삭제 관련 메서드
+    @Transactional
+    public ProductResponse createProduct(ProductRequest productRequest, Long reservationId, PrincipalDetails principalDetails) {
+        if (productRepository.existsByReservationId(reservationId)) {
+            throw new CustomException(PRODUCT_ALREADY_EXISTS);
+        }
+
+        Long userId = principalDetails.getUserId();
+
+        URI targetUrl = UriComponentsBuilder
+                .fromUriString(DISTRIBUTE_BAE_URL)
+                .path(RESERVATION_ENDPOINT)
+                .buildAndExpand(reservationId)
+                .encode(StandardCharsets.UTF_8)
+                .toUri();
+
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(targetUrl, String.class);
+
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            String responseBody = responseEntity.getBody();
+
+            try {
+                JsonNode reservationNode = objectMapper.readTree(responseBody).get("data");
+
+                ReservationDetailsResponse reservationDetailsResponse = objectMapper.treeToValue(reservationNode, ReservationDetailsResponse.class);
+                Product product = productRepository.save(productRequest.toEntity(reservationDetailsResponse, userId));
+
+                redisService.addZScore(VIEW_RANKING_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
+
+                return ProductResponse.fromEntity(product);
+            } catch (JsonProcessingException e) {
+                throw new CustomException(ErrorCode.COMMON_JSON_PROCESSING_ERROR);
+            }
+        } else {
+            throw new CustomException(ErrorCode.RESERVATION_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProduct(Long productId, PrincipalDetails principalDetails, HttpServletRequest request, HttpServletResponse response) {
+        Product product = getProduct(productId);
+
+        String userKey = (principalDetails != null) ? principalDetails.getUsername() : getOrCreateAnonymousKey(request, response);
+        UserType userType = (principalDetails != null && principalDetails.getUserId().equals(product.getUserId())) ? UserType.SELLER : UserType.BUYER;
+
+        updateProductViewCount(userKey, productId.toString());
+
+        return ProductDetailResponse.fromEntity(product, userType);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(ProductRequest productRequest, Long productId) {
+        Product product = getProduct(productId);
+        product.update(productRequest.getGoldenPrice(), productRequest.getContent());
+        Product updatedProduct = productRepository.save(product);
+
+        return ProductResponse.fromEntity(updatedProduct);
+    }
+
+    @Transactional
+    public ProductResponse deleteProduct(Long productId) {
+        Product product = getProduct(productId);
+        productRepository.delete(product);
+
+        return ProductResponse.fromEntity(product);
+    }
+
+    // 4. 기타 유틸 메서드
     private Product getProduct(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
-    private void updateProductViews(String userKey, String productKey) {
-        // 사용자가 조회한 상품 목록 가져오기
-        Map<String, List<String>> userViewMap = redisService.getMap(userKey, String.class);
+    private String getOrCreateAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        String anonymousKey = null;
 
-        // 1. 사용자의 조회 이력에 해당 상품이 포함되어 있지 않으면
-        if (!userViewMap.containsKey("viewProduct") || !userViewMap.get("viewProduct").contains(productKey)) {
-
-            // 1-1. 사용자의 조회 이력에 해당 상품 추가 ( 누적 증가 방지 )
-            List<String> viewedProductList = userViewMap.computeIfAbsent("viewProduct", k -> new ArrayList<>());
-            viewedProductList.add(productKey);
-            redisService.setMap(userKey, userViewMap);
-
-            // 1-2. 해당 상품의 조회수 가져온 후 증가
-            int viewCount = redisService.get(productKey, String.class).map(Integer::parseInt).orElse(0) + 1;
-
-            // 1-3. 조회수 업데이트
-            redisService.set(productKey, String.valueOf(viewCount), 86400L);
-        }
-        // 2. 이미 조회한 상품이라면 조회수 업데이트를 수행하지 않음
-    }
-
-    @Transactional
-    public void updateViewCounts() {
-        List<Product> productList = productRepository.findAll();
-
-        for (Product product : productList) {
-            String productKey = String.valueOf(product.getId());
-
-            int dailyViewCount = redisService.get(productKey, String.class).map(Integer::parseInt).orElse(0);
-            int updatedViewCount = product.getViewCount() + dailyViewCount;
-
-            product.setViewCount(updatedViewCount);
-            redisService.delete(productKey);
-
-            log.info("Product ViewCount Update 완료. 상품 ID: {}, 조회수: {}", product.getId(), updatedViewCount);
-        }
-
-        productRepository.saveAll(productList);
-    }
-
-    @Transactional
-    public void updateProductStatus() {
-        List<Product> productList = productRepository.findAll();
-        LocalDate currentDate = LocalDate.now();
-
-        for (Product product : productList) {
-            LocalDate checkInDate = product.getCheckInDate();
-
-            if (checkInDate.isBefore(currentDate)) {
-                product.setProductStatus(ProductStatus.EXPIRED);
-
-                log.info("Product Status Update 완료. 상품 ID: {}, 상태: {}", product.getId(), product.getProductStatus());
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("AnonymousKey".equals(cookie.getName())) {
+                    anonymousKey = cookie.getValue();
+                    break;
+                }
             }
         }
 
-        productRepository.saveAll(productList);
+        if (anonymousKey == null) {
+            anonymousKey = UUID.randomUUID().toString();
+
+            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
+                    .domain(".golden-ticket.site")
+                    .httpOnly(false)
+                    .secure(true)
+                    .path("/")
+                    .sameSite("None")
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
+        }
+
+        return anonymousKey;
+    }
+
+    private void updateProductViewCount(String userKey, String productKey) {
+        String viewProductKey = userKey.concat(":").concat("viewProductList");
+
+        List<String> viewProductList = redisService.getList(viewProductKey, String.class);
+
+        if (!viewProductList.contains(productKey)) {
+            redisService.leftPush(viewProductKey, productKey);
+
+            Double currentViewCount = redisService.getZScore(VIEW_RANKING_KEY, productKey);
+            Double updateViewCount = (currentViewCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
+            redisService.addZScore(VIEW_RANKING_KEY, productKey, updateViewCount);
+        }
+    }
+
+    public HomeProductResponse getHomeProduct() {
+        Pageable pageable = PageRequest.of(PaginationConstants.DEFAULT_PAGE, PaginationConstants.MIN_PAGE_SIZE);
+
+        List<ProductResponse> goldenPriceTop5 = getProductResponseList(productRepository.findTop5ByGoldenPriceAsc(pageable));
+        List<ProductResponse> viewCountTop5 = getProductResponseList(productRepository.findTop5ByViewCountDesc(pageable));
+        List<ProductResponse> recentRegisteredTop5 = getProductResponseList(productRepository.findTop5ByIdDesc(pageable));
+        List<ProductResponse> dayUseTop5 = getProductResponseList(productRepository.findTop5DayUseProductsCheckInDateAsc(pageable));
+
+        return HomeProductResponse.builder()
+                .goldenPriceTop5(goldenPriceTop5)
+                .viewCountTop5(viewCountTop5)
+                .recentRegisteredTop5(recentRegisteredTop5)
+                .dayUseTop5(dayUseTop5)
+                .build();
+    }
+
+    private List<ProductResponse> getProductResponseList(List<Product> productList) {
+        return productList.stream()
+                .map(ProductResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 }

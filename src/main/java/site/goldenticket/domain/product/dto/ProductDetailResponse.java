@@ -2,10 +2,11 @@ package site.goldenticket.domain.product.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import site.goldenticket.common.constants.ProductStatus;
-import site.goldenticket.common.constants.ReservationType;
-import site.goldenticket.common.util.DateUtil;
-import site.goldenticket.common.util.DiscountCalculatorUtil;
+import site.goldenticket.domain.product.constants.ProductStatus;
+import site.goldenticket.domain.product.constants.UserType;
+import site.goldenticket.dummy.reservation.constants.ReservationType;
+import site.goldenticket.domain.product.util.DateUtil;
+import site.goldenticket.domain.product.util.DiscountCalculatorUtil;
 import site.goldenticket.domain.product.model.Product;
 
 import java.time.LocalDate;
@@ -35,8 +36,9 @@ public class ProductDetailResponse {
     int marketPriceRatio;
     String content;
     ProductStatus productStatus;
+    UserType userType;
 
-    public static ProductDetailResponse fromEntity(Product product) {
+    public static ProductDetailResponse fromEntity(Product product, UserType userType) {
 
         LocalDate checkInDate = product.getCheckInDate();
         LocalDate checkOutDate = product.getCheckOutDate();
@@ -72,6 +74,7 @@ public class ProductDetailResponse {
                 .marketPriceRatio(marketPriceRatio)
                 .content(product.getContent())
                 .productStatus(product.getProductStatus())
+                .userType(userType)
                 .build();
     }
 }

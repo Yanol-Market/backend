@@ -1,9 +1,8 @@
 package site.goldenticket.domain.product.dto;
 
 import lombok.Getter;
-import site.goldenticket.common.constants.ProductStatus;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
-import site.goldenticket.domain.reservation.model.Reservation;
 
 @Getter
 public class ProductRequest {
@@ -11,29 +10,31 @@ public class ProductRequest {
     private Integer goldenPrice;
     private String content;
 
-    public Product toEntity(Reservation reservation, Long reservationId) {
+    public Product toEntity(ReservationDetailsResponse reservationDetailsResponse, Long userId) {
 
         return Product.builder()
-                .areaCode(reservation.getAreaCode())
-                .accommodationImage(reservation.getAccommodationImage())
-                .accommodationName(reservation.getAccommodationName())
-                .accommodationAddress(reservation.getAccommodationAddress())
-                .reservationType(reservation.getReservationType())
-                .roomName(reservation.getRoomName())
-                .standardNumber(reservation.getStandardNumber())
-                .maximumNumber(reservation.getMaximumNumber())
-                .checkInTime(reservation.getCheckInTime())
-                .checkOutDate(reservation.getCheckOutDate())
-                .checkInDate(reservation.getCheckInDate())
-                .checkOutTime(reservation.getCheckOutTime())
-                .reservationDate(reservation.getReservationDate())
-                .originPrice(reservation.getOriginPrice())
-                .yanoljaPrice(reservation.getYanoljaPrice())
+                .areaCode(reservationDetailsResponse.getAreaCode())
+                .accommodationImage(reservationDetailsResponse.getAccommodationImage())
+                .accommodationName(reservationDetailsResponse.getAccommodationName())
+                .accommodationAddress(reservationDetailsResponse.getAccommodationAddress())
+                .reservationType(reservationDetailsResponse.getReservationType())
+                .roomName(reservationDetailsResponse.getRoomName())
+                .standardNumber(reservationDetailsResponse.getStandardNumber())
+                .maximumNumber(reservationDetailsResponse.getMaximumNumber())
+                .checkInTime(reservationDetailsResponse.getCheckInTime())
+                .checkOutDate(reservationDetailsResponse.getCheckOutDate())
+                .checkInDate(reservationDetailsResponse.getCheckInDate())
+                .checkOutTime(reservationDetailsResponse.getCheckOutTime())
+                .reservationDate(reservationDetailsResponse.getReservationDate())
+                .originPrice(reservationDetailsResponse.getOriginPrice())
+                .yanoljaPrice(reservationDetailsResponse.getYanoljaPrice())
                 .goldenPrice(goldenPrice)
                 .content(content)
                 .viewCount(0)
                 .productStatus(ProductStatus.SELLING)
-                .reservationId(reservationId)
+                .reservationId(reservationDetailsResponse.getReservationId())
+                .userId(userId)
+
                 .build();
     }
 }

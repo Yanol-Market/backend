@@ -1,4 +1,4 @@
-package site.goldenticket.common.constants;
+package site.goldenticket.domain.product.constants;
 
 public enum ProductStatus {
     SELLING,
