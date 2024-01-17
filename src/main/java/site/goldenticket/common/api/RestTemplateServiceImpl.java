@@ -37,8 +37,7 @@ public class RestTemplateServiceImpl implements RestTemplateService {
     @Override
     public <T> List<T> getList(String url, Class<T[]> type) {
         try {
-            T[] result = restTemplate.getForObject(url, type);
-            return (result != null) ? Arrays.asList(result) : Collections.emptyList();
+            return Arrays.asList(restTemplate.getForObject(url, type));
         } catch (HttpClientErrorException e) {
             log.error("RestTemplate Get List Exception Message = {}", e.getMessage());
             return Collections.emptyList();

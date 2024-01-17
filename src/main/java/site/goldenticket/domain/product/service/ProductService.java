@@ -165,9 +165,13 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
+    public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
     private String buildReservationUrl(String endpoint, Long pathVariable) {
         return UriComponentsBuilder
-                .fromUriString(DISTRIBUTE_BAE_URL)
+                .fromUriString(DISTRIBUTE_BASE_URL)
                 .path(endpoint)
                 .buildAndExpand(pathVariable)
                 .encode(StandardCharsets.UTF_8)

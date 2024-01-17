@@ -38,3 +38,7 @@ out/
 
 src/main/generated
 src/main/resources/static/docs
+
+### iamport ###
+src/main/resources/templates
+*.properties
