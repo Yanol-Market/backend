@@ -33,11 +33,11 @@ public class NegoSchedulerService {
             }
         }
 
-        for (Nego nego : completedNegos){
-            if(nego.getStatus() == NEGOTIATION_COMPLETED){
-                throw new CustomException("완료된 네고로 인해 제안을 막습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
-            }
-        }
+//        for (Nego nego : completedNegos){
+//            if(nego.getStatus() == NEGOTIATION_COMPLETED){
+//                throw new CustomException("완료된 네고로 인해 제안을 막습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
+//            }
+//        }
 
 
         negoRepository.saveAll(pendingNegos);

@@ -191,9 +191,9 @@ public class NegoServiceImpl implements NegoService {
 
         // 상태가 결제 완료인 경우에만 양도 가능
         if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-
+            nego.setUpdatedAt(LocalDateTime.now());
             product.setProductStatus(ProductStatus.SOLD_OUT);
-
+            negoRepository.save(nego);
             // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
             return HandoverResponse.fromEntity(product, nego);
         } else {
@@ -201,6 +201,29 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("양도가 불가능한 상태입니다.", ErrorCode.COMMON_CANNOT_HANDOVER);
         }
     }
+
+    @Override
+    public NegoResponse denyHandoverProduct(Long negoId, PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getUserId();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+
+        Nego nego = negoRepository.findById(negoId)
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
+
+        // 상태가 결제 완료인 경우에만 양도 가능
+        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+            nego.setConsent(Boolean.FALSE);
+            nego.setExpirationTime(LocalDateTime.now());
+            nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
+            negoRepository.save(nego);
+            return NegoResponse.fromEntity(nego);
+        } else {
+            throw new CustomException("Nego not in completed status.", ErrorCode.NEGO_NOT_COMPLETED);
+        }
+    }
+
 
     @Override
     public Optional<Nego> getNego(Long userId, Long productId) {

@@ -20,39 +20,45 @@ public class NegoController {
     private final NegoService negoService;
 
     @PostMapping("/proposePrice/{productId}")
-    public CommonResponse<PriceProposeResponse> proposePrice(@RequestBody PriceProposeRequest request, @PathVariable Long productId,@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public CommonResponse<PriceProposeResponse> proposePrice(@RequestBody PriceProposeRequest request, @PathVariable Long productId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         PriceProposeResponse response = negoService.proposePrice(productId, request, principalDetails);
         return CommonResponse.ok("네고가 전달되었습니다.", response);
     }
 
     @PatchMapping("/confirm/{negoId}")
-    public CommonResponse<NegoResponse> confirmPrice(@PathVariable Long negoId,@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        NegoResponse response = negoService.confirmPrice(negoId,principalDetails);
+    public CommonResponse<NegoResponse> confirmPrice(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        NegoResponse response = negoService.confirmPrice(negoId, principalDetails);
         return CommonResponse.ok("네고가 승인되었습니다", response);
     }
 
     @PatchMapping("/deny/{negoId}")
-    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId,@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        NegoResponse response = negoService.denyPrice(negoId,principalDetails);
+    public CommonResponse<NegoResponse> denyPrice(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        NegoResponse response = negoService.denyPrice(negoId, principalDetails);
         return CommonResponse.ok("네고가 거절되었습니다", response);
     }
 
     @PatchMapping("/pay/{negoId}")
-    public CommonResponse<PayResponse> pay(@PathVariable Long negoId,@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        PayResponse payResponse = negoService.pay(negoId,principalDetails);
+    public CommonResponse<PayResponse> pay(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        PayResponse payResponse = negoService.pay(negoId, principalDetails);
         return CommonResponse.ok("결제가 진행됩니다", payResponse);
     }
 
     @PostMapping("/payOriginPrice/{negoId}")
-    public CommonResponse<PayResponse> payOriginPrice(@PathVariable Long negoId,@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        PayResponse payResponse = negoService.payOriginPrice(negoId,principalDetails);
+    public CommonResponse<PayResponse> payOriginPrice(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        PayResponse payResponse = negoService.payOriginPrice(negoId, principalDetails);
         return CommonResponse.ok("결제가 완료되었습니다", payResponse);
     }
 
     @PostMapping("/handoverProduct/{negoId}")
-    public CommonResponse<HandoverResponse> handoverProduct(@PathVariable Long negoId,@AuthenticationPrincipal PrincipalDetails principalDetails){
-        HandoverResponse handoverResponse = negoService.handOverProduct(negoId,principalDetails);
+    public CommonResponse<HandoverResponse> handoverProduct(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        HandoverResponse handoverResponse = negoService.handOverProduct(negoId, principalDetails);
         return CommonResponse.ok("양도가 완료되었습니다", handoverResponse);
+    }
+
+    @PatchMapping("/denyhandoverProduct/{negoId}")
+    public CommonResponse<NegoResponse> denyhandoverProduct(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        NegoResponse response = negoService.denyHandoverProduct(negoId, principalDetails);
+        return CommonResponse.ok("양도가 거절되었습니다", response);
     }
 
 }

@@ -24,6 +24,8 @@ public interface NegoService {
 
     HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails);
 
+    NegoResponse denyHandoverProduct(Long negoId, PrincipalDetails principalDetails);
+
 
     Optional<Nego> getNego(Long userId, Long productId);
 
