@@ -31,19 +31,21 @@ public abstract class ApiTest {
     @LocalServerPort
     private int port;
 
+    public Long userId;
     public String accessToken;
 
     @BeforeEach
     void init() {
         RestAssured.port = port;
-        saveUser();
+        userId = saveUser();
         accessToken = getAccessToken();
     }
 
-    private void saveUser() {
+    private Long saveUser() {
         String encodePassword = passwordEncoder.encode(PASSWORD);
         User user = createUser(encodePassword);
         userRepository.save(user);
+        return user.getId();
     }
 
     private String getAccessToken() {

@@ -11,13 +11,18 @@ import site.goldenticket.common.config.ApiTest;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.user.wish.dto.WishProductSaveRequest;
+import site.goldenticket.domain.user.wish.entity.WishProduct;
+import site.goldenticket.domain.user.wish.repository.WishProductRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static site.goldenticket.common.utils.ProductUtils.createProduct;
 
 @DisplayName("관심 상품 검증")
-class WishControllerTest extends ApiTest {
+class WishProductControllerTest extends ApiTest {
+
+    @Autowired
+    private WishProductRepository wishProductRepository;
 
     @Autowired
     private ProductRepository productRepository;
@@ -45,6 +50,42 @@ class WishControllerTest extends ApiTest {
         // then
         assertThat(result.statusCode()).isEqualTo(HttpStatus.OK.value());
         assertThat(result.jsonPath().getLong("data.id")).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("관심 상품 삭제 검증")
+    void deleteWishProduct() {
+        // given
+        Product product = saveProduct();
+        WishProduct wishProduct = saveWishProduct(product);
+
+        String url = "/users/wishes/product/" + wishProduct.getId();
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(HttpStatus.OK.value());
+    }
+
+    private WishProduct saveWishProduct(Product product) {
+        WishProduct wishProduct = createWishProduct(product);
+        wishProductRepository.save(wishProduct);
+        return wishProduct;
+    }
+
+    private WishProduct createWishProduct(Product product) {
+        return WishProduct.builder()
+                .userId(userId)
+                .product(product)
+                .build();
     }
 
     private Product saveProduct() {
