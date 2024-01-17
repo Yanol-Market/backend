@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -20,18 +22,13 @@ public class Nego {
     private Integer price; // 네고가격
     private Integer count; // 네고횟수
 
-    //임시
-    private Long userId;
-    private Long productId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user; //유저ID
 
-
-    //@ManyToOne
-    //@JoinColumn(name = "user_id")
-    //private User user; //유저ID
-
-    //@ManyToOne
-    //@JoinColumn(name = "product_id")
-    //private Product product; // 상품ID
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product; // 상품ID
 
     @Enumerated(EnumType.STRING)
     private NegotiationStatus status; // 네고 상태
@@ -40,6 +37,12 @@ public class Nego {
     private LocalDateTime expirationTime; // 만료일시
     private LocalDateTime createdAt; // 생성일시
     private LocalDateTime updatedAt; // 수정일시
+
+
+    public Nego(User user, Product product) {
+        this.user = user;
+        this.product = product;
+    }
 
     public void setStatus(NegotiationStatus status) {
         this.status = status;
@@ -60,8 +63,25 @@ public class Nego {
         this.consent = consent;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public void setPrice(Integer price) {
         this.price = price;
+    }
+    public Long getProductId() {
+        return (product != null) ? product.getId() : null;
+    }
+    public Integer getCount() {
+        return (count != null) ? count : 0;
+    }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Builder
@@ -71,8 +91,6 @@ public class Nego {
         this.id = id;
         this.price = price;
         this.count = (count != null) ? count : 0;
-        this.userId = userId;
-        this.productId = productId;
         this.status = (status != null) ? status : NegotiationStatus.PAYMENT_PENDING;
         this.consent = consent;
         this.expirationTime = expirationTime;

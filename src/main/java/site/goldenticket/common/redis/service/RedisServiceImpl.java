@@ -35,7 +35,6 @@ public class RedisServiceImpl implements RedisService {
         try {
             return Optional.of(objectMapper.readValue(serializedValue, type));
         } catch (IllegalArgumentException | InvalidFormatException e) {
-            log.warn("[{}] Not Exist Value", key);
             return Optional.empty();
         } catch (Exception e) {
             log.error("Redis Get Exception", e);

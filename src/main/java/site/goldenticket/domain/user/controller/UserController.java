@@ -2,9 +2,12 @@ package site.goldenticket.domain.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.common.security.authentication.dto.LoginRequest;
+import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.JoinResponse;
 import site.goldenticket.domain.user.service.UserService;
@@ -32,5 +35,13 @@ public class UserController {
     public ResponseEntity<CommonResponse<JoinResponse>> join(@RequestBody @Validated JoinRequest joinRequest) {
         JoinResponse response = userService.join(joinRequest);
         return new ResponseEntity<>(CommonResponse.ok(response), CREATED);
+    }
+
+    @PostMapping("/yanolja-login")
+    public ResponseEntity<CommonResponse<Long>> yanoljaLogin(
+            @RequestBody LoginRequest loginRequest,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok(userService.yanoljaLogin(loginRequest, principalDetails.getUserId())));
     }
 }
