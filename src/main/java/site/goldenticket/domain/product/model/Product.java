@@ -109,4 +109,12 @@ public class Product {
     public void setProductStatus(ProductStatus productStatus) {
         this.productStatus = productStatus;
     }
+
+    public boolean isOnSale() {
+        return this.productStatus == ProductStatus.SELLING;
+    }
+
+    public boolean isNotOnSale() {
+        return !isOnSale();
+    }
 }
