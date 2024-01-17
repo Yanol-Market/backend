@@ -41,7 +41,8 @@ public class SecurityConfiguration {
 
     private static final String[] PERMIT_ALL_URLS = new String[]{
             "/h2-console/**",
-            "/dummy/**"
+            "/dummy/**",
+            "/payments/**"
     };
 
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
@@ -56,6 +57,7 @@ public class SecurityConfiguration {
             "/users",
             "/reissue",
             "/yanolja-login",
+            "/alerts/test",
             "/chats/test"
     };
 
