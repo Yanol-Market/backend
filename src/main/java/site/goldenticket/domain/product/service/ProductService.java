@@ -1,7 +1,23 @@
 package site.goldenticket.domain.product.service;
 
+import static site.goldenticket.common.redis.constants.RedisConstants.SCORE_INCREMENT_AMOUNT;
+import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKING_KEY;
+import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
+import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.RESERVATION_NOT_FOUND;
+import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -14,13 +30,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.constants.PaginationConstants;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
-import site.goldenticket.domain.product.dto.*;
-import site.goldenticket.domain.product.repository.CustomSlice;
-import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.domain.product.dto.HomeProductResponse;
+import site.goldenticket.domain.product.dto.ProductDetailResponse;
+import site.goldenticket.domain.product.dto.ProductRequest;
+import site.goldenticket.domain.product.dto.ProductResponse;
+import site.goldenticket.domain.product.dto.RegionProductResponse;
+import site.goldenticket.domain.product.dto.SearchProductResponse;
 import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
@@ -238,5 +259,9 @@ public class ProductService {
         return productList.stream()
                 .map(ProductResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public List<Product> findProductListByUserId(Long userId) {
+        return productRepository.findAllByUserId(userId);
     }
 }
