@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.domain.chat.entity.ChatRoom;
+import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.response.HandoverResponse;
-import site.goldenticket.domain.nego.dto.response.NegoResponse;
-import site.goldenticket.domain.nego.dto.response.PayResponse;
-import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
+import site.goldenticket.domain.nego.dto.response.*;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
@@ -31,6 +30,7 @@ public class NegoServiceImpl implements NegoService {
     private final NegoRepository negoRepository;
     private final ProductService productService;
     private final UserRepository userRepository;
+    private final ChatService chatService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId, PrincipalDetails principalDetails) {
@@ -261,5 +261,54 @@ public class NegoServiceImpl implements NegoService {
     @Override
     public Nego save(Nego nego) {
         return negoRepository.save(nego);
+    }
+
+    /***
+     * 네고 가능 여부 조회
+     * @param userId 회원 ID
+     * @param productId 상품 ID
+     * @return 네고 가능 여부 응답 DTO (네고 가능 여부, 네고 가능 시, 채팅방 ID)
+     */
+    public NegoAvailableResponse isAvailableNego(Long userId, Long productId) {
+        Boolean negoAvailable = true;
+        Long chatRoomId = -1L;
+        Product product = productService.getProduct(productId);
+        //본인이 판매하는 상품이면 네고 불가
+        if (product.getUserId().equals(userId)) {
+            negoAvailable = false;
+        }
+        //판매중인 상품인지 확인: 판매중이 아니면 네고 불가
+        if (!product.getProductStatus().equals(ProductStatus.SELLING)) {
+            negoAvailable = false;
+
+        } else {
+            if (!negoRepository.existsByUser_IdAndProduct_Id(userId, productId)) {
+                //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
+                if (!chatService.existsChatRoomByUserIdAndProductId(userId, productId)) {
+                    ChatRoom chatRoom = chatService.createChatRoom(userId, productId);
+                    negoAvailable = true;
+                    chatRoomId = chatRoom.getId();
+                    System.out.println(chatRoomId);
+                }
+            } else {
+                //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
+                List<Nego> negoList = negoRepository.findAllByUser_IdAndProduct_Id(userId,
+                        productId);
+                for (Nego nego : negoList) {
+                    if (nego.getCount().equals(2) || nego.getStatus()
+                            .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
+                        negoAvailable = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (negoAvailable) {
+            chatRoomId = chatService.getChatRoomByBuyerIdAndProductId(userId, productId).getId();
+        }
+        return NegoAvailableResponse.builder()
+                .negoAvailable(negoAvailable)
+                .chatRoomId(chatRoomId)
+                .build();
     }
 }
