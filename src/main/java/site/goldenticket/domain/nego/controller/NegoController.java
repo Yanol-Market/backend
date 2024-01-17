@@ -45,11 +45,11 @@ public class NegoController {
         return ResponseEntity.ok(CommonResponse.ok("결제가 진행됩니다", payResponse));
     }
 
-    @PostMapping("/payOriginPrice/{negoId}")
-    public ResponseEntity<CommonResponse<PayResponse>>payOriginPrice(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        PayResponse payResponse = negoService.payOriginPrice(negoId, principalDetails);
-        return ResponseEntity.ok(CommonResponse.ok("결제가 완료되었습니다", payResponse));
-    }
+//    @PostMapping("/payOriginPrice/{negoId}")
+//    public ResponseEntity<CommonResponse<PayResponse>>payOriginPrice(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+//        PayResponse payResponse = negoService.payOriginPrice(negoId, principalDetails);
+//        return ResponseEntity.ok(CommonResponse.ok("결제가 완료되었습니다", payResponse));
+//    }
 
     @PostMapping("/handoverProduct/{negoId}")
     public ResponseEntity<CommonResponse<HandoverResponse>> handoverProduct(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {

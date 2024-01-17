@@ -33,6 +33,7 @@ public enum ErrorCode {
     NEGO_NOT_FOUND(NOT_FOUND, "네고 정보를 찾을 수 없습니다"),
     NEGO_NOT_COMPLETED(BAD_REQUEST, "네고가 완료되지 않았습니다."),
     CANNOT_PROPOSE_NEGO(BAD_REQUEST,"네고를 제안할수 없습니다"),
+    NEGO_COMPLETED(BAD_REQUEST, "다른 유저가 네고를 성공해 진행할수 없습니다."),
 
 
 

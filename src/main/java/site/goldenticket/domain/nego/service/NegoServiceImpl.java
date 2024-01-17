@@ -20,8 +20,11 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -96,7 +99,10 @@ public class NegoServiceImpl implements NegoService {
                 .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
 
         if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
+            throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
+        }
+        if (nego != null && nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
+            throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
         }
 
         if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
@@ -132,13 +138,22 @@ public class NegoServiceImpl implements NegoService {
     public PayResponse pay(Long negoId, PrincipalDetails principalDetails) {
 
         Long userId = principalDetails.getUserId();
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
+        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+            throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
+        }
+        if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
+            throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
+        }
+
         if (nego.getConsent()) {
-            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+            nego.setStatus(NegotiationStatus.TRANSFER_PENDING);
             nego.setUpdatedAt(LocalDateTime.now());
             negoRepository.save(nego);
 
@@ -149,36 +164,36 @@ public class NegoServiceImpl implements NegoService {
     }
 
 
-    @Override
-    public PayResponse payOriginPrice(Long negoId, PrincipalDetails principalDetails) {
-
-        Long userId = principalDetails.getUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
-        Nego nego = negoRepository.findById(negoId)
-                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
-
-        if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
-        }
-
-        if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
-        }
-
-        Integer originPrice = nego.getProduct().getOriginPrice();
-
-        // 네고의 가격을 상품의 원래 가격으로 업데이트
-        nego.updatePrice(originPrice);
-
-        // 네고 상태를 완료로 변경
-        nego.payNego(NegotiationStatus.NEGOTIATION_COMPLETED, Boolean.TRUE, LocalDateTime.now());
-
-        negoRepository.save(nego);
-
-        return PayResponse.fromEntity(nego);
-
-    }
+//    @Override
+//    public PayResponse payOriginPrice(Long negoId, PrincipalDetails principalDetails) {
+//
+//        Long userId = principalDetails.getUserId();
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+//        Nego nego = negoRepository.findById(negoId)
+//                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
+//
+//        if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+//            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
+//        }
+//
+//        if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
+//            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
+//        }
+//
+//        Integer originPrice = nego.getProduct().getOriginPrice();
+//
+//        // 네고의 가격을 상품의 원래 가격으로 업데이트
+//        nego.updatePrice(originPrice);
+//
+//        // 네고 상태를 완료로 변경
+//        nego.payNego(NegotiationStatus.NEGOTIATION_COMPLETED, Boolean.TRUE, LocalDateTime.now());
+//
+//        negoRepository.save(nego);
+//
+//        return PayResponse.fromEntity(nego);
+//
+//    }
 
     @Override
     public HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails) {
@@ -194,8 +209,9 @@ public class NegoServiceImpl implements NegoService {
         Product product = productService.getProduct(nego.getProductId());
 
         // 상태가 결제 완료인 경우에만 양도 가능
-        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+        if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             nego.setUpdatedAt(LocalDateTime.now());
+            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             negoRepository.save(nego);
             // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
@@ -217,7 +233,7 @@ public class NegoServiceImpl implements NegoService {
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
         // 상태가 결제 완료인 경우에만 양도 가능
-        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+        if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             nego.setConsent(Boolean.FALSE);
             nego.setExpirationTime(LocalDateTime.now());
             nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
@@ -226,6 +242,16 @@ public class NegoServiceImpl implements NegoService {
         } else {
             throw new CustomException("Nego not in completed status.", ErrorCode.NEGO_NOT_COMPLETED);
         }
+    }
+
+    // 수빈아 이거 쓰면 돼!!
+    @Override
+    public void updateNegotiationStatusForCompletedProduct(Long productId) {
+        List<Nego> completedNegos = negoRepository.findByProductIdAndStatus(productId, NegotiationStatus.NEGOTIATION_COMPLETED);
+        for (Nego nego : completedNegos) {
+            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+        }
+        negoRepository.saveAll(completedNegos);
     }
 
 
