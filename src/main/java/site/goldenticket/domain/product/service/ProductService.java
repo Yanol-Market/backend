@@ -169,18 +169,6 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    private String getOrCreateAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
-        Cookie[] cookies = request.getCookies();
-        String anonymousKey = null;
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("AnonymousKey".equals(cookie.getName())) {
-                    anonymousKey = cookie.getValue();
-                    break;
-                }
-            }
-        }
     private String buildReservationUrl(String endpoint, Long pathVariable) {
         return UriComponentsBuilder
                 .fromUriString(DISTRIBUTE_BAE_URL)
