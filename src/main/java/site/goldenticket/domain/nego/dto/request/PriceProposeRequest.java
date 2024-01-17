@@ -13,4 +13,5 @@ public record PriceProposeRequest(
     public Integer price() {
         return price;
     }
+
 }
