@@ -21,6 +21,7 @@ import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -194,4 +195,13 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
+    @Override
+    public Optional<Nego> getNego(Long userId, Long productId) {
+        return negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, productId);
+    }
+
+    @Override
+    public Nego save(Nego nego) {
+        return negoRepository.save(nego);
+    }
 }

@@ -44,7 +44,7 @@ public class SecurityService implements UserDetailsService {
     }
 
     public YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
-        return restTemplateService.get(
+        return restTemplateService.post(
                 "http://localhost:8080/dummy/yauser",
                 loginRequest,
                 YanoljaUserResponse.class
