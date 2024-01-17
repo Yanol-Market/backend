@@ -21,9 +21,13 @@ public interface NegoService {
     PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request, PrincipalDetails principalDetails);
     PayResponse pay(Long negoId,PrincipalDetails principalDetails); // 결제하기
 
-    PayResponse payOriginPrice(Long negoId,PrincipalDetails principalDetails); //원래 가격으로 결제하기
+    //PayResponse payOriginPrice(Long negoId,PrincipalDetails principalDetails); //원래 가격으로 결제하기
 
     HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails);
+
+    NegoResponse denyHandoverProduct(Long negoId, PrincipalDetails principalDetails);
+
+    void updateNegotiationStatusForCompletedProduct(Long productId);
 
 
     Optional<Nego> getNego(Long userId, Long productId);

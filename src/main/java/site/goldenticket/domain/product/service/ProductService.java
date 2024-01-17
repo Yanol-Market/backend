@@ -254,4 +254,9 @@ public class ProductService {
     public List<Product> findProductListByUserId(Long userId) {
         return productRepository.findAllByUserId(userId);
     }
+
+    @Transactional
+    public void updateProductForNego(Product product) {
+        productRepository.save(product);
+    }
 }
