@@ -43,6 +43,7 @@ public class NegoSchedulerService {
                 transferNego.setStatus(NEGOTIATION_COMPLETED);
                 transferNego.setUpdatedAt(currentTime);
                 product.setProductStatus(ProductStatus.SOLD_OUT);
+                productService.updateProductForNego(product);
             }
         }
 
