@@ -154,8 +154,15 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
-        Integer originPrice = nego.getProduct().getOriginPrice();
+        if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+        }
 
+        if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+        }
+
+        Integer originPrice = nego.getProduct().getOriginPrice();
 
         // 네고의 가격을 상품의 원래 가격으로 업데이트
         nego.updatePrice(originPrice);
