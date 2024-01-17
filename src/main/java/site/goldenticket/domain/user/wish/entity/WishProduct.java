@@ -16,7 +16,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @ToString
-public class Wish extends BaseTimeEntity {
+public class WishProduct extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -29,7 +29,7 @@ public class Wish extends BaseTimeEntity {
     private Product product;
 
     @Builder
-    private Wish(Long userId, Product product) {
+    private WishProduct(Long userId, Product product) {
         this.userId = userId;
         this.product = product;
     }

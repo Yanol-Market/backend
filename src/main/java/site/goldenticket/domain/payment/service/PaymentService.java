@@ -41,7 +41,7 @@ public class PaymentService {
     private final ProductService productService;
 
     public PaymentDetailResponse getPaymentDetail(Long productId, PrincipalDetails principalDetails) {
-        User user = userService.getUser(principalDetails.getUserId());
+        User user = userService.findById(principalDetails.getUserId());
 
         Product product = productService.getProduct(productId);
         if (product.isNotOnSale()) {
@@ -68,7 +68,7 @@ public class PaymentService {
 
     public PaymentReadyResponse preparePayment(Long orderId, PrincipalDetails principalDetails) {
 
-        User user = userService.getUser(principalDetails.getUserId());
+        User user = userService.findById(principalDetails.getUserId());
 
         Order order = orderRepository.findById(orderId).orElseThrow(
                 () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)

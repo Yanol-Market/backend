@@ -87,7 +87,7 @@ CREATE TABLE `wish_region`
                  DEFAULT CHARSET = utf8mb4
                  COLLATE = utf8mb4_bin;
 
-CREATE TABLE `wish`
+CREATE TABLE `wish_product`
 (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '찜 ID',
     user_id    BIGINT NOT NULL COMMENT '사용자 ID',
