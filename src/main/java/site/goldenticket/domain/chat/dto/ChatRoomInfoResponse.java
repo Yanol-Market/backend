@@ -1,7 +1,7 @@
 package site.goldenticket.domain.chat.dto;
 
 import lombok.Builder;
-import site.goldenticket.common.constants.ProductStatus;
+import site.goldenticket.domain.product.constants.ProductStatus;
 
 @Builder
 public record ChatRoomInfoResponse(

@@ -1,6 +1,8 @@
 package site.goldenticket.domain.chat.service;
 
 import static site.goldenticket.common.response.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
+import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +38,12 @@ public class ChatService {
     private final ProductService productService;
     private final UserService userService;
 
-    public ChatResponse createChat(Long userId, ChatRequest chatRequest) {
+    public ChatResponse createChat(ChatRequest chatRequest) {
+        if (!chatRequest.senderType().equals(SenderType.SYSTEM)
+            && !chatRequest.senderType().equals(SenderType.BUYER)
+            && !chatRequest.senderType().equals(SenderType.SELLER)) {
+            throw new CustomException(INVALID_SENDER_TYPE);
+        }
         Chat chat = Chat.builder()
             .chatRoomId(chatRequest.chatRoomId())
             .senderType(chatRequest.senderType())
@@ -59,11 +66,11 @@ public class ChatService {
     public ChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
-        Product product = productService.findProduct(chatRoom.getProductId());
+        Product product = productService.getProduct(chatRoom.getProductId());
         Long sellerId = product.getUserId();
         Long buyerId = chatRoom.getUserId();
         Long receiverId = (sellerId.equals(userId)) ? buyerId : sellerId; //채팅 상대 ID
-        User receiver = userService.findUser(receiverId);
+        User receiver = userService.findById(receiverId);
 
         ChatRoomInfoResponse chatRoomInfoResponse = ChatRoomInfoResponse.builder()
             .chatRoomId(chatRoomId)
@@ -100,15 +107,14 @@ public class ChatService {
 
     public ChatRoomListResponse getChatRoomList(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
-        //내가 판매자인 경우 = 내가 판매중인 상품 id 목록 => 상품id가 일치하는 채팅방 목록 조회
-        //내가 구매자인 경우 = 채팅방의 구매자 id와 유저id가 일치하는 채팅방 목록 조회
         //모든 채팅 조회 = 판매자인 경우 + 구매자인 경우
         if (userType.equals("all")) {
             chatRoomShortResponseList.addAll(getChatRoomListByUserType(userId, "seller"));
             chatRoomShortResponseList.addAll(getChatRoomListByUserType(userId, "buyer"));
-        }
-        if (userType.equals("seller") || userType.equals("buyer")) {
+        } else if (userType.equals("seller") || userType.equals("buyer")) {
             chatRoomShortResponseList = getChatRoomListByUserType(userId, userType);
+        } else {
+            throw new CustomException(INVALID_USER_TYPE);
         }
         Collections.sort(chatRoomShortResponseList,
             Comparator.comparing(ChatRoomShortResponse::lastMessageCreatedAt).reversed());
@@ -119,14 +125,15 @@ public class ChatService {
 
     private List<ChatRoomShortResponse> getChatRoomListByUserType(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
-        List<ChatRoom> chatRoomList;
+        List<ChatRoom> chatRoomList = new ArrayList<>();
 
+        //내가 구매자인 경우 = 채팅방의 구매자 id와 유저id가 일치하는 채팅방 목록 조회
         if (userType.equals("buyer")) {
             //내가 구매자. 상대가 판매자.
             chatRoomList = chatRoomRepository.findAllByUserId(userId);
             for (ChatRoom chatRoom : chatRoomList) {
-                Product product = productService.findProduct(chatRoom.getProductId());
-                User receiver = userService.findUser(product.getUserId());
+                Product product = productService.getProduct(chatRoom.getProductId());
+                User receiver = userService.findById(product.getUserId());
                 // *채팅 내역이 비어 있을 경우 예외 처리 추가 예정
                 Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
@@ -142,14 +149,17 @@ public class ChatService {
             }
         }
 
+        //내가 판매자인 경우 = 내가 판매중인 상품 id 목록 => 상품id가 일치하는 채팅방 목록 조회
         if (userType.equals("seller")) {
             //내가 판매자. 상대가 구매자.
             List<Product> productList = productService.findProductListByUserId(userId);
-            chatRoomList = chatRoomRepository.findAllByUserId(userId);
+            for (Product product : productList) {
+                chatRoomList.addAll(chatRoomRepository.findAllByProductId(product.getId()));
+            }
 
             for (ChatRoom chatRoom : chatRoomList) {
-                User receiver = userService.findUser(chatRoom.getUserId());
-                Product product = productService.findProduct(chatRoom.getProductId());
+                User receiver = userService.findById(chatRoom.getUserId());
+                Product product = productService.getProduct(chatRoom.getProductId());
                 Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())

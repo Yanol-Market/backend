@@ -19,13 +19,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.goldenticket.common.security.authentication.token.TokenProvider;
+import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.common.security.exception.InvalidJwtException;
 
 import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static site.goldenticket.common.response.ErrorCode.INVALID_TOKEN;
+import static site.goldenticket.common.response.ErrorCode.LOGOUT_ACCESS_TOKEN;
 import static site.goldenticket.common.security.authorization.SecurityErrorCode.ERROR_KEY;
 import static site.goldenticket.common.security.authorization.SecurityErrorCode.TOKEN_EXPIRED;
 
@@ -35,7 +36,7 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
 
     private static final String GRANT_TYPE = "Bearer ";
 
-    private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -51,8 +52,12 @@ public class TokenAuthorizationFilter extends OncePerRequestFilter {
             String token = authorization.substring(GRANT_TYPE.length());
             log.info("accessToken = {}", token);
 
+            if (tokenService.isBlackListToken(token)) {
+                throw new InvalidJwtException(LOGOUT_ACCESS_TOKEN);
+            }
+
             try {
-                String username = tokenProvider.getUsername(token);
+                String username = tokenService.getUsername(token);
                 log.info("Authority username = {}", username);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

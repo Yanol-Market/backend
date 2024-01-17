@@ -18,6 +18,10 @@ public class CommonResponse<T> {
         this.data = data;
     }
 
+    public static CommonResponse<Void> ok() {
+        return ok(null);
+    }
+
     public static <T> CommonResponse<T> ok(T data) {
         return ok(null, data);
     }

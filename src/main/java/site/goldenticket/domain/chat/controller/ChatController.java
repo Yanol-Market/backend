@@ -3,6 +3,7 @@ package site.goldenticket.domain.chat.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import site.goldenticket.domain.chat.dto.ChatResponse;
 import site.goldenticket.domain.chat.dto.ChatRoomDetailResponse;
 import site.goldenticket.domain.chat.dto.ChatRoomListResponse;
 import site.goldenticket.domain.chat.service.ChatService;
+import site.goldenticket.domain.security.PrincipalDetails;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,28 +26,28 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @PostMapping()
-    public ResponseEntity<CommonResponse<ChatResponse>> createChat(
+    @PostMapping("/test")
+    public ResponseEntity<CommonResponse<ChatResponse>> createChatForTest(
         @Valid @RequestBody ChatRequest chatRequest
     ) {
-        Long userId = 1L; //시큐리티 적용 후 수정 예정
         return ResponseEntity.ok(
-            CommonResponse.ok("새로운 채팅이 저장되었습니다.", chatService.createChat(userId, chatRequest)));
+            CommonResponse.ok("새로운 채팅이 저장되었습니다.",
+                chatService.createChat(chatRequest)));
     }
 
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<CommonResponse<ChatRoomDetailResponse>> getChatRoom(
-        @PathVariable Long chatRoomId) {
-        Long userId = 1L; //시큐리티 적용 후 수정 예정
+        @PathVariable(name = "chatRoomId") Long chatRoomId,
+        @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(CommonResponse.ok("채팅방 상세 정보를 조회했습니다",
-            chatService.getChatRoomDetail(userId, chatRoomId)));
+            chatService.getChatRoomDetail(principalDetails.getUserId(), chatRoomId)));
     }
 
     @GetMapping()
     public ResponseEntity<CommonResponse<ChatRoomListResponse>> getChatRoomList(
-        @RequestParam String userType) {
-        Long userId = 1L; // 시큐리티 적용 후 수정 예정
+        @RequestParam(name = "userType") String userType,
+        @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(CommonResponse.ok("채팅방 목록(거래 내역)이 조회되었습니다",
-            chatService.getChatRoomList(userId, userType)));
+            chatService.getChatRoomList(principalDetails.getUserId(), userType)));
     }
 }
