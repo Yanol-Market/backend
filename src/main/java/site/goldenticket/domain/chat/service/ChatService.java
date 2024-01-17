@@ -1,6 +1,8 @@
 package site.goldenticket.domain.chat.service;
 
 import static site.goldenticket.common.response.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
+import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +38,12 @@ public class ChatService {
     private final ProductService productService;
     private final UserService userService;
 
-    public ChatResponse createChat(Long userId, ChatRequest chatRequest) {
+    public ChatResponse createChat(ChatRequest chatRequest) {
+        if (!chatRequest.senderType().equals(SenderType.SYSTEM)
+            && !chatRequest.senderType().equals(SenderType.BUYER)
+            && !chatRequest.senderType().equals(SenderType.SELLER)) {
+            throw new CustomException(INVALID_SENDER_TYPE);
+        }
         Chat chat = Chat.builder()
             .chatRoomId(chatRequest.chatRoomId())
             .senderType(chatRequest.senderType())
@@ -104,9 +111,10 @@ public class ChatService {
         if (userType.equals("all")) {
             chatRoomShortResponseList.addAll(getChatRoomListByUserType(userId, "seller"));
             chatRoomShortResponseList.addAll(getChatRoomListByUserType(userId, "buyer"));
-        }
-        if (userType.equals("seller") || userType.equals("buyer")) {
+        } else if (userType.equals("seller") || userType.equals("buyer")) {
             chatRoomShortResponseList = getChatRoomListByUserType(userId, userType);
+        } else {
+            throw new CustomException(INVALID_USER_TYPE);
         }
         Collections.sort(chatRoomShortResponseList,
             Comparator.comparing(ChatRoomShortResponse::lastMessageCreatedAt).reversed());

@@ -56,7 +56,9 @@ public enum ErrorCode {
     SEARCH_HISTORY_NOT_FOUND(NOT_FOUND, "검색 이력이 존재하지 않습니다."),
 
     //Chat
-    CHAT_ROOM_NOT_FOUND(NOT_FOUND, "존재하지 않는 채팅방입니다.")
+    CHAT_ROOM_NOT_FOUND(NOT_FOUND, "존재하지 않는 채팅방입니다."),
+    INVALID_USER_TYPE(BAD_REQUEST, "userType이 올바르지 않습니다. (userType: all, seller, buyer)"),
+    INVALID_SENDER_TYPE(BAD_REQUEST, "SenderType이 올바르지 않습니다. (SenderType: SYSTEM, SELLER, BUYER)")
     ;
 
     private final HttpStatus httpStatus;

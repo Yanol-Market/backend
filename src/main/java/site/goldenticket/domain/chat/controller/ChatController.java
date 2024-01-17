@@ -26,14 +26,13 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @PostMapping()
-    public ResponseEntity<CommonResponse<ChatResponse>> createChat(
+    @PostMapping("/test")
+    public ResponseEntity<CommonResponse<ChatResponse>> createChatForTest(
         @Valid @RequestBody ChatRequest chatRequest
     ) {
-        Long userId = 1L; //시큐리티 적용 후 수정 예정
         return ResponseEntity.ok(
             CommonResponse.ok("새로운 채팅이 저장되었습니다.",
-                chatService.createChat(userId, chatRequest)));
+                chatService.createChat(chatRequest)));
     }
 
     @GetMapping("/{chatRoomId}")
