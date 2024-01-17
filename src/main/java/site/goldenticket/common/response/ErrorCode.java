@@ -22,16 +22,18 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(BAD_REQUEST, "주문 정보를 찾을 수 없습니다"),
     PAYMENT_NOT_FOUND(BAD_REQUEST, "결제 정보를 찾을 수 없습니다"),
 
-    COMMON_CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
-    COMMON_NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
-    COMMON_CANNOT_CONFIRM_NEGO(BAD_REQUEST, "네고를 승인할수 없습니다."),
-    COMMON_NEGO_APPROVAL_REQUIRED(BAD_REQUEST, "네고 승인이 필요합니다."),
-    COMMON_ONLY_CAN_DENY_WHEN_NEGOTIATING(BAD_REQUEST, "네고 중인 경우에만 거절할 수 있습니다."),
-    COMMON_NEGO_TIMEOUT(BAD_REQUEST, "20분이 지나 제안할수 없습니다"),
-    COMMON_NEGO_ALREADY_NEGOTIATING(BAD_REQUEST, "이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
-    COMMON_CANNOT_HANDOVER(BAD_REQUEST, "양도가 불가능한 상태입니다."),
+    CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
+    NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
+    CANNOT_CONFIRM_NEGO(BAD_REQUEST, "네고를 승인할수 없습니다."),
+    NEGO_APPROVAL_REQUIRED(BAD_REQUEST, "네고 승인이 필요합니다."),
+    ONLY_CAN_DENY_WHEN_NEGOTIATING(BAD_REQUEST, "네고 중인 경우에만 거절할 수 있습니다."),
+    NEGO_TIMEOUT(BAD_REQUEST, "20분이 지나 제안할수 없습니다"),
+    NEGO_ALREADY_NEGOTIATING(BAD_REQUEST, "이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
+    CANNOT_HANDOVER(BAD_REQUEST, "양도가 불가능한 상태입니다."),
     NEGO_NOT_FOUND(NOT_FOUND, "네고 정보를 찾을 수 없습니다"),
-    NEGO_NOT_COMPLETED(BAD_REQUEST, "Nego not in completed status."),
+    NEGO_NOT_COMPLETED(BAD_REQUEST, "네고가 완료되지 않았습니다."),
+    CANNOT_PROPOSE_NEGO(BAD_REQUEST,"네고를 제안할수 없습니다"),
+
 
 
     // Auth

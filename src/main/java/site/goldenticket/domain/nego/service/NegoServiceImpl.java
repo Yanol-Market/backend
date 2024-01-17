@@ -48,10 +48,10 @@ public class NegoServiceImpl implements NegoService {
 
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
-            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMON_CANNOT_CONFIRM_NEGO);
+            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
         }
         if (nego.getCount() > 3) {
-            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.COMMON_CANNOT_CONFIRM_NEGO);
+            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
         }
         return NegoResponse.fromEntity(nego);
     }
@@ -79,7 +79,7 @@ public class NegoServiceImpl implements NegoService {
             return NegoResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
-            throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.COMMON_ONLY_CAN_DENY_WHEN_NEGOTIATING);
+            throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.", ErrorCode.ONLY_CAN_DENY_WHEN_NEGOTIATING);
         }
     }
 
@@ -96,19 +96,19 @@ public class NegoServiceImpl implements NegoService {
                 .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
 
         if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
         }
 
         if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
         }
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
-            throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+            throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
         }
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
-            throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
+            throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.CANNOT_PROPOSE_NEGO);
         }
 
         // count 증가
@@ -116,11 +116,11 @@ public class NegoServiceImpl implements NegoService {
 
         // 여기서 count가 3인 경우 예외 처리
         if (newCount > 2) {
-            throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
+            throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.CANNOT_NEGOTIATE);
         }
 
         // 네고 엔터티 업데이트
-        userNego.updateNego(newCount, request.getPrice(), NegotiationStatus.NEGOTIATING, LocalDateTime.now(), LocalDateTime.now(), Boolean.FALSE);
+        userNego.updateNego(newCount, request.price(), NegotiationStatus.NEGOTIATING, LocalDateTime.now(), LocalDateTime.now(), Boolean.FALSE);
 
         // 네고 저장
         negoRepository.save(userNego);
@@ -144,7 +144,7 @@ public class NegoServiceImpl implements NegoService {
 
             return PayResponse.fromEntity(nego);
         } else {
-            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_NEGO_APPROVAL_REQUIRED);
+            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.NEGO_APPROVAL_REQUIRED);
         }
     }
 
@@ -159,11 +159,11 @@ public class NegoServiceImpl implements NegoService {
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
         if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
         }
 
         if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
-            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
         }
 
         Integer originPrice = nego.getProduct().getOriginPrice();
@@ -202,7 +202,7 @@ public class NegoServiceImpl implements NegoService {
             return HandoverResponse.fromEntity(product, nego);
         } else {
             // 양도 불가능한 상태인 경우 예외 처리
-            throw new CustomException("양도가 불가능한 상태입니다.", ErrorCode.COMMON_CANNOT_HANDOVER);
+            throw new CustomException("양도가 불가능한 상태입니다.", ErrorCode.CANNOT_HANDOVER);
         }
     }
 
