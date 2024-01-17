@@ -185,7 +185,7 @@ public class ProductService {
 
     private String buildReservationUrl(String endpoint, Long pathVariable) {
         return UriComponentsBuilder
-                .fromUriString(DISTRIBUTE_BAE_URL)
+                .fromUriString(DISTRIBUTE_BASE_URL)
                 .path(endpoint)
                 .buildAndExpand(pathVariable)
                 .encode(StandardCharsets.UTF_8)
