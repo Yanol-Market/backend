@@ -27,5 +27,7 @@ public interface NegoService {
 
     Optional<Nego> getNego(Long userId, Long productId);
 
+    Optional<Nego> getUserNego(Long userId);
+
     Nego save(Nego nego);
 }

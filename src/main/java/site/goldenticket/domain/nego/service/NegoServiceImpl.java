@@ -210,6 +210,11 @@ public class NegoServiceImpl implements NegoService {
     }
 
     @Override
+    public Optional<Nego> getUserNego(Long userId) {
+        return negoRepository.findNegoByUser_Id(userId);
+    }
+
+    @Override
     public Nego save(Nego nego) {
         return negoRepository.save(nego);
     }
