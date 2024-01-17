@@ -204,54 +204,13 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
-    private void updateCountForNewNego(Nego newNego) {
-        // productId와 userId에 해당하는 네고 중 가장 최근의 것을 가져옴
-        Optional<Nego> latestNegoOptional = negoRepository.findLatestNegoByProductIdAndUserIdOrderByCreatedAtDesc(newNego.getProductId(), newNego.getUserId(), PageRequest.of(0, 1))
-                .stream()
-                .findFirst();
-
-        // 최근의 네고가 있으면 count를 1 증가, 없으면 1로 초기화
-        int newCount = latestNegoOptional.map(latestNego -> latestNego.getCount() + 1).orElse(1);
-
-        // 여기서 count가 3인 경우 예외 처리
-        if (newCount > 2) {
-            throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.COMMON_CANNOT_NEGOTIATE);
-        }
-
-        newNego.setCount(newCount);
-    }
-
     @Override
     public Optional<Nego> getNego(Long userId, Long productId) {
-        return negoRepository.findFirstByUserIdAndProductIdOrderByCreatedAtDesc(userId, productId);
+        return negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, productId);
     }
 
     @Override
     public Nego save(Nego nego) {
         return negoRepository.save(nego);
     }
-
-//    @Override
-//    public PayResponse payOriginPrice(Long negoId) {
-//        Nego nego = negoRepository.findById(negoId)
-//                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
-//
-//        if (nego.getConsent()) {
-//            Integer originPrice = nego.getProduct().getOriginPrice();
-//
-//
-//            // 네고의 가격을 상품의 원래 가격으로 업데이트
-//            nego.setPrice(originPrice);
-//
-//            // 네고 상태를 완료로 변경
-//            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-//            nego.setUpdatedAt(LocalDateTime.now());
-//            negoRepository.save(nego);
-//
-//            return PayResponse.fromEntity(nego);
-//        } else {
-//            throw new CustomException("네고 승인이 필요합니다.", ErrorCode.COMMON_INVALID_PARAMETER);
-//        }
-//    }
-
 }
