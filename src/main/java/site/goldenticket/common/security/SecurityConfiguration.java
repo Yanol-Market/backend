@@ -41,19 +41,24 @@ public class SecurityConfiguration {
 
     private static final String[] PERMIT_ALL_URLS = new String[]{
             "/h2-console/**",
-            "/dummy/**"
+            "/dummy/**",
+            "/payments/**"
     };
 
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
             "/favicon.ico",
             "/docs/**",
             "/users/check/**",
-            "/products/**"
+            "/products/**",
+            "/home"
     };
 
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
             "/users",
-            "/yanolja-login"
+            "/reissue",
+            "/yanolja-login",
+            "/alerts/test",
+            "/chats/test"
     };
 
     private final ObjectMapper objectMapper;
