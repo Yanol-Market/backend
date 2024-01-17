@@ -1,23 +1,10 @@
 package site.goldenticket.domain.chat.service;
 
-import static site.goldenticket.common.response.ErrorCode.CHAT_ROOM_NOT_FOUND;
-import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
-import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.exception.CustomException;
-import site.goldenticket.domain.chat.dto.ChatRequest;
-import site.goldenticket.domain.chat.dto.ChatResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomDetailResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomInfoResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomListResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomShortResponse;
+import site.goldenticket.domain.chat.dto.*;
 import site.goldenticket.domain.chat.entity.Chat;
 import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.entity.SenderType;
@@ -27,6 +14,13 @@ import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static site.goldenticket.common.response.ErrorCode.*;
 
 @Service
 @Transactional
@@ -185,7 +179,7 @@ public class ChatService {
         return chatRoomShortResponseList;
     }
 
-    private List<Chat> getChatList(Long chatRoomId, Long userId) {
+    public List<Chat> getChatList(Long chatRoomId, Long userId) {
         List<Chat> chatList = chatRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
         //SenderType이 SYSTEM인 경우 userId와 일치하지 않는 chat은 삭제
         chatList.removeIf(
