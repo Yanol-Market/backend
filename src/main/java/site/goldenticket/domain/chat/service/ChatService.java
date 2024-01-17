@@ -63,6 +63,15 @@ public class ChatService {
             .build();
     }
 
+    public ChatRoom createChatRoom(Long userId, Long productId) {
+        return chatRoomRepository.save(
+            ChatRoom.builder()
+                .userId(userId)
+                .productId(productId)
+                .build()
+        );
+    }
+
     public ChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));

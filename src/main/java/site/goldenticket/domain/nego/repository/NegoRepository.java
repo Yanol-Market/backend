@@ -20,7 +20,7 @@ public interface NegoRepository extends JpaRepository<Nego, Long> {
 
     Nego findByProduct(Product product);
 
-    Boolean existsByUserIdAndProductId(Long userId, Long productId);
+    Boolean existsByUser_IdAndProduct_Id(Long userId, Long productId);
 
-    List<Nego> findAllByUserIdAndProductId(Long userId, Long productId);
+    List<Nego> findAllByUser_IdAndProduct_Id(Long userId, Long productId);
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
 import site.goldenticket.domain.nego.dto.response.HandoverResponse;
 import site.goldenticket.domain.nego.dto.response.NegoAvailableResponse;
@@ -31,6 +32,7 @@ public class NegoServiceImpl implements NegoService {
     private final NegoRepository negoRepository;
     private final ProductService productService;
     private final UserRepository userRepository;
+    private final ChatService chatService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId, PrincipalDetails principalDetails) {
@@ -217,20 +219,31 @@ public class NegoServiceImpl implements NegoService {
         return negoRepository.save(nego);
     }
 
+    /***
+     * 네고 가능 여부 조회
+     * @param userId 회원 ID
+     * @param productId 상품 ID
+     * @return 네고 가능 여부 응답 DTO
+     */
     public NegoAvailableResponse isAvailableNego(Long userId, Long productId) {
         Boolean negoAvailable = true;
         Product product = productService.getProduct(productId);
+        if (product.getUserId().equals(userId)) {
+            negoAvailable = false;
+        }
+        //판매중인 상품인지 확인: 판매중이 아니면 네고 불가
         if (!product.getProductStatus().equals(ProductStatus.SELLING)) {
             negoAvailable = false;
 
         } else {
-            if (!negoRepository.existsByUserIdAndProductId(userId, productId)) {
+            if (!negoRepository.existsByUser_IdAndProduct_Id(userId, productId)) {
                 //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
-                //*채팅방 생성 로직 추가
+                chatService.createChatRoom(userId, productId);
                 negoAvailable = true;
             } else {
                 //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
-                List<Nego> negoList = negoRepository.findAllByUserIdAndProductId(userId, productId);
+                List<Nego> negoList = negoRepository.findAllByUser_IdAndProduct_Id(userId,
+                    productId);
                 for (Nego nego : negoList) {
                     if (nego.getCount().equals(2) || nego.getStatus()
                         .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
