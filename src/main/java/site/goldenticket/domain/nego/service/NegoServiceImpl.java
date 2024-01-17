@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
 @Service
 @RequiredArgsConstructor
 public class NegoServiceImpl implements NegoService {
@@ -48,7 +46,6 @@ public class NegoServiceImpl implements NegoService {
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.confirmNego(LocalDateTime.now(), NegotiationStatus.PAYMENT_PENDING, LocalDateTime.now().plusMinutes(20), Boolean.TRUE);
             negoRepository.save(nego);
-
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
@@ -145,12 +142,10 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
-        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
+        if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED || nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
         }
-        if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
-            throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
-        }
+
 
         if (nego.getConsent()) {
             nego.setStatus(NegotiationStatus.TRANSFER_PENDING);
@@ -247,7 +242,10 @@ public class NegoServiceImpl implements NegoService {
     // 수빈아 이거 쓰면 돼!!
     @Override
     public void updateNegotiationStatusForCompletedProduct(Long productId) {
-        List<Nego> completedNegos = negoRepository.findByProductIdAndStatus(productId, NegotiationStatus.NEGOTIATION_COMPLETED);
+
+        Product product = productService.getProduct(productId);
+
+        List<Nego> completedNegos = negoRepository.findByProductAndStatus(product, NegotiationStatus.NEGOTIATION_COMPLETED);
         for (Nego nego : completedNegos) {
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
         }
