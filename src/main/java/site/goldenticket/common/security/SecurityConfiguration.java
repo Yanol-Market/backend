@@ -56,7 +56,8 @@ public class SecurityConfiguration {
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
             "/users",
             "/reissue",
-            "/yanolja-login"
+            "/yanolja-login",
+            "/alerts/test"
     };
 
     private final ObjectMapper objectMapper;

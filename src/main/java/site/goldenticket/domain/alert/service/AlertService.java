@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.domain.alert.dto.AlertListResponse;
+import site.goldenticket.domain.alert.dto.AlertRequest;
 import site.goldenticket.domain.alert.dto.AlertResponse;
 import site.goldenticket.domain.alert.dto.AlertUnSeenResponse;
 import site.goldenticket.domain.alert.entity.Alert;
@@ -19,6 +20,22 @@ import site.goldenticket.domain.alert.repository.AlertRepository;
 public class AlertService {
 
     private final AlertRepository alertRepository;
+
+    public AlertResponse createAlert(AlertRequest alertRequest) {
+        Alert alert = Alert.builder()
+            .userId(alertRequest.userId())
+            .content(alertRequest.content())
+            .viewed(false)
+            .build();
+        alertRepository.save(alert);
+        return AlertResponse.builder()
+            .alertId(alert.getId())
+            .content(alert.getContent())
+            .createdAt(alert.getCreatedAt())
+            .viewed(alert.getViewed())
+            .build();
+    }
+
 
     public AlertUnSeenResponse getExistsNewAlert(Long userId) {
         return AlertUnSeenResponse.builder()
