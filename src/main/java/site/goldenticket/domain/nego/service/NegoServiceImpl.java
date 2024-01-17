@@ -103,6 +103,10 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
         }
 
+        if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
+            throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+        }
+
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
             throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
         }
