@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.user.wish.dto.WishProductSaveResponse;
 import site.goldenticket.domain.user.wish.entity.Wish;
 import site.goldenticket.domain.user.wish.repository.WishRepository;
 
@@ -19,7 +20,7 @@ public class WishService {
     private final ProductService productService;
 
     @Transactional
-    public Long saveWishProduct(Long userId, Long productId) {
+    public WishProductSaveResponse saveWishProduct(Long userId, Long productId) {
         Product product = productService.getProduct(productId);
         log.info("Save User Id ={}, Product = {}", userId, product);
 
@@ -27,7 +28,9 @@ public class WishService {
         wishRepository.save(wish);
         log.info("Save Wish Sequence Id = {}", wish.getId());
 
-        return wish.getId();
+        return WishProductSaveResponse.builder()
+                .id(wish.getId())
+                .build();
     }
 
     private Wish createWish(Long userId, Product product) {
