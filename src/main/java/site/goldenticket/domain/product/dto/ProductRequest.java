@@ -22,6 +22,8 @@ public record ProductRequest(
                 .maximumNumber(reservationDetailsResponse.maximumNumber())
                 .checkInDate(reservationDetailsResponse.checkInDate())
                 .checkOutDate(reservationDetailsResponse.checkOutDate())
+                .checkInTime(reservationDetailsResponse.checkInTime())
+                .checkOutTime(reservationDetailsResponse.checkOutTime())
                 .reservationDate(reservationDetailsResponse.reservationDate())
                 .originPrice(reservationDetailsResponse.originPrice())
                 .yanoljaPrice(reservationDetailsResponse.yanoljaPrice())
