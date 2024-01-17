@@ -5,7 +5,10 @@ import site.goldenticket.domain.nego.dto.response.HandoverResponse;
 import site.goldenticket.domain.nego.dto.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.response.PayResponse;
 import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
+import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.security.PrincipalDetails;
+
+import java.util.Optional;
 
 public interface NegoService {
 
@@ -20,4 +23,9 @@ public interface NegoService {
     PayResponse payOriginPrice(Long negoId,PrincipalDetails principalDetails); //원래 가격으로 결제하기
 
     HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails);
+
+
+    Optional<Nego> getNego(Long userId, Long productId);
+
+    Nego save(Nego nego);
 }
