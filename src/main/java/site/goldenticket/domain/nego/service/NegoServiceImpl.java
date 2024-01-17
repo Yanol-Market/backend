@@ -42,10 +42,7 @@ public class NegoServiceImpl implements NegoService {
 
 
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
-            nego.setUpdatedAt(LocalDateTime.now());
-            nego.setStatus(NegotiationStatus.PAYMENT_PENDING);
-            nego.setExpirationTime(LocalDateTime.now().plusMinutes(20));
-            nego.setConsent(Boolean.TRUE);
+            nego.confirmNego(LocalDateTime.now(), NegotiationStatus.PAYMENT_PENDING, LocalDateTime.now().plusMinutes(20), Boolean.TRUE);
             negoRepository.save(nego);
 
         } else {
@@ -71,7 +68,6 @@ public class NegoServiceImpl implements NegoService {
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING || nego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setConsent(Boolean.FALSE);
-            nego.setUpdatedAt(LocalDateTime.now());
 
             // 네고 취소 상태로 변경
             if (nego.getCount() == 2) {
@@ -86,8 +82,6 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
-
-    // 가격제안은 productId를 받아서 사용할 예정 아래는 임시!
     public PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request, PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
@@ -104,7 +98,11 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
         }
 
-        if(userNego.getStatus()==NegotiationStatus.NEGOTIATION_TIMEOUT){
+        if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.COMMON_NEGO_ALREADY_APPROVED);
+        }
+
+        if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
             throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.COMMON_NEGO_TIMEOUT);
         }
 
@@ -117,12 +115,7 @@ public class NegoServiceImpl implements NegoService {
         }
 
         // 네고 엔터티 업데이트
-        userNego.setCount(newCount);
-        userNego.setPrice(request.getPrice());
-        userNego.setStatus(NegotiationStatus.NEGOTIATING);
-        userNego.setCreatedAt(LocalDateTime.now());
-        userNego.setUpdatedAt(LocalDateTime.now());
-        userNego.setConsent(Boolean.FALSE);
+        userNego.updateNego(newCount, request.getPrice(), NegotiationStatus.NEGOTIATING, LocalDateTime.now(), LocalDateTime.now(), Boolean.FALSE);
 
         // 네고 저장
         negoRepository.save(userNego);
@@ -164,12 +157,11 @@ public class NegoServiceImpl implements NegoService {
 
 
         // 네고의 가격을 상품의 원래 가격으로 업데이트
-        nego.setPrice(originPrice);
+        nego.updatePrice(originPrice);
 
         // 네고 상태를 완료로 변경
-        nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-        nego.setConsent(Boolean.TRUE);
-        nego.setUpdatedAt(LocalDateTime.now());
+        nego.payNego(NegotiationStatus.NEGOTIATION_COMPLETED, Boolean.TRUE, LocalDateTime.now());
+
         negoRepository.save(nego);
 
         return PayResponse.fromEntity(nego);
@@ -178,7 +170,6 @@ public class NegoServiceImpl implements NegoService {
 
     @Override
     public HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails) {
-        // Nego ID로 Nego 정보 가져오기
 
         Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
