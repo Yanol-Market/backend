@@ -5,10 +5,7 @@ import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKI
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.RESERVATION_NOT_FOUND;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.DISTRIBUTE_BAE_URL;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.RESERVATIONS_ENDPOINT;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.RESERVATION_ENDPOINT;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.RESERVATION_UPDATE_STATUS_ENDPOINT;
+import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
