@@ -80,7 +80,7 @@ public class UserService {
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
     }
 
-    private User findById(Long userId) {
+    public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
     }
