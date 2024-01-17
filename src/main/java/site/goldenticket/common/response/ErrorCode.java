@@ -22,6 +22,7 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(BAD_REQUEST, "주문 정보를 찾을 수 없습니다"),
     PAYMENT_NOT_FOUND(BAD_REQUEST, "결제 정보를 찾을 수 없습니다"),
 
+    //Nego
     CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
     NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
     CANNOT_CONFIRM_NEGO(BAD_REQUEST, "네고를 승인할수 없습니다."),
