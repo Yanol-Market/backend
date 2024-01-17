@@ -100,8 +100,6 @@ public class ChatService {
 
     public ChatRoomListResponse getChatRoomList(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
-        //내가 판매자인 경우 = 내가 판매중인 상품 id 목록 => 상품id가 일치하는 채팅방 목록 조회
-        //내가 구매자인 경우 = 채팅방의 구매자 id와 유저id가 일치하는 채팅방 목록 조회
         //모든 채팅 조회 = 판매자인 경우 + 구매자인 경우
         if (userType.equals("all")) {
             chatRoomShortResponseList.addAll(getChatRoomListByUserType(userId, "seller"));
@@ -119,8 +117,9 @@ public class ChatService {
 
     private List<ChatRoomShortResponse> getChatRoomListByUserType(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
-        List<ChatRoom> chatRoomList;
+        List<ChatRoom> chatRoomList = new ArrayList<>();
 
+        //내가 구매자인 경우 = 채팅방의 구매자 id와 유저id가 일치하는 채팅방 목록 조회
         if (userType.equals("buyer")) {
             //내가 구매자. 상대가 판매자.
             chatRoomList = chatRoomRepository.findAllByUserId(userId);
@@ -142,10 +141,13 @@ public class ChatService {
             }
         }
 
+        //내가 판매자인 경우 = 내가 판매중인 상품 id 목록 => 상품id가 일치하는 채팅방 목록 조회
         if (userType.equals("seller")) {
             //내가 판매자. 상대가 구매자.
             List<Product> productList = productService.findProductListByUserId(userId);
-            chatRoomList = chatRoomRepository.findAllByUserId(userId);
+            for (Product product : productList) {
+                chatRoomList.addAll(chatRoomRepository.findAllByProductId(product.getId()));
+            }
 
             for (ChatRoom chatRoom : chatRoomList) {
                 User receiver = userService.findById(chatRoom.getUserId());

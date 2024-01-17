@@ -7,4 +7,5 @@ import site.goldenticket.domain.chat.entity.ChatRoom;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     List<ChatRoom> findAllByUserId(Long userId);
+    List<ChatRoom> findAllByProductId(Long productId);
 }
