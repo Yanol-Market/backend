@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.common.security.authentication.dto.AuthenticationToken;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
+import site.goldenticket.domain.security.dto.ReissueRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.security.service.SecurityService;
 
@@ -16,6 +18,12 @@ import site.goldenticket.domain.security.service.SecurityService;
 public class SecurityController {
 
     private final SecurityService securityService;
+
+    @PostMapping("/reissue")
+    public ResponseEntity<CommonResponse<AuthenticationToken>> reissue(@RequestBody ReissueRequest reissueRequest) {
+        AuthenticationToken token = securityService.reissue(reissueRequest);
+        return ResponseEntity.ok(CommonResponse.ok(token));
+    }
 
     @PostMapping("/yanolja-login")
     public ResponseEntity<CommonResponse<?>> yanoljaLogin(@RequestBody LoginRequest loginRequest) {
