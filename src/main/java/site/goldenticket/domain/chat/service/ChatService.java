@@ -63,6 +63,15 @@ public class ChatService {
             .build();
     }
 
+    public ChatRoom createChatRoom(Long userId, Long productId) {
+        return chatRoomRepository.save(
+            ChatRoom.builder()
+                .userId(userId)
+                .productId(productId)
+                .build()
+        );
+    }
+
     public ChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
@@ -184,5 +193,14 @@ public class ChatService {
                 .equals(userId));
 
         return chatList;
+    }
+
+    public ChatRoom getChatRoomByBuyerIdAndProductId(Long buyerId, Long productId) {
+        return chatRoomRepository.findByUserIdAndProductId(buyerId, productId)
+            .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+    }
+
+    public Boolean existsChatRoomByUserIdAndProductId(Long userId, Long productId) {
+        return chatRoomRepository.existsByUserIdAndProductId(userId, productId);
     }
 }
