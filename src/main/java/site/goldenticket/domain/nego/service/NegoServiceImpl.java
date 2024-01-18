@@ -218,10 +218,14 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
+        Product product = productService.getProduct(nego.getProductId());
+
         if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             nego.setConsent(Boolean.FALSE);
             nego.setExpirationTime(LocalDateTime.now());
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+            product.setProductStatus(ProductStatus.SELLING);
+            productService.updateProductForNego(product);
             negoRepository.save(nego);
             return NegoResponse.fromEntity(nego);
         } else {
