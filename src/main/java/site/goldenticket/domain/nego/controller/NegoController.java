@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
 import site.goldenticket.domain.nego.dto.response.HandoverResponse;
+import site.goldenticket.domain.nego.dto.response.NegoAvailableResponse;
 import site.goldenticket.domain.nego.dto.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.response.PayResponse;
 import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
@@ -63,4 +63,11 @@ public class NegoController {
         return ResponseEntity.ok(CommonResponse.ok("양도가 거절되었습니다", response));
     }
 
+    @GetMapping("/available")
+    public ResponseEntity<CommonResponse<NegoAvailableResponse>> getNegoAvailable(
+        @RequestParam(name = "productId") Long productId,
+        @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(CommonResponse.ok("네고 가능 여부가 조회되었습니다",
+            negoService.isAvailableNego(principalDetails.getUserId(), productId)));
+    }
 }
