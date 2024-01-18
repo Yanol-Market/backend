@@ -162,12 +162,12 @@ public class ProductService {
     @Transactional
     public Long deleteProduct(Long productId) {
         Product product = getProduct(productId);
-        productRepository.delete(product);
-
+        
         String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, product.getReservationId());
-
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
-
+        
+        productRepository.delete(product);
+        
         return productId;
     }
 
