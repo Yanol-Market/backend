@@ -9,6 +9,7 @@ import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
