@@ -1,7 +1,7 @@
-package site.goldenticket.domain.user.wish.dto;
+package site.goldenticket.domain.product.wish.dto;
 
 import lombok.Builder;
-import site.goldenticket.domain.user.wish.entity.WishProduct;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
 
 @Builder
 public record WishProductSaveResponse(Long id) {

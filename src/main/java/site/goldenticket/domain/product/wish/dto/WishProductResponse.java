@@ -1,8 +1,8 @@
-package site.goldenticket.domain.user.wish.dto;
+package site.goldenticket.domain.product.wish.dto;
 
 import lombok.Builder;
 import site.goldenticket.domain.product.constants.ProductStatus;
-import site.goldenticket.domain.user.wish.entity.WishProduct;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
 import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;

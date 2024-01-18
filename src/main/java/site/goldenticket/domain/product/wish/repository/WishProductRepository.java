@@ -1,9 +1,9 @@
-package site.goldenticket.domain.user.wish.repository;
+package site.goldenticket.domain.product.wish.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import site.goldenticket.domain.user.wish.entity.WishProduct;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
 
 import java.util.List;
 
