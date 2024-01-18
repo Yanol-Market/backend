@@ -2,7 +2,7 @@ package site.goldenticket.domain.product.dto;
 
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.dummy.reservation.constants.ReservationType;
-import site.goldenticket.domain.product.util.DateUtil;
+import site.goldenticket.common.utils.DateUtil;
 import site.goldenticket.domain.product.util.DiscountCalculatorUtil;
 import site.goldenticket.domain.product.model.Product;
 

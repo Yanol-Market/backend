@@ -6,11 +6,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.domain.user.wish.dto.WishProductResponse;
 import site.goldenticket.domain.user.wish.dto.WishProductSaveRequest;
 import site.goldenticket.domain.user.wish.dto.WishProductSaveResponse;
+import site.goldenticket.domain.user.wish.dto.WishProductsResponse;
 import site.goldenticket.domain.user.wish.entity.WishProduct;
 import site.goldenticket.domain.user.wish.service.WishService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,12 +22,12 @@ public class WishController {
     private final WishService wishService;
 
     @GetMapping("/product")
-    public ResponseEntity<CommonResponse<WishProductResponse>> getWishProduct(
+    public ResponseEntity<CommonResponse<WishProductsResponse>> getWishProducts(
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         Long userId = principalDetails.getUserId();
-
-        return null;
+        List<WishProduct> response = wishService.findWishProduct(userId);
+        return ResponseEntity.ok(CommonResponse.ok(WishProductsResponse.of(response)));
     }
 
     @PostMapping("/product")
