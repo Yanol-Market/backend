@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
 @Service
 @RequiredArgsConstructor
 public class NegoServiceImpl implements NegoService {
@@ -45,7 +43,7 @@ public class NegoServiceImpl implements NegoService {
 
         Product product = productService.getProduct(nego.getProductId());
 
-        if(!(product.getProductStatus() == ProductStatus.SELLING)){
+        if (!(product.getProductStatus() == ProductStatus.SELLING)) {
             throw new CustomException("승인한 다른 네고가 있어 승인할수 없습니다.", ErrorCode.NEGO_ALREADY_CONFIRMED);
         }
 
@@ -228,9 +226,9 @@ public class NegoServiceImpl implements NegoService {
         Product product = productService.getProduct(nego.getProductId());
 
         if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
-            if(nego.getCount()<2){
+            if (nego.getCount() < 2) {
                 nego.setStatus(NegotiationStatus.NEGOTIATING);
-            }else {
+            } else {
                 nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             }
             nego.setConsent(Boolean.FALSE);
@@ -243,7 +241,6 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("Nego not in completed status.", ErrorCode.NEGO_NOT_COMPLETED);
         }
     }
-
 
 
     @Override
