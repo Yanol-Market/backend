@@ -38,6 +38,11 @@ public class ChatService {
     private final ProductService productService;
     private final UserService userService;
 
+    /***
+     * 채팅 생성
+     * @param chatRequest 채팅 생성 요청 DTO
+     * @return 채팅 응답 DTO
+     */
     public ChatResponse createChat(ChatRequest chatRequest) {
         if (!chatRequest.senderType().equals(SenderType.SYSTEM)
             && !chatRequest.senderType().equals(SenderType.BUYER)
@@ -64,6 +69,12 @@ public class ChatService {
             .build();
     }
 
+    /***
+     * 채팅방 생성
+     * @param userId 구매자 ID
+     * @param productId 상품 ID
+     * @return 생성된 채팅방 Entity
+     */
     public ChatRoom createChatRoom(Long userId, Long productId) {
         return chatRoomRepository.save(
             ChatRoom.builder()
@@ -73,6 +84,12 @@ public class ChatService {
         );
     }
 
+    /***
+     * 채팅방 상세 조회 (상품 및 상대방 정보 + 채팅내역)
+     * @param userId 회원 ID
+     * @param chatRoomId 채팅방 ID
+     * @return 채팅방 상세 응답 DTO
+     */
     public ChatRoomDetailResponse getChatRoomDetail(Long userId, Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
@@ -119,6 +136,12 @@ public class ChatService {
             .chatResponseList(chatResponseList).build();
     }
 
+    /***
+     * 채팅방 목록(거래내역) 조회
+     * @param userId 회원 ID
+     * @param userType 회원타입: all(전체), seller(판매내역), buyer(구매내역)
+     * @return 채팅방 목록 응답 DTO
+     */
     public ChatRoomListResponse getChatRoomList(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
         //모든 채팅 조회 = 판매자인 경우 + 구매자인 경우
@@ -137,6 +160,12 @@ public class ChatService {
             .build();
     }
 
+    /***
+     * 회원 타입별 채팅방 목록 조회
+     * @param userId 회원 ID
+     * @param userType 회원 타입: all(전체), seller(판매내역), buyer(구매내역)
+     * @return 채팅방 요약 응답 DTO List
+     */
     private List<ChatRoomShortResponse> getChatRoomListByUserType(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
         List<ChatRoom> chatRoomList = new ArrayList<>();
@@ -190,6 +219,12 @@ public class ChatService {
         return chatRoomShortResponseList;
     }
 
+    /***
+     * 채팅 목록 조회
+     * @param chatRoomId 채팅방 ID
+     * @param userId 회원 ID
+     * @return 채팅 Entity List
+     */
     private List<Chat> getChatList(Long chatRoomId, Long userId) {
         List<Chat> chatList = chatRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
         //SenderType이 SYSTEM인 경우 userId와 일치하지 않는 chat은 삭제
@@ -200,11 +235,23 @@ public class ChatService {
         return chatList;
     }
 
+    /***
+     * 채팅방 조회
+     * @param buyerId 구매자 ID
+     * @param productId 상품 ID
+     * @return 채팅방 Entity
+     */
     public ChatRoom getChatRoomByBuyerIdAndProductId(Long buyerId, Long productId) {
         return chatRoomRepository.findByUserIdAndProductId(buyerId, productId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
     }
 
+    /***
+     * 채팅방 존재 여부 조회
+     * @param userId 구매자 ID
+     * @param productId 상품 ID
+     * @return
+     */
     public Boolean existsChatRoomByUserIdAndProductId(Long userId, Long productId) {
         return chatRoomRepository.existsByUserIdAndProductId(userId, productId);
     }
