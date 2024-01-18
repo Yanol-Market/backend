@@ -214,7 +214,7 @@ CREATE TABLE `chat_room`
 (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '채팅 방 ID',
     product_id BIGINT   NOT NULL COMMENT '상품 ID',
-    user_id   BIGINT   NOT NULL COMMENT '구매자 ID',
+    buyer_id   BIGINT   NOT NULL COMMENT '구매자 ID',
     created_at DATETIME NOT NULL COMMENT '생성 일시',
     updated_at DATETIME NOT NULL COMMENT '수정 일시'
 ) COMMENT '채팅방' ENGINE = InnoDB
