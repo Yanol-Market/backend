@@ -28,8 +28,6 @@ public class Chat extends BaseTimeEntity {
 
     private Long userId;
 
-    private Boolean viewed;
-
     private Boolean viewedBySeller;
 
     private Boolean viewedByBuyer;
@@ -43,7 +41,6 @@ public class Chat extends BaseTimeEntity {
         this.senderType = senderType;
         this.userId = userId;
         this.content = content;
-        this.viewed = false;
         this.viewedBySeller = viewedBySeller;
         this.viewedByBuyer = viewedByBuyer;
     }
