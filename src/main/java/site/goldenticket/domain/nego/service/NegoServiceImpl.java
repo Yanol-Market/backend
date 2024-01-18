@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-
-// 네고 종료는 실패값만 유지 + 상품 상태 확인해서 예외처리 + 네고에서만 확인할거면 enum 추가해야됨
-// 상품만료
-
-
 @Service
 @RequiredArgsConstructor
 public class NegoServiceImpl implements NegoService {
@@ -61,7 +56,7 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
         }
         return NegoResponse.fromEntity(nego);
-    }  // 여기다가 상품 상태 예약중 코드 추가해야됨 ㅜ
+    }
 
 
     @Override
@@ -121,11 +116,11 @@ public class NegoServiceImpl implements NegoService {
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
             throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.CANNOT_NEGOTIATE);
-        }   //OK
+        }
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
             throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.CANNOT_PROPOSE_NEGO);
-        }   //OK
+        }
 
         // count 증가
         int newCount = userNego.getCount() + 1;
