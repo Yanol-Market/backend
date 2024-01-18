@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 @Service
 @RequiredArgsConstructor
 public class NegoServiceImpl implements NegoService {
@@ -43,6 +45,10 @@ public class NegoServiceImpl implements NegoService {
 
         Product product = productService.getProduct(nego.getProductId());
 
+        if(!(product.getProductStatus() == ProductStatus.SELLING)){
+            throw new CustomException("승인한 다른 네고가 있어 승인할수 없습니다.", ErrorCode.NEGO_ALREADY_CONFIRMED);
+        }
+
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.confirmNego(LocalDateTime.now(), NegotiationStatus.PAYMENT_PENDING, LocalDateTime.now().plusMinutes(20), Boolean.TRUE);
             product.setProductStatus(ProductStatus.RESERVED);
@@ -53,7 +59,7 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
         }
         if (nego.getCount() > 3) {
-            throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
+            throw new CustomException("네고를 3회이상 제안하실수 없습니다.", ErrorCode.NEGO_COUNT_OVER);
         }
         return NegoResponse.fromEntity(nego);
     }
@@ -111,7 +117,7 @@ public class NegoServiceImpl implements NegoService {
                 .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
 
         if (userNego.getProduct().getProductStatus() == ProductStatus.SOLD_OUT) {
-            throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
+            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
         }
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
