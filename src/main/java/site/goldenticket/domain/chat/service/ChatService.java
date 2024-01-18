@@ -5,6 +5,8 @@ import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
 import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
 import static site.goldenticket.common.response.ErrorCode.NEGO_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,12 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
-import site.goldenticket.domain.chat.dto.ChatRequest;
-import site.goldenticket.domain.chat.dto.ChatResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomDetailResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomInfoResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomListResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomShortResponse;
+import site.goldenticket.domain.chat.dto.request.ChatRequest;
+import site.goldenticket.domain.chat.dto.response.ChatResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomDetailResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomInfoResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomListResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomShortResponse;
 import site.goldenticket.domain.chat.entity.Chat;
 import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.entity.SenderType;
@@ -94,15 +97,25 @@ public class ChatService {
      * 채팅방 생성
      * @param userId 구매자 ID
      * @param productId 상품 ID
-     * @return 생성된 채팅방 Entity
+     * @return 채팅방 응답 DTO
      */
-    public ChatRoom createChatRoom(Long userId, Long productId) {
-        return chatRoomRepository.save(
-            ChatRoom.builder()
-                .userId(userId)
-                .productId(productId)
-                .build()
-        );
+    public ChatRoomResponse createChatRoom(Long userId, Long productId) {
+        if(userService.findById(userId).equals(null)){
+            throw new CustomException(USER_NOT_FOUND);
+        }
+        if(productService.getProduct(productId).equals(null)) {
+            throw new CustomException(PRODUCT_NOT_FOUND);
+        }
+        ChatRoom chatRoom = ChatRoom.builder()
+            .userId(userId)
+            .productId(productId)
+            .build();
+        chatRoomRepository.save(chatRoom);
+        return ChatRoomResponse.builder()
+            .chatRoomId(chatRoom.getId())
+            .userId(chatRoom.getUserId())
+            .productId(chatRoom.getProductId())
+            .build();
     }
 
     /***

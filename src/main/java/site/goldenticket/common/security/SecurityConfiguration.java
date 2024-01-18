@@ -58,7 +58,7 @@ public class SecurityConfiguration {
             "/reissue",
             "/yanolja-login",
             "/alerts/test",
-            "/chats/test"
+            "/chats/test/**"
     };
 
     private final ObjectMapper objectMapper;

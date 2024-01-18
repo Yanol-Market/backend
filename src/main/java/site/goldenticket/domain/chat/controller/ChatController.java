@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.goldenticket.common.response.CommonResponse;
-import site.goldenticket.domain.chat.dto.ChatRequest;
-import site.goldenticket.domain.chat.dto.ChatResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomDetailResponse;
-import site.goldenticket.domain.chat.dto.ChatRoomListResponse;
+import site.goldenticket.domain.chat.dto.request.ChatRequest;
+import site.goldenticket.domain.chat.dto.response.ChatResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomDetailResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomListResponse;
+import site.goldenticket.domain.chat.dto.request.ChatRoomRequest;
+import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.security.PrincipalDetails;
 
@@ -31,10 +33,18 @@ public class ChatController {
         @Valid @RequestBody ChatRequest chatRequest
     ) {
         return ResponseEntity.ok(
-            CommonResponse.ok("새로운 채팅이 저장되었습니다.",
+            CommonResponse.ok("새로운 채팅이 생성되었습니다.",
                 chatService.createChat(chatRequest)));
     }
 
+    @PostMapping("/test/chat-room")
+    public ResponseEntity<CommonResponse<ChatRoomResponse>> createChatRoomForTest(
+        @Valid @RequestBody ChatRoomRequest chatRoomRequest
+    ) {
+        return ResponseEntity.ok(
+            CommonResponse.ok("새로운 채팅방이 생성되었습니다.",
+                chatService.createChatRoom(chatRoomRequest.userId(), chatRoomRequest.productId())));
+    }
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<CommonResponse<ChatRoomDetailResponse>> getChatRoom(
         @PathVariable(name = "chatRoomId") Long chatRoomId,
