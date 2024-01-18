@@ -1,4 +1,4 @@
-package site.goldenticket.domain.user.wish.dto;
+package site.goldenticket.domain.product.wish.dto;
 
 public record WishProductSaveRequest(Long productId) {
 }

@@ -1,4 +1,4 @@
-package site.goldenticket.domain.user.wish.entity;
+package site.goldenticket.domain.product.wish.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;

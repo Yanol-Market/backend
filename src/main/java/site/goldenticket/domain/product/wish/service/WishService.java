@@ -1,4 +1,4 @@
-package site.goldenticket.domain.user.wish.service;
+package site.goldenticket.domain.product.wish.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
-import site.goldenticket.domain.user.wish.entity.WishProduct;
-import site.goldenticket.domain.user.wish.repository.WishProductRepository;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
+import site.goldenticket.domain.product.wish.repository.WishProductRepository;
 
 import java.util.List;
 
