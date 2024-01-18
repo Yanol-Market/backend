@@ -10,9 +10,9 @@ import org.springframework.http.HttpStatus;
 import site.goldenticket.common.config.ApiTest;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.ProductRepository;
-import site.goldenticket.domain.user.wish.dto.WishProductSaveRequest;
-import site.goldenticket.domain.user.wish.entity.WishProduct;
-import site.goldenticket.domain.user.wish.repository.WishProductRepository;
+import site.goldenticket.domain.product.wish.dto.WishProductSaveRequest;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
+import site.goldenticket.domain.product.wish.repository.WishProductRepository;
 
 import java.util.stream.IntStream;
 
@@ -39,7 +39,7 @@ class WishProductControllerTest extends ApiTest {
                     saveWishProduct(product);
                 });
 
-        String url = "/users/wishes/product";
+        String url = "/products/wish";
 
         // when
         ExtractableResponse<Response> result = RestAssured
@@ -61,7 +61,7 @@ class WishProductControllerTest extends ApiTest {
         Product product = saveProduct();
 
         WishProductSaveRequest request = new WishProductSaveRequest(product.getId());
-        String url = "/users/wishes/product";
+        String url = "/products/wish";
 
         // when
         ExtractableResponse<Response> result = RestAssured
@@ -86,7 +86,7 @@ class WishProductControllerTest extends ApiTest {
         Product product = saveProduct();
         WishProduct wishProduct = saveWishProduct(product);
 
-        String url = "/users/wishes/product/" + wishProduct.getId();
+        String url = "/products/wish/" + wishProduct.getId();
 
         // when
         ExtractableResponse<Response> result = RestAssured
