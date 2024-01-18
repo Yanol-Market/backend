@@ -113,13 +113,18 @@ public class ChatService {
 
         ChatRoomInfoResponse chatRoomInfoResponse = ChatRoomInfoResponse.builder()
             .chatRoomId(chatRoomId)
+            .productId(product.getId())
             .accommodationName(product.getAccommodationName())
             .roomName(product.getRoomName())
+            .accommodationImage(product.getAccommodationImage())
+            .checkInDate(product.getCheckInDate())
+            .checkOutDate(product.getCheckOutDate())
+            .checkInTime(product.getCheckInTime())
+            .checkOutTime(product.getCheckOutTime())
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
-            //.price(getPriceOfChatRoom(buyerId, product.getId()))
+            // * .price(getPriceOfChatRoom(buyerId, product.getId()))
             .price(product.getGoldenPrice())
-            .productId(product.getId())
             .productStatus(product.getProductStatus())
             .build();
 
