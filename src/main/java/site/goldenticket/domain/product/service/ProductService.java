@@ -260,7 +260,4 @@ public class ProductService {
     public void updateProductForNego(Product product) {
         productRepository.save(product);
     }
-    public List<Product> getSoldOutProducts() {
-        return productRepository.findByStatus(ProductStatus.SOLD_OUT);
-    }
 }
