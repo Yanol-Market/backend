@@ -191,6 +191,7 @@ public class NegoServiceImpl implements NegoService {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             product.setProductStatus(ProductStatus.SOLD_OUT);
+            product.setGoldenPrice(nego.getPrice());
             productService.updateProductForNego(product);
 
             // 해당 Product에 대한 모든 네고 상태를 변경
@@ -221,9 +222,13 @@ public class NegoServiceImpl implements NegoService {
         Product product = productService.getProduct(nego.getProductId());
 
         if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
+            if(nego.getCount()<2){
+                nego.setStatus(NegotiationStatus.NEGOTIATING);
+            }else {
+                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+            }
             nego.setConsent(Boolean.FALSE);
             nego.setExpirationTime(LocalDateTime.now());
-            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             product.setProductStatus(ProductStatus.SELLING);
             productService.updateProductForNego(product);
             negoRepository.save(nego);
