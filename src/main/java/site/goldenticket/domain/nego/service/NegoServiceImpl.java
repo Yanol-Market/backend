@@ -288,7 +288,6 @@ public class NegoServiceImpl implements NegoService {
                     ChatRoom chatRoom = chatService.createChatRoom(userId, productId);
                     negoAvailable = true;
                     chatRoomId = chatRoom.getId();
-                    System.out.println(chatRoomId);
                 }
             } else {
                 //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가

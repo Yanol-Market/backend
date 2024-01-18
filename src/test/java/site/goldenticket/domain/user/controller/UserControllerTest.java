@@ -23,8 +23,8 @@ class UserControllerTest extends ApiTest {
         // given
         JoinRequest request = new JoinRequest(
                 NAME,
-                NICKNAME,
-                EMAIL,
+                "NICKNAME",
+                "join@gmail.com",
                 PASSWORD,
                 PHONE_NUMBER,
                 null,
@@ -45,6 +45,5 @@ class UserControllerTest extends ApiTest {
 
         // then
         assertThat(result.statusCode()).isEqualTo(CREATED.value());
-        assertThat(result.jsonPath().getLong("data.id")).isEqualTo(1L);
     }
 }

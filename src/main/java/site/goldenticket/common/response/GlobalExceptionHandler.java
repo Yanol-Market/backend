@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.COMMON_JSON_PROCESSING_ERROR;
 import static site.goldenticket.common.response.ErrorCode.COMMON_RESOURCE_NOT_FOUND;
 
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = NoResourceFoundException.class)
     public ResponseEntity<CommonResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
         log.error("[NoResourceFoundException] URL = {}, Message = {}", e.getResourcePath(), e.getMessage());
-        return ResponseEntity.badRequest().body(CommonResponse.error(COMMON_RESOURCE_NOT_FOUND.getMessage()));
+        return new ResponseEntity(CommonResponse.error(COMMON_RESOURCE_NOT_FOUND.getMessage()), NOT_FOUND);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.exception.CustomException;
-import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.dto.JoinRequest;
@@ -37,10 +36,9 @@ public class UserService {
         return userRepository.existsByNickname(nickname);
     }
 
-    public User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+    public User findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     @Transactional
@@ -78,10 +76,5 @@ public class UserService {
                 loginRequest,
                 YanoljaUserResponse.class
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
-    }
-
-    public User findById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
     }
 }
