@@ -202,6 +202,7 @@ CREATE TABLE `chat`
     sender_type  VARCHAR(50)  NOT NULL COMMENT '작성자 타입',
     user_id      BIGINT       NULL COMMENT '사용자 ID',
     content      VARCHAR(500) NOT NULL COMMENT '채팅 내용',
+    viewed       BOOLEAN      NOT NULL COMMENT '읽음 여부',
     viewed_by_seller BOOLEAN      NOT NULL COMMENT '판매자 읽음 여부',
     viewed_by_buyer  BOOLEAN      NOT NULL COMMENT '구매자 읽음 여부',
     created_at   DATETIME     NOT NULL COMMENT '생성 일시',
