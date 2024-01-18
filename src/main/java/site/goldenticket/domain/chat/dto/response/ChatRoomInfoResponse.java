@@ -8,6 +8,7 @@ import site.goldenticket.domain.product.constants.ProductStatus;
 @Builder
 public record ChatRoomInfoResponse(
     Long chatRoomId,
+    Long receiverId,
     String receiverNickname,
     String receiverProfileImage,
     Long productId,
@@ -19,7 +20,8 @@ public record ChatRoomInfoResponse(
     LocalTime checkInTime,
     LocalTime checkOutTime,
     ProductStatus productStatus,
-    Integer price
+    Integer price,
+    String chatStatus
 ) {
 
 }

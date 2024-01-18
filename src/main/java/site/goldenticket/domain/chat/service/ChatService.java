@@ -7,6 +7,7 @@ import static site.goldenticket.common.response.ErrorCode.NEGO_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.TRANSFER_PENDING;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -153,11 +154,13 @@ public class ChatService {
             .checkOutDate(product.getCheckOutDate())
             .checkInTime(product.getCheckInTime())
             .checkOutTime(product.getCheckOutTime())
+            .receiverId(receiverId)
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
             // * .price(getPriceOfChatRoom(buyerId, product.getId()))
             .price(product.getGoldenPrice())
             .productStatus(product.getProductStatus())
+            .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
             .build();
 
         List<Chat> chatList = getChatList(chatRoomId, userId);
@@ -206,16 +209,53 @@ public class ChatService {
         } else if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
-            if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
+            if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING) ||
+                nego.getStatus().equals(TRANSFER_PENDING)) {
                 price = nego.getPrice();
             }
         } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
-            price = order.getPrice();
+            if (order.getStatus().equals(OrderStatus.COMPLETED_TRANSFER)) {
+                price = order.getPrice();
+            }
         }
         return price;
+    }
+
+    /***
+     * 채팅방 진행 상태 조회
+     * @param buyerId 구매자 ID
+     * @param productId 상품 ID
+     * @return 채팅방 진행상태: 재결제, 양도대기중, 양도완료 (빈문자열)
+     */
+    private String getStatusOfChatRoom(Long buyerId, Long productId) {
+        Product product = productService.getProduct(productId);
+        String chatStatus = "";
+
+        Boolean existsNego = negoRepository.existsByUser_IdAndProduct_Id(buyerId, product.getId());
+        if (product.getProductStatus().equals(ProductStatus.SELLING) && existsNego) {
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
+                product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
+            if (nego.getStatus().equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
+                chatStatus = "NEGO_TIMEOUT";
+            }
+        } else if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
+                product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
+            if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
+                chatStatus = "TRANSFER_PENDING";
+            }
+        } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
+            Order order = orderRepository.findByProductIdAndStatus(product.getId(),
+                    OrderStatus.COMPLETED_TRANSFER)
+                .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+            if (order.getUserId().equals(buyerId)&&order.getStatus().equals(OrderStatus.COMPLETED_TRANSFER)) {
+                chatStatus = "TRANSFER_COMPLETED";
+            }
+        }
+        return chatStatus;
     }
 
     /***
