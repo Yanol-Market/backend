@@ -49,7 +49,8 @@ public class ChatService {
             .senderType(chatRequest.senderType())
             .userId(chatRequest.userId())
             .content(chatRequest.content())
-            .viewed(false)
+            .viewedBySeller(false)
+            .viewedByBuyer(false)
             .build();
         chatRepository.save(chat);
 
@@ -58,7 +59,7 @@ public class ChatService {
             .senderType(chat.getSenderType())
             .userId(chat.getUserId())
             .content(chat.getContent())
-            .viewed(chat.getViewed())
+            .viewed(false)
             .createdAt(chat.getCreatedAt())
             .build();
     }
@@ -96,7 +97,11 @@ public class ChatService {
         List<ChatResponse> chatResponseList = new ArrayList<>();
 
         for (Chat chat : chatList) {
-            chat.setViewed(true);
+            if (sellerId.equals(userId)) {
+                chat.setViewedBySeller(true);
+            } else {
+                chat.setViewedByBuyer(true);
+            }
             chatRepository.save(chat); // *확인 필요
             ChatResponse chatResponse = ChatResponse.builder()
                 .chatId(chat.getId())
@@ -104,7 +109,7 @@ public class ChatService {
                 .userId(chat.getUserId())
                 .content(chat.getContent())
                 .createdAt(chat.getCreatedAt())
-                .viewed(chat.getViewed())
+                .viewed(true)
                 .build();
             chatResponseList.add(chatResponse);
         }
@@ -153,7 +158,7 @@ public class ChatService {
                     .roomName(product.getRoomName())
                     .lastMessage(lastChat.getContent())
                     .lastMessageCreatedAt(lastChat.getCreatedAt())
-                    .viewed(lastChat.getViewed())
+                    .viewed(lastChat.getViewedByBuyer())
                     .build());
             }
         }
@@ -178,7 +183,7 @@ public class ChatService {
                     .roomName(product.getRoomName())
                     .lastMessage(lastChat.getContent())
                     .lastMessageCreatedAt(lastChat.getCreatedAt())
-                    .viewed(lastChat.getViewed())
+                    .viewed(lastChat.getViewedBySeller())
                     .build());
             }
         }
