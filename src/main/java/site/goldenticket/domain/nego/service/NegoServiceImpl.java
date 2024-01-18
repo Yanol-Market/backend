@@ -175,38 +175,6 @@ public class NegoServiceImpl implements NegoService {
         }
     }
 
-
-//    @Override
-//    public PayResponse payOriginPrice(Long negoId, PrincipalDetails principalDetails) {
-//
-//        Long userId = principalDetails.getUserId();
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
-//        Nego nego = negoRepository.findById(negoId)
-//                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
-//
-//        if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
-//            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
-//        }
-//
-//        if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
-//            throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
-//        }
-//
-//        Integer originPrice = nego.getProduct().getOriginPrice();
-//
-//        // 네고의 가격을 상품의 원래 가격으로 업데이트
-//        nego.updatePrice(originPrice);
-//
-//        // 네고 상태를 완료로 변경
-//        nego.payNego(NegotiationStatus.NEGOTIATION_COMPLETED, Boolean.TRUE, LocalDateTime.now());
-//
-//        negoRepository.save(nego);
-//
-//        return PayResponse.fromEntity(nego);
-//
-//    }
-
     @Override
     public HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails) {
 
