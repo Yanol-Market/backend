@@ -30,7 +30,10 @@ public class NegoSchedulerService {
         List<Product> soldOutProducts = productService.getSoldOutProducts();
 
         for (Product soldProduct : soldOutProducts) {
-            markAllNegotiationsAsCompletedForProduct(soldProduct.getId());
+            Product product = productService.getProduct(soldProduct.getId());
+            Nego nego = negoRepository.findByProduct(product);
+            nego.setStatus(NEGOTIATION_COMPLETED);
+            negoRepository.save(nego);
         }
 
         for (Nego nego : pendingNegos) {
@@ -55,13 +58,6 @@ public class NegoSchedulerService {
         }
         negoRepository.saveAll(transferNegos);
         negoRepository.saveAll(pendingNegos);
-    }
-
-    private void markAllNegotiationsAsCompletedForProduct(Long productId) {
-        Product product = productService.getProduct(productId);
-        Nego nego = negoRepository.findByProduct(product);
-        nego.setStatus(NEGOTIATION_COMPLETED);
-        negoRepository.save(nego);
     }
 
 }
