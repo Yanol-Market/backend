@@ -23,7 +23,7 @@ public class WishService {
     private final ProductService productService;
 
     @Transactional
-    public WishProductSaveResponse saveWishProduct(Long userId, Long productId) {
+    public WishProduct saveWishProduct(Long userId, Long productId) {
         Product product = productService.getProduct(productId);
         log.info("Save User Id ={}, Product = {}", userId, product);
 
@@ -31,9 +31,7 @@ public class WishService {
         wishProductRepository.save(wishProduct);
         log.info("Save Wish Sequence Id = {}", wishProduct.getId());
 
-        return WishProductSaveResponse.builder()
-                .id(wishProduct.getId())
-                .build();
+        return wishProduct;
     }
 
     @Transactional
