@@ -25,7 +25,7 @@ public class NegoSchedulerService {
         LocalDateTime currentTime = LocalDateTime.now();
 
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
-        List<Nego> transferNegos = negoRepository.findByStatus(TRANSFER_PENDING);
+        //List<Nego> transferNegos = negoRepository.findByStatus(TRANSFER_PENDING);
 
         for (Nego nego : pendingNegos) {
             Product product = productService.getProduct(nego.getProductId());
