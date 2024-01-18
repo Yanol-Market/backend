@@ -285,9 +285,8 @@ public class NegoServiceImpl implements NegoService {
             if (!negoRepository.existsByUser_IdAndProduct_Id(userId, productId)) {
                 //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
                 if (!chatService.existsChatRoomByUserIdAndProductId(userId, productId)) {
-                    ChatRoom chatRoom = chatService.createChatRoom(userId, productId);
+                    chatService.createChatRoom(userId, productId);
                     negoAvailable = true;
-                    chatRoomId = chatRoom.getId();
                 }
             } else {
                 //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가

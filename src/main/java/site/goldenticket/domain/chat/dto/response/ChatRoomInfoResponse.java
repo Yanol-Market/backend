@@ -1,5 +1,7 @@
-package site.goldenticket.domain.chat.dto;
+package site.goldenticket.domain.chat.dto.response;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.Builder;
 import site.goldenticket.domain.product.constants.ProductStatus;
 
@@ -11,6 +13,11 @@ public record ChatRoomInfoResponse(
     Long productId,
     String accommodationName,
     String roomName,
+    String accommodationImage,
+    LocalDate checkInDate,
+    LocalDate checkOutDate,
+    LocalTime checkInTime,
+    LocalTime checkOutTime,
     ProductStatus productStatus,
     Integer price
 ) {
