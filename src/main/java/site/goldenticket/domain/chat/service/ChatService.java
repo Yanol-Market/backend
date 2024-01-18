@@ -3,6 +3,8 @@ package site.goldenticket.domain.chat.service;
 import static site.goldenticket.common.response.ErrorCode.CHAT_ROOM_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
 import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
+import static site.goldenticket.common.response.ErrorCode.NEGO_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +13,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.chat.dto.ChatRequest;
 import site.goldenticket.domain.chat.dto.ChatResponse;
@@ -23,6 +26,12 @@ import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.entity.SenderType;
 import site.goldenticket.domain.chat.repository.ChatRepository;
 import site.goldenticket.domain.chat.repository.ChatRoomRepository;
+import site.goldenticket.domain.nego.entity.Nego;
+import site.goldenticket.domain.nego.repository.NegoRepository;
+import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.payment.model.Order;
+import site.goldenticket.domain.payment.repository.OrderRepository;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.user.entity.User;
@@ -37,6 +46,8 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ProductService productService;
     private final UserService userService;
+    private final NegoRepository negoRepository;
+    private final OrderRepository orderRepository;
 
     /***
      * 채팅 생성
@@ -105,7 +116,7 @@ public class ChatService {
             .roomName(product.getRoomName())
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
-            .price(product.getGoldenPrice()) // *네고 승인 시, 네고가격으로 수정하는 로직 추가 예정
+            .price(getPriceOfChatRoom(buyerId, product.getId()))
             .productId(product.getId())
             .productStatus(product.getProductStatus())
             .build();
@@ -134,6 +145,38 @@ public class ChatService {
         return ChatRoomDetailResponse.builder()
             .chatRoomInfoResponse(chatRoomInfoResponse)
             .chatResponseList(chatResponseList).build();
+    }
+
+    /***
+     * 채팅방 상단 가격값 조회
+     * @param buyerId 구매자 ID
+     * @param productId 상품 ID
+     * @return 채팅방 상단에 띄울 가격값
+     */
+    private Integer getPriceOfChatRoom(Long buyerId, Long productId) {
+        Product product = productService.getProduct(productId);
+        Integer price = product.getGoldenPrice();
+
+        Boolean existsNego = negoRepository.existsByUser_IdAndProduct_Id(buyerId, product.getId());
+        if (product.getProductStatus().equals(ProductStatus.SELLING) && existsNego) {
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
+                product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
+            if (nego.getStatus().equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
+                price = nego.getPrice();
+            }
+        } else if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
+                product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
+            if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
+                price = nego.getPrice();
+            }
+        } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
+            Order order = orderRepository.findByProductIdAndStatus(product.getId(),
+                    OrderStatus.COMPLETED_TRANSFER)
+                .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+            price = order.getPrice();
+        }
+        return price;
     }
 
     /***
