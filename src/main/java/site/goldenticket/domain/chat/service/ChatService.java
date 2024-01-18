@@ -55,15 +55,24 @@ public class ChatService {
      * @return 채팅 응답 DTO
      */
     public ChatResponse createChat(ChatRequest chatRequest) {
-        if (!chatRequest.senderType().equals(SenderType.SYSTEM)
-            && !chatRequest.senderType().equals(SenderType.BUYER)
-            && !chatRequest.senderType().equals(SenderType.SELLER)) {
+        SenderType senderType;
+        if (chatRequest.senderType().equals(SenderType.SYSTEM)) {
+            senderType = SenderType.SYSTEM;
+        } else if (chatRequest.senderType().equals(SenderType.BUYER)) {
+            senderType = SenderType.BUYER;
+        } else if (chatRequest.senderType().equals(SenderType.SELLER)) {
+            senderType = SenderType.SELLER;
+        } else {
             throw new CustomException(INVALID_SENDER_TYPE);
         }
-        // *존재하는 채팅방 ID인지 확인하는 로직 추가 예정
+
+        if (getChatRoom(chatRequest.chatRoomId()).equals(null)) {
+            throw new CustomException(CHAT_ROOM_NOT_FOUND);
+        }
+
         Chat chat = Chat.builder()
             .chatRoomId(chatRequest.chatRoomId())
-            .senderType(chatRequest.senderType())
+            .senderType(senderType)
             .userId(chatRequest.userId())
             .content(chatRequest.content())
             .viewedBySeller(false)
@@ -94,6 +103,16 @@ public class ChatService {
                 .productId(productId)
                 .build()
         );
+    }
+
+    /***
+     * 채팅방 ID를 통한 채팅방 조회
+     * @param chatRoomId 채팅방 ID
+     * @return 채팅방 Entity
+     */
+    public ChatRoom getChatRoom(Long chatRoomId) {
+        return chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
     }
 
     /***
@@ -286,7 +305,7 @@ public class ChatService {
     }
 
     /***
-     * 채팅방 조회
+     * 구매자 ID, 상품 ID를 통한 채팅방 조회
      * @param buyerId 구매자 ID
      * @param productId 상품 ID
      * @return 채팅방 Entity
