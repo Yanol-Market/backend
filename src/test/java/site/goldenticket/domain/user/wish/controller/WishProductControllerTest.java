@@ -14,6 +14,8 @@ import site.goldenticket.domain.user.wish.dto.WishProductSaveRequest;
 import site.goldenticket.domain.user.wish.entity.WishProduct;
 import site.goldenticket.domain.user.wish.repository.WishProductRepository;
 
+import java.util.stream.IntStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static site.goldenticket.common.utils.ProductUtils.createProduct;
@@ -26,6 +28,31 @@ class WishProductControllerTest extends ApiTest {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Test
+    @DisplayName("관심 상품 조회 검증")
+    void getWishProducts() {
+        // given
+        IntStream.range(0, 3)
+                .forEach(i -> {
+                    Product product = saveProduct();
+                    saveWishProduct(product);
+                });
+
+        String url = "/users/wishes/product";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(HttpStatus.OK.value());
+    }
 
     @Test
     @DisplayName("관심 상품 등록 검증")
