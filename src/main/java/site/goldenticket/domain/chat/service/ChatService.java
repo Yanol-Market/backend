@@ -59,11 +59,11 @@ public class ChatService {
      */
     public ChatResponse createChat(ChatRequest chatRequest) {
         SenderType senderType;
-        if (chatRequest.senderType().equals(SenderType.SYSTEM)) {
+        if (chatRequest.senderType().equals("SYSTEM")) {
             senderType = SenderType.SYSTEM;
-        } else if (chatRequest.senderType().equals(SenderType.BUYER)) {
+        } else if (chatRequest.senderType().equals("BUYER")) {
             senderType = SenderType.BUYER;
-        } else if (chatRequest.senderType().equals(SenderType.SELLER)) {
+        } else if (chatRequest.senderType().equals("SELLER")) {
             senderType = SenderType.SELLER;
         } else {
             throw new CustomException(INVALID_SENDER_TYPE);
