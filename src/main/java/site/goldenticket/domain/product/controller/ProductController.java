@@ -131,7 +131,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<CommonResponse<ProductResponse>> deleteProduct(
+    public ResponseEntity<CommonResponse<Long>> deleteProduct(
             @PathVariable Long productId
     ) {
         return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 삭제가 완료되었습니다.", productService.deleteProduct(productId)));

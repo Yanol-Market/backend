@@ -160,7 +160,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse deleteProduct(Long productId) {
+    public Long deleteProduct(Long productId) {
         Product product = getProduct(productId);
         productRepository.delete(product);
 
@@ -168,7 +168,7 @@ public class ProductService {
 
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
 
-        return ProductResponse.fromEntity(product);
+        return productId;
     }
 
     // 4. 기타 유틸 메서드
