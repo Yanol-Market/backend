@@ -107,7 +107,7 @@ public class NegoServiceImpl implements NegoService {
         }
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
-            throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
+            throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.CANNOT_NEGOTIATE);
         }
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
@@ -203,11 +203,12 @@ public class NegoServiceImpl implements NegoService {
         // Nego의 Product ID로 Product 정보 가져오기
         Product product = productService.getProduct(nego.getProductId());
 
-        // 상태가 결제 완료인 경우에만 양도 가능
+        // 상태가 양도 대기인 경우에만 양도 가능
         if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
             product.setProductStatus(ProductStatus.SOLD_OUT);
+            productService.updateProductForNego(product);
             negoRepository.save(nego);
             // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
             return HandoverResponse.fromEntity(product, nego);
