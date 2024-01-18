@@ -14,10 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -196,26 +193,38 @@ public class ProductService {
 
         if (cookies != null) {
             String anonymousKey = Arrays.stream(cookies)
-                .filter(cookie -> "AnonymousKey".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-            
+                    .filter(cookie -> "AnonymousKey".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+
             if (anonymousKey == null) {
-                ResponseCookie cookie = ResponseCookie.from("AnonymousKey", UUID.randomUUID().toString())
+                anonymousKey = UUID.randomUUID().toString();
+                ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
+                        .domain(".golden-ticket.site")
+                        .httpOnly(false)
+                        .secure(true)
+                        .path("/")
+                        .sameSite("None")
+                        .build();
+
+                response.addHeader("Set-Cookie", cookie.toString());
+            }
+
+            return anonymousKey;
+        } else {
+            String anonymousKey = UUID.randomUUID().toString();
+            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
                     .domain(".golden-ticket.site")
                     .httpOnly(false)
                     .secure(true)
                     .path("/")
                     .sameSite("None")
                     .build();
-                
-                response.addHeader("Set-Cookie", cookie.toString());
-            }
-            
+
+            response.addHeader("Set-Cookie", cookie.toString());
+
             return anonymousKey;
-        } else {
-            return null;
         }
     }
 
