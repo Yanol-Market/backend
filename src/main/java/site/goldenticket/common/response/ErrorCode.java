@@ -27,6 +27,7 @@ public enum ErrorCode {
     NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
     CANNOT_CONFIRM_NEGO(BAD_REQUEST, "네고를 승인할수 없습니다."),
     NEGO_APPROVAL_REQUIRED(BAD_REQUEST, "네고 승인이 필요합니다."),
+    NEGO_ALREADY_CONFIRMED(BAD_REQUEST,"승인한 다른 네고가 있어 승인할수 없습니다."),
     ONLY_CAN_DENY_WHEN_NEGOTIATING(BAD_REQUEST, "네고 중인 경우에만 거절할 수 있습니다."),
     NEGO_TIMEOUT(BAD_REQUEST, "20분이 지나 제안할수 없습니다"),
     NEGO_ALREADY_NEGOTIATING(BAD_REQUEST, "이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
@@ -35,7 +36,7 @@ public enum ErrorCode {
     NEGO_NOT_COMPLETED(BAD_REQUEST, "네고가 완료되지 않았습니다."),
     CANNOT_PROPOSE_NEGO(BAD_REQUEST,"네고를 제안할수 없습니다"),
     NEGO_COMPLETED(BAD_REQUEST, "다른 유저가 네고를 성공해 진행할수 없습니다."),
-
+    NEGO_COUNT_OVER(BAD_REQUEST,"네고를 3회이상 제안하실수 없습니다."),
 
 
     // Auth

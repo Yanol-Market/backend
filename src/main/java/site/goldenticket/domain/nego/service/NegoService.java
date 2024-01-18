@@ -9,15 +9,13 @@ import java.util.Optional;
 
 public interface NegoService {
 
-    // 판매자 입장
-    NegoResponse confirmPrice(Long negoId, PrincipalDetails principalDetails); // 가격승낙
+    NegoResponse confirmPrice(Long negoId, PrincipalDetails principalDetails);
 
-    NegoResponse denyPrice(Long negoId, PrincipalDetails principalDetails); // 거절하기
+    NegoResponse denyPrice(Long negoId, PrincipalDetails principalDetails);
 
-    // 구매자 입장
     PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request, PrincipalDetails principalDetails);
 
-    PayResponse pay(Long negoId, PrincipalDetails principalDetails); // 결제하기
+    PayResponse pay(Long negoId, PrincipalDetails principalDetails);
 
     HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails);
 

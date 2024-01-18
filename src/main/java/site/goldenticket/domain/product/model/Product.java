@@ -117,4 +117,8 @@ public class Product {
     public boolean isNotOnSale() {
         return !isOnSale();
     }
+
+    public void setGoldenPrice(int goldenPrice) {
+        this.goldenPrice = goldenPrice;
+    }
 }
