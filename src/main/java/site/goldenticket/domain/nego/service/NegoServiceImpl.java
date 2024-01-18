@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
-import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
 import site.goldenticket.domain.nego.dto.response.*;
@@ -284,7 +283,7 @@ public class NegoServiceImpl implements NegoService {
         } else {
             if (!negoRepository.existsByUser_IdAndProduct_Id(userId, productId)) {
                 //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
-                if (!chatService.existsChatRoomByUserIdAndProductId(userId, productId)) {
+                if (!chatService.existsChatRoomByBuyerIdAndProductId(userId, productId)) {
                     chatService.createChatRoom(userId, productId);
                     negoAvailable = true;
                 }

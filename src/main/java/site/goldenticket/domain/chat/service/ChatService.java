@@ -95,25 +95,25 @@ public class ChatService {
 
     /***
      * 채팅방 생성
-     * @param userId 구매자 ID
+     * @param buyerId 구매자 ID
      * @param productId 상품 ID
      * @return 채팅방 응답 DTO
      */
-    public ChatRoomResponse createChatRoom(Long userId, Long productId) {
-        if(userService.findById(userId).equals(null)){
+    public ChatRoomResponse createChatRoom(Long buyerId, Long productId) {
+        if (userService.findById(buyerId).equals(null)) {
             throw new CustomException(USER_NOT_FOUND);
         }
-        if(productService.getProduct(productId).equals(null)) {
+        if (productService.getProduct(productId).equals(null)) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         ChatRoom chatRoom = ChatRoom.builder()
-            .userId(userId)
+            .buyerId(buyerId)
             .productId(productId)
             .build();
         chatRoomRepository.save(chatRoom);
         return ChatRoomResponse.builder()
             .chatRoomId(chatRoom.getId())
-            .userId(chatRoom.getUserId())
+            .userId(chatRoom.getBuyerId())
             .productId(chatRoom.getProductId())
             .build();
     }
@@ -139,7 +139,7 @@ public class ChatService {
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
         Product product = productService.getProduct(chatRoom.getProductId());
         Long sellerId = product.getUserId();
-        Long buyerId = chatRoom.getUserId();
+        Long buyerId = chatRoom.getBuyerId();
         Long receiverId = (sellerId.equals(userId)) ? buyerId : sellerId; //채팅 상대 ID
         User receiver = userService.findById(receiverId);
 
@@ -255,7 +255,7 @@ public class ChatService {
         //내가 구매자인 경우 = 채팅방의 구매자 id와 유저id가 일치하는 채팅방 목록 조회
         if (userType.equals("buyer")) {
             //내가 구매자. 상대가 판매자.
-            chatRoomList = chatRoomRepository.findAllByUserId(userId);
+            chatRoomList = chatRoomRepository.findAllByBuyerId(userId);
             for (ChatRoom chatRoom : chatRoomList) {
                 Product product = productService.getProduct(chatRoom.getProductId());
                 User receiver = userService.findById(product.getUserId());
@@ -283,7 +283,7 @@ public class ChatService {
             }
 
             for (ChatRoom chatRoom : chatRoomList) {
-                User receiver = userService.findById(chatRoom.getUserId());
+                User receiver = userService.findById(chatRoom.getBuyerId());
                 Product product = productService.getProduct(chatRoom.getProductId());
                 Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
@@ -324,17 +324,17 @@ public class ChatService {
      * @return 채팅방 Entity
      */
     public ChatRoom getChatRoomByBuyerIdAndProductId(Long buyerId, Long productId) {
-        return chatRoomRepository.findByUserIdAndProductId(buyerId, productId)
+        return chatRoomRepository.findByBuyerIdAndProductId(buyerId, productId)
             .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
     }
 
     /***
      * 채팅방 존재 여부 조회
-     * @param userId 구매자 ID
+     * @param buyerId 구매자 ID
      * @param productId 상품 ID
      * @return
      */
-    public Boolean existsChatRoomByUserIdAndProductId(Long userId, Long productId) {
-        return chatRoomRepository.existsByUserIdAndProductId(userId, productId);
+    public Boolean existsChatRoomByBuyerIdAndProductId(Long buyerId, Long productId) {
+        return chatRoomRepository.existsByBuyerIdAndProductId(buyerId, productId);
     }
 }

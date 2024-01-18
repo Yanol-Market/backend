@@ -22,12 +22,12 @@ public class ChatRoom extends BaseTimeEntity {
 
     private Long productId;
 
-    private Long userId;
+    private Long buyerId;
 
     @Builder
-    public ChatRoom(Long id, Long productId, Long userId) {
+    public ChatRoom(Long id, Long productId, Long buyerId) {
         this.id = id;
         this.productId = productId;
-        this.userId = userId;
+        this.buyerId = buyerId;
     }
 }
