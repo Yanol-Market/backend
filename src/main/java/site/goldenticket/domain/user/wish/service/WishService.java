@@ -7,9 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
-import site.goldenticket.domain.user.wish.dto.WishProductSaveResponse;
 import site.goldenticket.domain.user.wish.entity.WishProduct;
 import site.goldenticket.domain.user.wish.repository.WishProductRepository;
+
+import java.util.List;
 
 import static site.goldenticket.common.response.ErrorCode.WISH_PRODUCT_NOT_FOUND;
 
@@ -21,6 +22,11 @@ public class WishService {
 
     private final WishProductRepository wishProductRepository;
     private final ProductService productService;
+
+    public List<WishProduct> findWishProduct(Long userId) {
+        log.info("Find Wish Product User Id = {}", userId);
+        return wishProductRepository.findByUserIdWithProduct(userId);
+    }
 
     @Transactional
     public WishProduct saveWishProduct(Long userId, Long productId) {
