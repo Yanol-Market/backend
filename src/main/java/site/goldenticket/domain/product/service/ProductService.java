@@ -34,6 +34,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.HomeProductResponse;
 import site.goldenticket.domain.product.dto.ProductDetailResponse;
 import site.goldenticket.domain.product.dto.ProductRequest;
@@ -258,5 +259,8 @@ public class ProductService {
     @Transactional
     public void updateProductForNego(Product product) {
         productRepository.save(product);
+    }
+    public List<Product> getSoldOutProducts() {
+        return productRepository.findByStatus(ProductStatus.SOLD_OUT);
     }
 }

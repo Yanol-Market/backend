@@ -23,6 +23,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+
+// 네고 종료는 실패값만 유지 + 상품 상태 확인해서 예외처리 + 네고에서만 확인할거면 enum 추가해야됨
+// 상품만료
+
+
 @Service
 @RequiredArgsConstructor
 public class NegoServiceImpl implements NegoService {
@@ -91,28 +96,33 @@ public class NegoServiceImpl implements NegoService {
         Product product = productService.getProduct(productId);
         Nego nego = negoRepository.findByProduct(product);
 
+//        if(product.getProductStatus()==ProductStatus.SOLD_OUT){
+//
+//        }
+
         // 사용자별 상품에 대한 네고 조회
         Nego userNego = negoRepository.findByUserAndProduct(user, product)
                 .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
 
         if (nego != null && nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED) {
             throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
-        }
+        }   //CONSIDER
+
         if (nego != null && nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
-        }
+        }   //OK
 
         if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
             throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
-        }
+        }   //OK
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
             throw new CustomException("취소된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.CANNOT_NEGOTIATE);
-        }
+        }   //OK
 
         if (userNego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
             throw new CustomException("20분이 지나 제안할수 없습니다.", ErrorCode.CANNOT_PROPOSE_NEGO);
-        }
+        }   //OK
 
         // count 증가
         int newCount = userNego.getCount() + 1;
@@ -142,12 +152,16 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
+        Product product = productService.getProduct(nego.getProductId());
+
         if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED || nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
         }
 
 
         if (nego.getConsent()) {
+            product.setProductStatus(ProductStatus.RESERVED);
+            productService.updateProductForNego(product);
             nego.setStatus(NegotiationStatus.TRANSFER_PENDING);
             nego.setUpdatedAt(LocalDateTime.now());
             negoRepository.save(nego);
@@ -228,7 +242,6 @@ public class NegoServiceImpl implements NegoService {
         Nego nego = negoRepository.findById(negoId)
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
-        // 상태가 결제 완료인 경우에만 양도 가능
         if (nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             nego.setConsent(Boolean.FALSE);
             nego.setExpirationTime(LocalDateTime.now());
@@ -244,14 +257,20 @@ public class NegoServiceImpl implements NegoService {
     @Override
     public void updateNegotiationStatusForCompletedProduct(Long productId) {
 
+        // NegoCompleted가 아닌 상품에서 soldout된 id 찾아서 해당 id를 가진 네고의 상태 변경
+
         Product product = productService.getProduct(productId);
 
         List<Nego> completedNegos = negoRepository.findByProductAndStatus(product, NegotiationStatus.NEGOTIATION_COMPLETED);
+
         for (Nego nego : completedNegos) {
             nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
         }
+
         negoRepository.saveAll(completedNegos);
-    }
+    }   // 수빈이한테 물어봐야됨
+
+
 
 
     @Override

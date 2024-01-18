@@ -25,27 +25,47 @@ public class NegoSchedulerService {
         LocalDateTime currentTime = LocalDateTime.now();
 
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
-       // List<Nego> completedNegos = negoRepository.findByStatus(NEGOTIATION_COMPLETED);
+        // List<Nego> completedNegos = negoRepository.findByStatus(NEGOTIATION_COMPLETED);
         List<Nego> transferNegos = negoRepository.findByStatus(TRANSFER_PENDING);
+        List<Product> soldOutProducts = productService.getSoldOutProducts();
+
+        for (Product soldProduct : soldOutProducts) {
+            markAllNegotiationsAsCompletedForProduct(soldProduct.getId());
+        }
 
         for (Nego nego : pendingNegos) {
+            Product product = productService.getProduct(nego.getProductId());
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(10))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(30))) {
+                productService.updateProductForNego(product);
                 nego.setStatus(NEGOTIATION_TIMEOUT);
                 nego.setUpdatedAt(currentTime);
             }
         }
 
-        for(Nego transferNego : transferNegos){
+        for (Nego transferNego : transferNegos) {
             Product product = productService.getProduct(transferNego.getProductId());
             LocalDateTime updatedAt = transferNego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(10))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(30))) {
                 transferNego.setStatus(NEGOTIATION_COMPLETED);
                 transferNego.setUpdatedAt(currentTime);
                 product.setProductStatus(ProductStatus.SOLD_OUT);
                 productService.updateProductForNego(product);
             }
         }
+        negoRepository.saveAll(transferNegos);
+        negoRepository.saveAll(pendingNegos);
+    }
+
+    private void markAllNegotiationsAsCompletedForProduct(Long productId) {
+        Product product = productService.getProduct(productId);
+        Nego nego = negoRepository.findByProduct(product);
+        nego.setStatus(NEGOTIATION_COMPLETED);
+        negoRepository.save(nego);
+    }
+
+}
+
 
 //        for (Nego completedNego : completedNegos){
 //            Long productId = completedNego.getProductId();
@@ -55,9 +75,3 @@ public class NegoSchedulerService {
 //            }
 //        }
 //        negoRepository.saveAll(completedNegos);
-
-        negoRepository.saveAll(transferNegos);
-        negoRepository.saveAll(pendingNegos);
-    }
-
-}
