@@ -190,29 +190,31 @@ public class ProductService {
     }
 
     private String generateOrRetrieveAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
-        String anonymousKey = Arrays.stream(request.getCookies())
-                .filter(
-                        cookie -> "AnonymousKey".equals(cookie.getName())
-                )
-                .map(
-                        cookie -> cookie.getValue()
-                )
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            String anonymousKey = Arrays.stream(cookies)
+                .filter(cookie -> "AnonymousKey".equals(cookie.getName()))
+                .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);
-
-        if (anonymousKey == null) {
-            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", UUID.randomUUID().toString())
+            
+            if (anonymousKey == null) {
+                ResponseCookie cookie = ResponseCookie.from("AnonymousKey", UUID.randomUUID().toString())
                     .domain(".golden-ticket.site")
                     .httpOnly(false)
                     .secure(true)
                     .path("/")
                     .sameSite("None")
                     .build();
-
-            response.addHeader("Set-Cookie", cookie.toString());
+                
+                response.addHeader("Set-Cookie", cookie.toString());
+            }
+            
+            return anonymousKey;
+        } else {
+            return null;
         }
-
-        return anonymousKey;
     }
 
     private void updateProductViewCount(String userKey, String productKey) {
