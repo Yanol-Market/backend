@@ -60,6 +60,7 @@ public class ChatService {
             && !chatRequest.senderType().equals(SenderType.SELLER)) {
             throw new CustomException(INVALID_SENDER_TYPE);
         }
+        // *존재하는 채팅방 ID인지 확인하는 로직 추가 예정
         Chat chat = Chat.builder()
             .chatRoomId(chatRequest.chatRoomId())
             .senderType(chatRequest.senderType())
@@ -116,7 +117,8 @@ public class ChatService {
             .roomName(product.getRoomName())
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
-            .price(getPriceOfChatRoom(buyerId, product.getId()))
+            //.price(getPriceOfChatRoom(buyerId, product.getId()))
+            .price(product.getGoldenPrice())
             .productId(product.getId())
             .productStatus(product.getProductStatus())
             .build();
