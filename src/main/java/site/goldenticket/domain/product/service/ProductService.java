@@ -9,14 +9,12 @@ import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -160,15 +158,15 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse deleteProduct(Long productId) {
+    public Long deleteProduct(Long productId) {
         Product product = getProduct(productId);
-        productRepository.delete(product);
-
+        
         String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, product.getReservationId());
-
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
-
-        return ProductResponse.fromEntity(product);
+        
+        productRepository.delete(product);
+        
+        return productId;
     }
 
     // 4. 기타 유틸 메서드
@@ -191,18 +189,32 @@ public class ProductService {
     }
 
     private String generateOrRetrieveAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
-        String anonymousKey = Arrays.stream(request.getCookies())
-                .filter(
-                        cookie -> "AnonymousKey".equals(cookie.getName())
-                )
-                .map(
-                        cookie -> cookie.getValue()
-                )
-                .findFirst()
-                .orElse(null);
+        Cookie[] cookies = request.getCookies();
 
-        if (anonymousKey == null) {
-            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", UUID.randomUUID().toString())
+        if (cookies != null) {
+            String anonymousKey = Arrays.stream(cookies)
+                    .filter(cookie -> "AnonymousKey".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+
+            if (anonymousKey == null) {
+                anonymousKey = UUID.randomUUID().toString();
+                ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
+                        .domain(".golden-ticket.site")
+                        .httpOnly(false)
+                        .secure(true)
+                        .path("/")
+                        .sameSite("None")
+                        .build();
+
+                response.addHeader("Set-Cookie", cookie.toString());
+            }
+
+            return anonymousKey;
+        } else {
+            String anonymousKey = UUID.randomUUID().toString();
+            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
                     .domain(".golden-ticket.site")
                     .httpOnly(false)
                     .secure(true)
@@ -211,9 +223,9 @@ public class ProductService {
                     .build();
 
             response.addHeader("Set-Cookie", cookie.toString());
-        }
 
-        return anonymousKey;
+            return anonymousKey;
+        }
     }
 
     private void updateProductViewCount(String userKey, String productKey) {
