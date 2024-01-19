@@ -87,4 +87,9 @@ public class User extends BaseTimeEntity {
         this.bankName = bankName;
         this.accountNumber = accountNumber;
     }
+
+    public void removeAccount() {
+        this.bankName = null;
+        this.accountNumber = null;
+    }
 }

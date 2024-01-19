@@ -67,6 +67,14 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.ok());
     }
 
+    @DeleteMapping("/account")
+    public ResponseEntity<CommonResponse<Void>> removeAccount(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        userService.removeAccount(principalDetails.getUserId());
+        return ResponseEntity.ok(CommonResponse.ok());
+    }
+
     @PostMapping("/yanolja-login")
     public ResponseEntity<CommonResponse<Long>> yanoljaLogin(
             @RequestBody LoginRequest loginRequest,
