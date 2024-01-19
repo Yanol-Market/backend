@@ -23,7 +23,6 @@ public class NegoSchedulerService {
     @Scheduled(fixedDelay = 60000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
-
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
         List<Nego> transferNegos = negoRepository.findByStatus(TRANSFER_PENDING);
 
