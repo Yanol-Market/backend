@@ -13,10 +13,12 @@ import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.security.dto.ReissueRequest;
+import site.goldenticket.domain.security.dto.YanoljaLoginResponse;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static site.goldenticket.common.response.ErrorCode.LOGIN_FAIL;
@@ -43,7 +45,15 @@ public class SecurityService implements UserDetailsService {
         return tokenService.reissueToken(reissueRequest.refreshToken());
     }
 
-    public YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
+    public YanoljaLoginResponse yanoljaLogin(LoginRequest loginRequest) {
+        YanoljaUserResponse yanoljaUser = fetchYanoljaUser(loginRequest);
+        log.info("Yanolja Login Info = {}", yanoljaUser);
+
+        Optional<User> optionalUser = userRepository.findByYanoljaId(yanoljaUser.id());
+        return createYanoljaLoginResponse(optionalUser, yanoljaUser);
+    }
+
+    private YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
         return restTemplateService.post(
                 "http://localhost:8080/dummy/yauser",
                 loginRequest,
@@ -51,13 +61,24 @@ public class SecurityService implements UserDetailsService {
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
     }
 
-    public AuthenticationToken generateToken(Long yanoljaId) {
-        User user = userRepository.findByYanoljaId(yanoljaId)
-                .orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    private YanoljaLoginResponse createYanoljaLoginResponse(Optional<User> optionalUser, YanoljaUserResponse yanoljaUser) {
+        if (optionalUser.isEmpty()) {
+            return YanoljaLoginResponse.builder()
+                    .isFirst(true)
+                    .userInfo(yanoljaUser)
+                    .build();
+        }
 
-        String email = user.getEmail();
+        User user = optionalUser.get();
+        return YanoljaLoginResponse.builder()
+                .isFirst(false)
+                .token(generateToken(user.getEmail()))
+                .userInfo(yanoljaUser)
+                .build();
+    }
+
+    private AuthenticationToken generateToken(String email) {
         log.info("Yanolja Login Email = {}", email);
-
         String randomToken = UUID.randomUUID().toString();
         return tokenService.generatedToken(randomToken, email);
     }
