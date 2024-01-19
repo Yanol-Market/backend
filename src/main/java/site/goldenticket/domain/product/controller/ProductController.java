@@ -141,4 +141,11 @@ public class ProductController {
     ) {
         return ResponseEntity.ok(CommonResponse.ok("판매중인 상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getProgressProducts(principalDetails.getUserId())));
     }
+
+    @GetMapping("/history/completed")
+    public ResponseEntity<CommonResponse<List<ProductCompletedHistoryResponse>>> getAllCompletedProducts(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("판매완료 된 상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getAllCompletedProducts(principalDetails.getUserId())));
+    }
 }

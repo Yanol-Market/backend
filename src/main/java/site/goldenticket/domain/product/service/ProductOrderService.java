@@ -18,12 +18,14 @@ import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.constants.ProgressProductStatus;
+import site.goldenticket.domain.product.dto.ProductCompletedHistoryResponse;
 import site.goldenticket.domain.product.dto.ProductProgressHistoryResponse;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -121,5 +123,16 @@ public class ProductOrderService {
 
         }
         return productProgressHistoryResponseList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductCompletedHistoryResponse> getAllCompletedProducts(Long userId) {
+        List<ProductStatus> productStatusList = Arrays.asList(ProductStatus.SOLD_OUT, ProductStatus.EXPIRED);
+        List<Product> productList = productService.findByProductStatusInAndUserId(productStatusList, userId);
+
+        return productList.stream()
+                .filter(product -> !product.isSellerViewCheck())
+                .map(product -> ProductCompletedHistoryResponse.fromEntity(product, product.getProductStatus()))
+                .collect(Collectors.toList());
     }
 }
