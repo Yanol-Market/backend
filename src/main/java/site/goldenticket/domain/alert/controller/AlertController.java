@@ -29,7 +29,7 @@ public class AlertController {
         @Valid @RequestBody AlertRequest alertRequest) {
         return ResponseEntity.ok(
             CommonResponse.ok("테스트용 알림이 등록되었습니다.",
-                alertService.createAlert(alertRequest)));
+                alertService.createAlertForTest(alertRequest)));
     }
 
     @GetMapping("/unseen")
