@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import site.goldenticket.common.config.ApiTest;
 import site.goldenticket.domain.user.dto.AgreementRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
+import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -78,5 +79,31 @@ class UserControllerTest extends ApiTest {
                 () -> assertThat(jsonPath.getString("data.phoneNumber")).isEqualTo(PHONE_NUMBER),
                 () -> assertThat(jsonPath.getLong("data.id")).isEqualTo(YANOLJA_ID)
         );
+    }
+
+    @Test
+    @DisplayName("계좌 등록 검증")
+    void registerAccount() {
+        // given
+        RegisterAccountRequest request = new RegisterAccountRequest(
+                "bankName",
+                "000000000000"
+        );
+
+        String url = "/users/account";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .patch(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(OK.value());
     }
 }
