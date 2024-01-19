@@ -160,4 +160,11 @@ public class ProductOrderService {
 
         return ProductCompletedExpiredResponse.fromEntity(product);
     }
+
+    @Transactional
+    public Long deleteCompletedProduct(Long productId) {
+        Product product = productService.getProduct(productId);
+        product.setIsSellerViewCheck(true);
+        return productId;
+    }
 }

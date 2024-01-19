@@ -166,4 +166,11 @@ public class ProductController {
             throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
         }
     }
+
+    @DeleteMapping("/history/completed/{productId}")
+    public ResponseEntity<CommonResponse<Long>> deleteCompletedProduct(
+            @PathVariable Long productId
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("판매 내역의 상품 정보가 성공적으로 삭제가 완료되었습니다.", productOrderService.deleteCompletedProduct(productId)));
+    }
 }
