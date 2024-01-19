@@ -112,9 +112,9 @@ public class ProductOrderService {
 
             List<ProgressProductStatus> progressProductStatusList = new ArrayList<>(progressProductStatusSet);
             ProgressProductStatus progressProductStatus = progressProductStatusList.stream()
-                    .sorted()
-                    .toList()
-                    .get(0);
+                    .sorted(Comparator.reverseOrder())
+                    .findFirst()
+                    .orElse(null);
 
             ProductProgressHistoryResponse productProgressHistoryResponse = ProductProgressHistoryResponse.fromEntity(product, progressProductStatus, progressChatResponseList);
             productProgressHistoryResponseList.add(productProgressHistoryResponse);
