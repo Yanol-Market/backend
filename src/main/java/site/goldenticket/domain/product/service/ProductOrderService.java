@@ -18,12 +18,15 @@ import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.constants.ProgressProductStatus;
+import site.goldenticket.domain.product.dto.ProductCompletedExpiredResponse;
 import site.goldenticket.domain.product.dto.ProductCompletedHistoryResponse;
+import site.goldenticket.domain.product.dto.ProductCompletedSoldOutResponse;
 import site.goldenticket.domain.product.dto.ProductProgressHistoryResponse;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +57,7 @@ public class ProductOrderService {
             List<ProgressChatResponse> progressChatResponseList = new ArrayList<>();
 
             // 2.1 주문
-            List<Order> orderList = paymentService.findAllByStatus(OrderStatus.COMPLETED_TRANSFER);
+            List<Order> orderList = paymentService.findByStatusAndProductId(OrderStatus.WAITING_TRANSFER, productId);
 
             for (Order order : orderList) {
                 ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(order.getStatus()));
@@ -78,7 +81,7 @@ public class ProductOrderService {
 
             // 2.2 네고
             List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED);
-            List<Nego> negoList = negoService.findAllByStatusIn(negotiationStatusList);
+            List<Nego> negoList = negoService.findByStatusInAndProductId(negotiationStatusList, productId);
 
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();
@@ -134,5 +137,27 @@ public class ProductOrderService {
                 .filter(product -> !product.isSellerViewCheck())
                 .map(product -> ProductCompletedHistoryResponse.fromEntity(product, product.getProductStatus()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ProductCompletedSoldOutResponse getSoldOutCaseProductDetails(Long productId) {
+        Product product = productService.findByProductStatusAndProductId(ProductStatus.SOLD_OUT, productId);
+
+        Order order = paymentService.findByProductId(productId);
+
+        Long userId = order.getUserId();
+        User user = userService.findById(userId);
+
+        ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, productId);
+        LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), user.getId()).get(0).getUpdatedAt();
+
+        return ProductCompletedSoldOutResponse.fromEntity(product, order, user, chatRoom, lastUpdatedAt);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductCompletedExpiredResponse getExpiredCaseProductDetails(Long productId) {
+        Product product = productService.findByProductStatusAndProductId(ProductStatus.EXPIRED, productId);
+
+        return ProductCompletedExpiredResponse.fromEntity(product);
     }
 }

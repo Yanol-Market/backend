@@ -29,5 +29,5 @@ public interface NegoService {
 
     NegoAvailableResponse isAvailableNego(Long userId, Long productId); //네고 가능 여부 조회
 
-    List<Nego> findAllByStatusIn(List<NegotiationStatus> negotiationStatusList);
+    List<Nego> findByStatusInAndProductId(List<NegotiationStatus> negotiationStatusList, Long productId);
 }

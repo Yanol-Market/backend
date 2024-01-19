@@ -300,7 +300,7 @@ public class NegoServiceImpl implements NegoService {
                 .build();
     }
 
-    public List<Nego> findAllByStatusIn(List<NegotiationStatus> negotiationStatusList){
-        return negoRepository.findByStatusIn(negotiationStatusList);
+    public List<Nego> findByStatusInAndProductId(List<NegotiationStatus> negotiationStatusList, Long productId){
+        return negoRepository.findByStatusInAndProductId(negotiationStatusList, productId);
     }
 }

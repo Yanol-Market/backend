@@ -132,7 +132,11 @@ public class PaymentService {
         return PaymentResponse.success();
     }
 
-    public List<Order> findAllByStatus(OrderStatus orderStatus) {
-        return orderRepository.findAllByStatus(orderStatus);
+    public List<Order> findByStatusAndProductId(OrderStatus orderStatus, Long productId) {
+        return orderRepository.findByStatusAndProductId(orderStatus, productId);
+    }
+
+    public Order findByProductId(Long productId) {
+        return orderRepository.findByProductId(productId);
     }
 }

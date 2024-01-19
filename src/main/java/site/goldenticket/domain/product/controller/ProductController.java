@@ -12,9 +12,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.constants.PaginationConstants;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.search.service.SearchService;
 import site.goldenticket.domain.product.service.ProductOrderService;
@@ -147,5 +150,20 @@ public class ProductController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         return ResponseEntity.ok(CommonResponse.ok("판매완료 된 상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getAllCompletedProducts(principalDetails.getUserId())));
+    }
+
+    @GetMapping("/history/completed/{productId}")
+    public ResponseEntity<CommonResponse<?>> getCompletedProductDetails(
+            @RequestParam ProductStatus productStatus,
+            @PathVariable Long productId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        if (productStatus == ProductStatus.SOLD_OUT) {
+            return ResponseEntity.ok(CommonResponse.ok(productOrderService.getSoldOutCaseProductDetails(productId)));
+        } else if(productStatus == ProductStatus.EXPIRED) {
+            return ResponseEntity.ok(CommonResponse.ok(productOrderService.getExpiredCaseProductDetails(productId)));
+        } else {
+            throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
+        }
     }
 }
