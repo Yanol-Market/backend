@@ -140,4 +140,26 @@ class UserControllerTest extends ApiTest {
                 () -> assertThat(jsonPath.getString("data.accountNumber")).isEqualTo(ACCOUNT_NUMBER)
         );
     }
+
+    @Test
+    @DisplayName("계좌 삭제 검증")
+    void removeAccount() {
+        // given
+        user.registerAccount(BANK_NAME, ACCOUNT_NUMBER);
+        userRepository.save(user);
+
+        String url = "/users/account";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(OK.value());
+    }
 }
