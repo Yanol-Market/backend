@@ -60,6 +60,12 @@ public class UserService {
     }
 
     @Transactional
+    public void removeAccount(Long userId) {
+        User user = findById(userId);
+        user.removeAccount();
+    }
+
+    @Transactional
     public Long yanoljaLogin(LoginRequest loginRequest, Long userId) {
         YanoljaUserResponse yanoljaUser = getYanoljaUser(loginRequest);
         User user = findById(userId);
