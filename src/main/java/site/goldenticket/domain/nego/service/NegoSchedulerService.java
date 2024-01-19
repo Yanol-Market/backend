@@ -20,7 +20,7 @@ public class NegoSchedulerService {
     private final NegoRepository negoRepository;
     private final ProductService productService;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 60000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
 
@@ -30,7 +30,7 @@ public class NegoSchedulerService {
         for (Nego nego : pendingNegos) {
             Product product = productService.getProduct(nego.getProductId());
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(30))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
                 productService.updateProductForNego(product);
                 product.setProductStatus(ProductStatus.SELLING);
                 productService.updateProductForNego(product);
