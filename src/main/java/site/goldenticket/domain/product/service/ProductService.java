@@ -32,7 +32,6 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
-import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.HomeProductResponse;
 import site.goldenticket.domain.product.dto.ProductDetailResponse;
 import site.goldenticket.domain.product.dto.ProductRequest;
@@ -138,7 +137,7 @@ public class ProductService {
     public ProductDetailResponse getProduct(
             Long productId, PrincipalDetails principalDetails, HttpServletRequest request, HttpServletResponse response
     ) {
-        Product product = getProduct(productId);
+        Product product = productRepository.findProductWithWishProductsByProductIdAndUserId(productId, principalDetails.getUserId());
 
         String userKey = (principalDetails != null) ? principalDetails.getUsername() : generateOrRetrieveAnonymousKey(request, response);
         boolean isSeller = principalDetails != null && principalDetails.getUserId().equals(product.getUserId());

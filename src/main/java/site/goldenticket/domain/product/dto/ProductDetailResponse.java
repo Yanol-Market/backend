@@ -30,7 +30,8 @@ public record ProductDetailResponse(
         int marketPriceRatio,
         String content,
         ProductStatus productStatus,
-        boolean isSeller
+        boolean isSeller,
+        boolean isWished
 ) {
 
     public static ProductDetailResponse fromEntity(Product product, boolean isSeller) {
@@ -68,7 +69,8 @@ public record ProductDetailResponse(
                 marketPriceRatio,
                 product.getContent(),
                 product.getProductStatus(),
-                isSeller
+                isSeller,
+                !product.getWishProducts().isEmpty()
         );
     }
 }

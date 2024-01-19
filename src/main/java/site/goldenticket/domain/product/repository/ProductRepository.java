@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import site.goldenticket.domain.product.model.Product;
 
@@ -26,4 +27,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     List<Product> findAllByUserId(Long userId);
 
+    @Query("SELECT p FROM Product p " +
+            "LEFT JOIN p.wishProducts wp " +
+            "ON wp.userId = :userId " +
+            "WHERE p.id = :productId")
+    Product findProductWithWishProductsByProductIdAndUserId(
+            @Param("productId") Long productId,
+            @Param("userId") Long userId
+    );
 }
