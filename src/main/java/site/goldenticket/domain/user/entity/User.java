@@ -82,4 +82,9 @@ public class User extends BaseTimeEntity {
 
         this.yanoljaId = yanoljaId;
     }
+
+    public void registerAccount(String bankName, String accountNumber) {
+        this.bankName = bankName;
+        this.accountNumber = accountNumber;
+    }
 }

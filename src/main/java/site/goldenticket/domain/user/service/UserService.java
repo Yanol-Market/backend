@@ -10,6 +10,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.dto.JoinRequest;
+import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
@@ -35,12 +36,6 @@ public class UserService {
         return userRepository.existsByNickname(nickname);
     }
 
-    public User findById(Long userId) {
-        log.info("Find By ID = {}", userId);
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-    }
-
     @Transactional
     public Long join(JoinRequest joinRequest) {
         joinValidate(joinRequest);
@@ -50,6 +45,18 @@ public class UserService {
         User user = joinRequest.toEntity(encodePassword);
         userRepository.save(user);
         return user.getId();
+    }
+
+    public User findById(Long userId) {
+        log.info("Find By ID = {}", userId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public void registerAccount(Long userId, RegisterAccountRequest registerAccountRequest) {
+        User user = findById(userId);
+        user.registerAccount(registerAccountRequest.bankName(), registerAccountRequest.accountNumber());
     }
 
     @Transactional
