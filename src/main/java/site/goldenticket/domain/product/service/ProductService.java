@@ -272,4 +272,8 @@ public class ProductService {
     public void updateProductForNego(Product product) {
         productRepository.save(product);
     }
+
+    public List<Product> findByProductStatusInAndUserId(List<ProductStatus> productStatusList, Long userId) {
+        return productRepository.findByProductStatusInAndUserId(productStatusList, userId);
+    }
 }

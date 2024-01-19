@@ -15,12 +15,9 @@ import site.goldenticket.common.constants.PaginationConstants;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
-import site.goldenticket.domain.product.dto.ProductDetailResponse;
-import site.goldenticket.domain.product.dto.ProductRequest;
-import site.goldenticket.domain.product.dto.ProductResponse;
-import site.goldenticket.domain.product.dto.RegionProductResponse;
-import site.goldenticket.domain.product.dto.SearchProductResponse;
+import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.search.service.SearchService;
+import site.goldenticket.domain.product.service.ProductOrderService;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationResponse;
@@ -38,6 +35,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final SearchService searchService;
+    private final ProductOrderService productOrderService;
 
     @GetMapping
     public CompletableFuture<ResponseEntity<CommonResponse<Slice<SearchProductResponse>>>> getProductsBySearch(
@@ -135,5 +133,12 @@ public class ProductController {
             @PathVariable Long productId
     ) {
         return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 삭제가 완료되었습니다.", productService.deleteProduct(productId)));
+    }
+
+    @GetMapping("/history/progress")
+    public ResponseEntity<CommonResponse<List<ProductProgressHistoryResponse>>> getProgressProducts(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("판매중인 상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getProgressProducts(principalDetails.getUserId())));
     }
 }

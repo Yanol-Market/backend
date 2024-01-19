@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 
 @Repository
@@ -26,4 +27,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     List<Product> findAllByUserId(Long userId);
 
+    List<Product> findByProductStatusInAndUserId(List<ProductStatus> productStatusList, Long userId);
 }

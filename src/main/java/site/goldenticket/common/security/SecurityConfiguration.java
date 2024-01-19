@@ -61,6 +61,10 @@ public class SecurityConfiguration {
             "/chats/test/**"
     };
 
+    private static final String[] AUTHENTICATED_GET_URLS = new String[]{
+            "/products/history/**"
+    };
+
     private final ObjectMapper objectMapper;
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
@@ -82,6 +86,7 @@ public class SecurityConfiguration {
                         .requestMatchers(PERMIT_ALL_URLS).permitAll()
                         .requestMatchers(GET, PERMIT_ALL_GET_URLS).permitAll()
                         .requestMatchers(POST, PERMIT_ALL_POST_URLS).permitAll()
+                        .requestMatchers(GET, AUTHENTICATED_GET_URLS).authenticated()
                         .anyRequest().authenticated()
                 )
                 .logout(logoutConfigurer -> logoutConfigurer
