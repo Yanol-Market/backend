@@ -9,6 +9,7 @@ public final class UserUtils {
     public static String NAME = "name";
     public static String NICKNAME = "nickname";
     public static String PHONE_NUMBER = "01000000000";
+    public static Long YANOLJA_ID = 1L;
 
     public static User createUser(String encodePassword) {
         return User.builder()
@@ -17,6 +18,7 @@ public final class UserUtils {
                 .name(NAME)
                 .nickname(NICKNAME)
                 .phoneNumber(PHONE_NUMBER)
+                .yanoljaId(YANOLJA_ID)
                 .build();
     }
 

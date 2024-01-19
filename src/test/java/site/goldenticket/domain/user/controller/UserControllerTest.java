@@ -1,6 +1,7 @@
 package site.goldenticket.domain.user.controller;
 
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +11,9 @@ import site.goldenticket.domain.user.dto.AgreementRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static site.goldenticket.common.utils.UserUtils.*;
 
@@ -45,5 +48,35 @@ class UserControllerTest extends ApiTest {
 
         // then
         assertThat(result.statusCode()).isEqualTo(CREATED.value());
+    }
+
+    @Test
+    @DisplayName("사용자 정보 조회 검증")
+    void getUserInfo() {
+        // given
+        String url = "/users/me";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(OK.value());
+
+        JsonPath jsonPath = result.jsonPath();
+        assertAll(
+                () -> assertThat(jsonPath.getLong("data.id")).isEqualTo(userId),
+                () -> assertThat(jsonPath.getString("data.email")).isEqualTo(EMAIL),
+                () -> assertThat(jsonPath.getString("data.name")).isEqualTo(NAME),
+                () -> assertThat(jsonPath.getString("data.nickname")).isEqualTo(NICKNAME),
+                () -> assertThat(jsonPath.getString("data.imageUrl")).isNull(),
+                () -> assertThat(jsonPath.getString("data.phoneNumber")).isEqualTo(PHONE_NUMBER),
+                () -> assertThat(jsonPath.getLong("data.id")).isEqualTo(YANOLJA_ID)
+        );
     }
 }
