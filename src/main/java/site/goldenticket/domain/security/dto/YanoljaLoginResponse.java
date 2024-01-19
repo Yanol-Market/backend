@@ -9,4 +9,22 @@ public record YanoljaLoginResponse(
         AuthenticationToken token,
         YanoljaUserResponse userInfo
 ) {
+
+    public static YanoljaLoginResponse firstLoginUser(YanoljaUserResponse yanoljaUser) {
+        return YanoljaLoginResponse.builder()
+                .isFirst(true)
+                .userInfo(yanoljaUser)
+                .build();
+    }
+
+    public static YanoljaLoginResponse loginUser(
+            YanoljaUserResponse yanoljaUser,
+            AuthenticationToken token
+    ) {
+        return YanoljaLoginResponse.builder()
+                .isFirst(true)
+                .userInfo(yanoljaUser)
+                .token(token)
+                .build();
+    }
 }
