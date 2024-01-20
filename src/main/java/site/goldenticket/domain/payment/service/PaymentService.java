@@ -2,6 +2,7 @@ package site.goldenticket.domain.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.entity.Nego;
@@ -129,5 +130,9 @@ public class PaymentService {
         product.setProductStatus(ProductStatus.RESERVED);
         productService.save(product);
         return PaymentResponse.success();
+    }
+
+    public List<Order> findAllByStatus(OrderStatus orderStatus) {
+        return orderRepository.findAllByStatus(orderStatus);
     }
 }

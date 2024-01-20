@@ -347,7 +347,7 @@ public class ChatService {
      * @param userId 회원 ID
      * @return 채팅 Entity List
      */
-    private List<Chat> getChatList(Long chatRoomId, Long userId) {
+    public List<Chat> getChatList(Long chatRoomId, Long userId) {
         List<Chat> chatList = chatRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
         //SenderType이 SYSTEM인 경우 userId와 일치하지 않는 chat은 삭제
         chatList.removeIf(
