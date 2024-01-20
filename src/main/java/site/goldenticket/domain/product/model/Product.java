@@ -50,7 +50,12 @@ public class Product {
     private Long reservationId;
     private Long userId;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(
+            mappedBy = "product",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
     private List<WishProduct> wishProducts;
 
     @Builder
