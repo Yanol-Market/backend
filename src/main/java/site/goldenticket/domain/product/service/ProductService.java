@@ -1,7 +1,6 @@
 package site.goldenticket.domain.product.service;
 
-import static site.goldenticket.common.redis.constants.RedisConstants.SCORE_INCREMENT_AMOUNT;
-import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKING_KEY;
+import static site.goldenticket.common.redis.constants.RedisConstants.*;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.RESERVATION_NOT_FOUND;
@@ -133,6 +132,8 @@ public class ProductService {
 
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
 
+        redisService.addZScore(VIEW_RANKING_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
+
         return ProductResponse.fromEntity(savedProduct);
     }
 
@@ -151,6 +152,7 @@ public class ProductService {
         boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
 
         updateProductViewCount(userKey, productId.toString());
+        updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
 
         return ProductDetailResponse.fromEntity(product, isSeller, isAuthenticated);
     }
@@ -251,6 +253,12 @@ public class ProductService {
             Double updateViewCount = (currentViewCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
             redisService.addZScore(VIEW_RANKING_KEY, productKey, updateViewCount);
         }
+    }
+
+    private void updateAutocompleteCount(String autocompleteKey, String accommodationName) {
+        Double currentAutocompleteCount = redisService.getZScore(autocompleteKey, accommodationName);
+        Double updateAutocompleteCount = (currentAutocompleteCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
+        redisService.addZScore(autocompleteKey, accommodationName, updateAutocompleteCount);
     }
 
     public HomeProductResponse getHomeProduct(PrincipalDetails principalDetails) {
