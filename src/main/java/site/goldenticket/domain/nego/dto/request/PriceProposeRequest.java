@@ -1,33 +1,17 @@
 package site.goldenticket.domain.nego.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import site.goldenticket.domain.nego.entity.Nego;
 
-import java.time.LocalDateTime;
 
-@Getter
-@Builder
-
-public class PriceProposeRequest {
-
-    @NotNull
-    private Integer price; // 네고 가격
-    @NotNull
-    private Long userId;
-    @NotNull
-    private Long productId;
-    @NotNull
-    private Integer count; // 네고 횟수
-
-    public Nego toEntity(){
-        return Nego.builder()
-                .price(price)
-                .count(count)
-                .productId(productId)
-                .userId(userId)
-                .createdAt(LocalDateTime.now())
-                .build();
+public record PriceProposeRequest(
+        @NotNull Integer price,
+        @NotNull Integer count,
+        @NotNull Long productId,
+        @NotNull Long userId
+) {
+    @Override
+    public Integer price() {
+        return price;
     }
+
 }

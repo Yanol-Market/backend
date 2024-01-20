@@ -5,10 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.common.security.authentication.dto.AuthenticationToken;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
-import site.goldenticket.domain.security.dto.YanoljaUserResponse;
+import site.goldenticket.domain.security.dto.ReissueRequest;
+import site.goldenticket.domain.security.dto.YanoljaLoginResponse;
 import site.goldenticket.domain.security.service.SecurityService;
 
 @RestController
@@ -17,13 +18,15 @@ public class SecurityController {
 
     private final SecurityService securityService;
 
+    @PostMapping("/reissue")
+    public ResponseEntity<CommonResponse<AuthenticationToken>> reissue(@RequestBody ReissueRequest reissueRequest) {
+        AuthenticationToken token = securityService.reissue(reissueRequest);
+        return ResponseEntity.ok(CommonResponse.ok(token));
+    }
+
     @PostMapping("/yanolja-login")
-    public ResponseEntity<CommonResponse<?>> yanoljaLogin(@RequestBody LoginRequest loginRequest) {
-        YanoljaUserResponse yanoljaUserResponse = securityService.fetchYanoljaUser(loginRequest);
-        try {
-            return ResponseEntity.ok(CommonResponse.ok(securityService.generateToken(yanoljaUserResponse.id())));
-        } catch (CustomException e) {
-            return ResponseEntity.ok(CommonResponse.fail(yanoljaUserResponse));
-        }
+    public ResponseEntity<CommonResponse<YanoljaLoginResponse>> yanoljaLogin(@RequestBody LoginRequest loginRequest) {
+        YanoljaLoginResponse response = securityService.yanoljaLogin(loginRequest);
+        return ResponseEntity.ok(CommonResponse.ok(response));
     }
 }

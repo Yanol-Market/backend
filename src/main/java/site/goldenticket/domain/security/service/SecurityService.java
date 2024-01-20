@@ -2,27 +2,26 @@ package site.goldenticket.domain.security.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.security.authentication.dto.AuthenticationToken;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.domain.security.PrincipalDetails;
+import site.goldenticket.domain.security.dto.ReissueRequest;
+import site.goldenticket.domain.security.dto.YanoljaLoginResponse;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.util.UUID;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static site.goldenticket.common.response.ErrorCode.LOGIN_FAIL;
+import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -31,6 +30,7 @@ public class SecurityService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final RestTemplateService restTemplateService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -41,27 +41,42 @@ public class SecurityService implements UserDetailsService {
         return new PrincipalDetails(user);
     }
 
-    public YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        HttpEntity<LoginRequest> request = new HttpEntity<>(loginRequest, headers);
+    public AuthenticationToken reissue(ReissueRequest reissueRequest) {
+        return tokenService.reissueToken(reissueRequest.refreshToken());
+    }
 
+    public YanoljaLoginResponse yanoljaLogin(LoginRequest loginRequest) {
+        YanoljaUserResponse yanoljaUser = fetchYanoljaUser(loginRequest);
+        log.info("Yanolja Login Info = {}", yanoljaUser);
+
+        return createYanoljaLoginResponse(yanoljaUser);
+    }
+
+    private YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
+        return restTemplateService.post(
+                "http://localhost:8080/dummy/yauser",
+                loginRequest,
+                YanoljaUserResponse.class
+        ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    }
+
+    private YanoljaLoginResponse createYanoljaLoginResponse(YanoljaUserResponse yanoljaUser) {
         try {
-            return restTemplate.postForObject("http://localhost:8080/dummy/yauser", request, YanoljaUserResponse.class);
-        } catch (HttpClientErrorException e) {
-            log.error("Yanolja API Connect Error Message = {}", e.getMessage());
-            throw new CustomException(LOGIN_FAIL);
+            User user = findByYanoljaId(yanoljaUser.id());
+            AuthenticationToken token = generateToken(user.getEmail());
+            return YanoljaLoginResponse.loginUser(yanoljaUser, token);
+        } catch (CustomException e) {
+            return YanoljaLoginResponse.firstLoginUser(yanoljaUser);
         }
     }
 
-    public AuthenticationToken generateToken(Long yanoljaId) {
-        User user = userRepository.findByYanoljaId(yanoljaId)
-                .orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    private User findByYanoljaId(Long yanoljaId) {
+        return userRepository.findByYanoljaId(yanoljaId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
 
-        String email = user.getEmail();
+    private AuthenticationToken generateToken(String email) {
         log.info("Yanolja Login Email = {}", email);
-
         String randomToken = UUID.randomUUID().toString();
         return tokenService.generatedToken(randomToken, email);
     }
