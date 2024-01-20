@@ -1,4 +1,4 @@
-package site.goldenticket.domain.wishRegion.dto;
+package site.goldenticket.domain.user.wish.dto;
 
 import jakarta.validation.constraints.NotNull;
 import site.goldenticket.common.constants.AreaCode;

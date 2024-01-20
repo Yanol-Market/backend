@@ -1,4 +1,4 @@
-package site.goldenticket.domain.wishRegion.service;
+package site.goldenticket.domain.user.wish.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.AreaCode;
-import site.goldenticket.domain.wishRegion.dto.WishRegionCreateRequest;
-import site.goldenticket.domain.wishRegion.dto.WishRegionListResponse;
-import site.goldenticket.domain.wishRegion.dto.WishRegionResponse;
-import site.goldenticket.domain.wishRegion.entity.WishRegion;
-import site.goldenticket.domain.wishRegion.repository.WishRegionRepository;
+import site.goldenticket.domain.user.wish.dto.WishRegionCreateRequest;
+import site.goldenticket.domain.user.wish.dto.WishRegionListResponse;
+import site.goldenticket.domain.user.wish.dto.WishRegionResponse;
+import site.goldenticket.domain.user.wish.entity.WishRegion;
+import site.goldenticket.domain.user.wish.repository.WishRegionRepository;
 
 @Service
 @Transactional

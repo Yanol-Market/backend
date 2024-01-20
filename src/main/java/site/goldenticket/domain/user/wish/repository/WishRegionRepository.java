@@ -1,8 +1,8 @@
-package site.goldenticket.domain.wishRegion.repository;
+package site.goldenticket.domain.user.wish.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import site.goldenticket.domain.wishRegion.entity.WishRegion;
+import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 public interface WishRegionRepository extends JpaRepository<WishRegion, Long> {
 

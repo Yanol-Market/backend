@@ -1,4 +1,4 @@
-package site.goldenticket.domain.wishRegion.dto;
+package site.goldenticket.domain.user.wish.dto;
 
 import lombok.Builder;
 import site.goldenticket.common.constants.AreaCode;
