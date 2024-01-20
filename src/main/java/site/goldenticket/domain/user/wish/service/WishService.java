@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class WishRegionService {
+public class WishService {
 
     private final WishRegionRepository wishRegionRepository;
 
