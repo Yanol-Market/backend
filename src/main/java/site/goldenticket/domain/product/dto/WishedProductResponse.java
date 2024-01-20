@@ -21,6 +21,7 @@ public record WishedProductResponse(
         int yanoljaPrice,
         int goldenPrice,
         ProductStatus productStatus,
+        Long wishId,
         boolean isWished
 ) {
 
@@ -32,6 +33,7 @@ public record WishedProductResponse(
         long nights = DateUtil.daysBetween(checkInDate, checkOutDate);
         long days = DateUtil.daysFromNow(checkInDate);
 
+        Long wishId = isAuthenticated ? product.getWishProducts().get(0).getId() : null;
         boolean isWished = isAuthenticated ? !product.getWishProducts().isEmpty() : false;
 
         return new WishedProductResponse(
@@ -48,6 +50,7 @@ public record WishedProductResponse(
                 product.getYanoljaPrice(),
                 product.getGoldenPrice(),
                 product.getProductStatus(),
+                wishId,
                 isWished
         );
     }
