@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.PrincipalDetails;
+import site.goldenticket.domain.user.dto.AccountResponse;
+import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.UserResponse;
 import site.goldenticket.domain.user.entity.User;
@@ -46,6 +48,31 @@ public class UserController {
     ) {
         User user = userService.findById(principalDetails.getUserId());
         return ResponseEntity.ok(CommonResponse.ok(UserResponse.of(user)));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<CommonResponse<AccountResponse>> getAccount(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        User user = userService.findById(principalDetails.getUserId());
+        return ResponseEntity.ok(CommonResponse.ok(AccountResponse.of(user)));
+    }
+
+    @PatchMapping("/account")
+    public ResponseEntity<CommonResponse<Void>> registerAccount(
+            @RequestBody @Validated RegisterAccountRequest registerAccountRequest,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        userService.registerAccount(principalDetails.getUserId(), registerAccountRequest);
+        return ResponseEntity.ok(CommonResponse.ok());
+    }
+
+    @DeleteMapping("/account")
+    public ResponseEntity<CommonResponse<Void>> removeAccount(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        userService.removeAccount(principalDetails.getUserId());
+        return ResponseEntity.ok(CommonResponse.ok());
     }
 
     @PostMapping("/yanolja-login")
