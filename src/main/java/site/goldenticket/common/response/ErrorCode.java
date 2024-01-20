@@ -57,6 +57,7 @@ public enum ErrorCode {
     ALREADY_EXIST_NICKNAME(BAD_REQUEST, "이미 사용중인 아이디입니다."),
     USER_NOT_FOUND(NOT_FOUND, "유저 정보가 존재하지 않습니다"),
     ALREADY_REGISTER_YANOLJA_ID(BAD_REQUEST, "이미 등록된 야놀자 아이디가 존재합니다."),
+    ALREADY_REGISTER_ACCOUNT(BAD_REQUEST, "이미 등록된 계좌가 존재합니다."),
 
     // Wish
     WISH_PRODUCT_NOT_FOUND(BAD_REQUEST, "존재하지 않는 관심 상품입니다."),

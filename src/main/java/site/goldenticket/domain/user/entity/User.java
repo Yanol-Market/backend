@@ -17,6 +17,7 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
+import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_ACCOUNT;
 import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_YANOLJA_ID;
 import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 
@@ -84,6 +85,10 @@ public class User extends BaseTimeEntity {
     }
 
     public void registerAccount(String bankName, String accountNumber) {
+        if (!Objects.isNull(this.bankName) || !Objects.isNull(this.accountNumber)) {
+            throw new CustomException(ALREADY_REGISTER_ACCOUNT);
+        }
+
         this.bankName = bankName;
         this.accountNumber = accountNumber;
     }
