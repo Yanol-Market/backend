@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 
 @Repository
@@ -58,7 +59,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
             @Param("userId") Long userId,
             Pageable pageable
     );
-
+  
     @Query("SELECT p FROM Product p " +
             "LEFT JOIN p.wishProducts wp " +
             "ON wp.userId = :userId " +
@@ -67,4 +68,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
             @Param("productId") Long productId,
             @Param("userId") Long userId
     );
+
+    List<Product> findByProductStatusInAndUserId(List<ProductStatus> productStatusList, Long userId);
+
+    Product findByProductStatusAndId(ProductStatus productStatus, Long productId);
+  
 }

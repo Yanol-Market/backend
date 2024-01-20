@@ -299,4 +299,8 @@ public class NegoServiceImpl implements NegoService {
                 .chatRoomId(chatRoomId)
                 .build();
     }
+
+    public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList, Product product){
+        return negoRepository.findByStatusInAndProduct(negotiationStatusList, product);
+    }
 }
