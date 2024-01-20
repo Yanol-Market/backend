@@ -49,8 +49,8 @@ public record ProductDetailResponse(
         int originPriceRatio = DiscountCalculatorUtil.calculateDiscountPercentage(originPrice, goldenPrice);
         int marketPriceRatio = DiscountCalculatorUtil.calculateDiscountPercentage(yanoljaPrice, goldenPrice);
 
-        Long wishId = isAuthenticated ? product.getWishProducts().get(0).getId() : null;
         boolean isWished = isAuthenticated ? !product.getWishProducts().isEmpty() : false;
+        Long wishId = isWished ? product.getWishProducts().get(0).getId() : null;
 
         return new ProductDetailResponse(
                 product.getAccommodationImage(),
