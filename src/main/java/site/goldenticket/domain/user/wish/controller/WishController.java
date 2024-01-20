@@ -18,7 +18,7 @@ import site.goldenticket.domain.user.wish.dto.WishRegionResponse;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/wish-regions")
+@RequestMapping("/users/regions")
 public class WishController {
 
     private final WishService wishService;
