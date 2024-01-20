@@ -121,4 +121,8 @@ public class Product {
     public void setGoldenPrice(int goldenPrice) {
         this.goldenPrice = goldenPrice;
     }
+
+    public void setIsSellerViewCheck(boolean b) {
+        this.sellerViewCheck = b;
+    }
 }

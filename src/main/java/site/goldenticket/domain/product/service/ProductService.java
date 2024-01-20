@@ -276,4 +276,8 @@ public class ProductService {
     public List<Product> findByProductStatusInAndUserId(List<ProductStatus> productStatusList, Long userId) {
         return productRepository.findByProductStatusInAndUserId(productStatusList, userId);
     }
+
+    public Product findByProductStatusAndProductId(ProductStatus productStatus, Long productId) {
+        return productRepository.findByProductStatusAndProductId(productStatus, productId);
+    }
 }
