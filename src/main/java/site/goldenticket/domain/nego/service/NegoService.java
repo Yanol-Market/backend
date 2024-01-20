@@ -4,6 +4,7 @@ import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
 import site.goldenticket.domain.nego.dto.response.*;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.security.PrincipalDetails;
 
 import java.util.List;
@@ -29,5 +30,5 @@ public interface NegoService {
 
     NegoAvailableResponse isAvailableNego(Long userId, Long productId); //네고 가능 여부 조회
 
-    List<Nego> findByStatusInAndProductId(List<NegotiationStatus> negotiationStatusList, Long productId);
+    List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList, Product product);
 }

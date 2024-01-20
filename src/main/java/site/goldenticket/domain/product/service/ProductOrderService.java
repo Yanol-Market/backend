@@ -81,7 +81,7 @@ public class ProductOrderService {
 
             // 2.2 네고
             List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED);
-            List<Nego> negoList = negoService.findByStatusInAndProductId(negotiationStatusList, productId);
+            List<Nego> negoList = negoService.findByStatusInAndProduct(negotiationStatusList, product);
 
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();

@@ -303,6 +303,6 @@ public class ProductService {
     }
 
     public Product findByProductStatusAndProductId(ProductStatus productStatus, Long productId) {
-        return productRepository.findByProductStatusAndProductId(productStatus, productId);
+        return productRepository.findByProductStatusAndId(productStatus, productId);
     }
 }
