@@ -30,10 +30,11 @@ public record ProductDetailResponse(
         int marketPriceRatio,
         String content,
         ProductStatus productStatus,
-        boolean isSeller
+        boolean isSeller,
+        boolean isWished
 ) {
 
-    public static ProductDetailResponse fromEntity(Product product, boolean isSeller) {
+    public static ProductDetailResponse fromEntity(Product product, boolean isSeller, boolean isAuthenticated) {
         LocalDate checkInDate = product.getCheckInDate();
         LocalDate checkOutDate = product.getCheckOutDate();
 
@@ -46,6 +47,8 @@ public record ProductDetailResponse(
 
         int originPriceRatio = DiscountCalculatorUtil.calculateDiscountPercentage(originPrice, goldenPrice);
         int marketPriceRatio = DiscountCalculatorUtil.calculateDiscountPercentage(yanoljaPrice, goldenPrice);
+
+        boolean isWished = isAuthenticated ? !product.getWishProducts().isEmpty() : false;
 
         return new ProductDetailResponse(
                 product.getAccommodationImage(),
@@ -68,7 +71,8 @@ public record ProductDetailResponse(
                 marketPriceRatio,
                 product.getContent(),
                 product.getProductStatus(),
-                isSeller
+                isSeller,
+                isWished
         );
     }
 }
