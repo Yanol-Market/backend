@@ -1,17 +1,12 @@
 package site.goldenticket.domain.user.wish.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.goldenticket.common.constants.AreaCode;
 import site.goldenticket.common.entiy.BaseTimeEntity;
+import site.goldenticket.domain.product.constants.AreaCode;
 
 @Entity
 @Getter
@@ -28,8 +23,7 @@ public class WishRegion extends BaseTimeEntity {
     private AreaCode region;
 
     @Builder
-    public WishRegion(Long id, Long userId, AreaCode areaCode) {
-        this.id = id;
+    private WishRegion(Long userId, AreaCode areaCode) {
         this.userId = userId;
         this.region = areaCode;
     }

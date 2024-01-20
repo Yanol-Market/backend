@@ -1,8 +1,9 @@
 package site.goldenticket.domain.user.wish.dto;
 
-import java.util.List;
 import lombok.Builder;
-import site.goldenticket.common.constants.AreaCode;
+import site.goldenticket.domain.product.constants.AreaCode;
+
+import java.util.List;
 
 @Builder
 public record WishRegionListResponse(
