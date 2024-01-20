@@ -1,7 +1,6 @@
 package site.goldenticket.domain.product.service;
 
-import static site.goldenticket.common.redis.constants.RedisConstants.SCORE_INCREMENT_AMOUNT;
-import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKING_KEY;
+import static site.goldenticket.common.redis.constants.RedisConstants.*;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.RESERVATION_NOT_FOUND;
@@ -32,13 +31,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
-import site.goldenticket.domain.product.constants.ProductStatus;
-import site.goldenticket.domain.product.dto.HomeProductResponse;
-import site.goldenticket.domain.product.dto.ProductDetailResponse;
-import site.goldenticket.domain.product.dto.ProductRequest;
-import site.goldenticket.domain.product.dto.ProductResponse;
-import site.goldenticket.domain.product.dto.RegionProductResponse;
-import site.goldenticket.domain.product.dto.SearchProductResponse;
+import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
@@ -61,14 +54,18 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Slice<SearchProductResponse> getProductsBySearch(
             AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
-            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, PrincipalDetails principalDetails
     ) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        boolean isAuthenticated = (userId != null);
+
         CustomSlice<Product> productSlice = productRepository.getProductsBySearch(
-                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable, userId
         );
 
         SearchProductResponse searchProductResponse = SearchProductResponse.fromEntity(
-                areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice.getTotalElements(), productSlice
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice.getTotalElements(), productSlice, isAuthenticated
         );
 
         return new SliceImpl<>(
@@ -80,14 +77,18 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Slice<RegionProductResponse> getProductsByAreaCode(
-            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, PrincipalDetails principalDetails
     ) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        boolean isAuthenticated = (userId != null);
+
         CustomSlice<Product> productSlice = productRepository.getProductsByAreaCode(
-                areaCode, cursorCheckInDate, cursorId, pageable
+                areaCode, cursorCheckInDate, cursorId, pageable, userId
         );
 
         RegionProductResponse regionProductResponse = RegionProductResponse.fromEntity(
-                productSlice.getTotalElements(), productSlice
+                productSlice.getTotalElements(), productSlice, isAuthenticated
         );
 
         return new SliceImpl<>(
@@ -131,6 +132,8 @@ public class ProductService {
 
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
 
+        redisService.addZScore(VIEW_RANKING_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
+
         return ProductResponse.fromEntity(savedProduct);
     }
 
@@ -138,14 +141,20 @@ public class ProductService {
     public ProductDetailResponse getProduct(
             Long productId, PrincipalDetails principalDetails, HttpServletRequest request, HttpServletResponse response
     ) {
-        Product product = getProduct(productId);
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
 
-        String userKey = (principalDetails != null) ? principalDetails.getUsername() : generateOrRetrieveAnonymousKey(request, response);
-        boolean isSeller = principalDetails != null && principalDetails.getUserId().equals(product.getUserId());
+        Product product = (userId != null) ? getProductWithWishProducts(productId, userId) : getProduct(productId);
+
+        boolean isAuthenticated = (userId != null);
+
+        String userKey = isAuthenticated ? principalDetails.getUsername() : generateOrRetrieveAnonymousKey(request, response);
+
+        boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
 
         updateProductViewCount(userKey, productId.toString());
+        updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
 
-        return ProductDetailResponse.fromEntity(product, isSeller);
+        return ProductDetailResponse.fromEntity(product, isSeller, isAuthenticated);
     }
 
     @Transactional
@@ -160,12 +169,12 @@ public class ProductService {
     @Transactional
     public Long deleteProduct(Long productId) {
         Product product = getProduct(productId);
-        
+
         String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, product.getReservationId());
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
-        
+
         productRepository.delete(product);
-        
+
         return productId;
     }
 
@@ -173,6 +182,10 @@ public class ProductService {
     public Product getProduct(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
+    }
+
+    private Product getProductWithWishProducts(Long productId, Long userId) {
+        return productRepository.findProductWithWishProductsByProductIdAndUserId(productId, userId);
     }
 
     public Product save(Product product) {
@@ -242,13 +255,23 @@ public class ProductService {
         }
     }
 
-    public HomeProductResponse getHomeProduct() {
+    private void updateAutocompleteCount(String autocompleteKey, String accommodationName) {
+        Double currentAutocompleteCount = redisService.getZScore(autocompleteKey, accommodationName);
+        Double updateAutocompleteCount = (currentAutocompleteCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
+        redisService.addZScore(autocompleteKey, accommodationName, updateAutocompleteCount);
+    }
+
+    public HomeProductResponse getHomeProduct(PrincipalDetails principalDetails) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        boolean isAuthenticated = (userId != null);
+
         Pageable pageable = PageRequest.of(PaginationConstants.DEFAULT_PAGE, PaginationConstants.MIN_PAGE_SIZE);
 
-        List<ProductResponse> goldenPriceTop5 = getProductResponseList(productRepository.findTop5ByGoldenPriceAsc(pageable));
-        List<ProductResponse> viewCountTop5 = getProductResponseList(productRepository.findTop5ByViewCountDesc(pageable));
-        List<ProductResponse> recentRegisteredTop5 = getProductResponseList(productRepository.findTop5ByIdDesc(pageable));
-        List<ProductResponse> dayUseTop5 = getProductResponseList(productRepository.findTop5DayUseProductsCheckInDateAsc(pageable));
+        List<WishedProductResponse> goldenPriceTop5 = getProductResponseList(productRepository.findTop5ByGoldenPriceAsc(userId, pageable), isAuthenticated);
+        List<WishedProductResponse> viewCountTop5 = getProductResponseList(productRepository.findTop5ByViewCountDesc(userId, pageable), isAuthenticated);
+        List<WishedProductResponse> recentRegisteredTop5 = getProductResponseList(productRepository.findTop5ByIdDesc(userId, pageable), isAuthenticated);
+        List<WishedProductResponse> dayUseTop5 = getProductResponseList(productRepository.findTop5DayUseProductsCheckInDateAsc(userId, pageable), isAuthenticated);
 
         return new HomeProductResponse(
                 goldenPriceTop5,
@@ -258,9 +281,10 @@ public class ProductService {
         );
     }
 
-    private List<ProductResponse> getProductResponseList(List<Product> productList) {
+    private List<WishedProductResponse> getProductResponseList(List<Product> productList, boolean isAuthenticated) {
         return productList.stream()
-                .map(ProductResponse::fromEntity)
+                .map(
+                        product -> WishedProductResponse.fromEntity(product, isAuthenticated))
                 .collect(Collectors.toList());
     }
 

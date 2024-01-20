@@ -30,9 +30,13 @@ public class ProductSchedulerService {
             String productKey = String.valueOf(product.getId());
 
             Double currentViewCount = redisService.getZScore(VIEW_RANKING_KEY, productKey);
-            product.setViewCount(Integer.parseInt(String.valueOf(currentViewCount)));
 
-            log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", product.getId(), currentViewCount);
+            int intValue = (int) Math.floor(currentViewCount);
+            product.setViewCount(intValue);
+
+            System.out.println(product.getViewCount());
+
+            log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", product.getId(), intValue);
         }
 
         productRepository.saveAll(productList);

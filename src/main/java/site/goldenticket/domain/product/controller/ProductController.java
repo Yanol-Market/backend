@@ -58,7 +58,7 @@ public class ProductController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         CompletableFuture<Slice<SearchProductResponse>> searchProductFuture = CompletableFuture.supplyAsync(() ->
-                productService.getProductsBySearch(areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable)
+                productService.getProductsBySearch(areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable, principalDetails)
         );
 
         CompletableFuture<Void> searchHistoryFuture = CompletableFuture.runAsync(() ->
@@ -83,10 +83,11 @@ public class ProductController {
                     size = PaginationConstants.DEFAULT_PAGE_SIZE,
                     sort = PaginationConstants.DEFAULT_SORT_FIELD,
                     direction = Sort.Direction.ASC
-            ) Pageable pageable
+            ) Pageable pageable,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         CompletableFuture<Slice<RegionProductResponse>> regionProductFuture = CompletableFuture.supplyAsync(() ->
-                productService.getProductsByAreaCode(areaCode, cursorCheckInDate, cursorId, pageable)
+                productService.getProductsByAreaCode(areaCode, cursorCheckInDate, cursorId, pageable, principalDetails)
         );
 
         CompletableFuture<Void> updateSearchAreaRankingFuture = CompletableFuture.runAsync(() ->

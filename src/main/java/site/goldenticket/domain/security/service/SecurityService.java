@@ -13,6 +13,7 @@ import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.security.dto.ReissueRequest;
+import site.goldenticket.domain.security.dto.YanoljaLoginResponse;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
@@ -20,6 +21,7 @@ import site.goldenticket.domain.user.repository.UserRepository;
 import java.util.UUID;
 
 import static site.goldenticket.common.response.ErrorCode.LOGIN_FAIL;
+import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -43,7 +45,14 @@ public class SecurityService implements UserDetailsService {
         return tokenService.reissueToken(reissueRequest.refreshToken());
     }
 
-    public YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
+    public YanoljaLoginResponse yanoljaLogin(LoginRequest loginRequest) {
+        YanoljaUserResponse yanoljaUser = fetchYanoljaUser(loginRequest);
+        log.info("Yanolja Login Info = {}", yanoljaUser);
+
+        return createYanoljaLoginResponse(yanoljaUser);
+    }
+
+    private YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
         return restTemplateService.post(
                 "http://localhost:8080/dummy/yauser",
                 loginRequest,
@@ -51,13 +60,23 @@ public class SecurityService implements UserDetailsService {
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
     }
 
-    public AuthenticationToken generateToken(Long yanoljaId) {
-        User user = userRepository.findByYanoljaId(yanoljaId)
-                .orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    private YanoljaLoginResponse createYanoljaLoginResponse(YanoljaUserResponse yanoljaUser) {
+        try {
+            User user = findByYanoljaId(yanoljaUser.id());
+            AuthenticationToken token = generateToken(user.getEmail());
+            return YanoljaLoginResponse.loginUser(yanoljaUser, token);
+        } catch (CustomException e) {
+            return YanoljaLoginResponse.firstLoginUser(yanoljaUser);
+        }
+    }
 
-        String email = user.getEmail();
+    private User findByYanoljaId(Long yanoljaId) {
+        return userRepository.findByYanoljaId(yanoljaId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+    }
+
+    private AuthenticationToken generateToken(String email) {
         log.info("Yanolja Login Email = {}", email);
-
         String randomToken = UUID.randomUUID().toString();
         return tokenService.generatedToken(randomToken, email);
     }

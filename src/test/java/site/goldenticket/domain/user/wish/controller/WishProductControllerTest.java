@@ -110,7 +110,7 @@ class WishProductControllerTest extends ApiTest {
 
     private WishProduct createWishProduct(Product product) {
         return WishProduct.builder()
-                .userId(userId)
+                .userId(user.getId())
                 .product(product)
                 .build();
     }
