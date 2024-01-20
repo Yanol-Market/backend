@@ -133,7 +133,7 @@ public class ProductService {
 
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
 
-        redisService.addZScore(VIEW_RANKING_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
+        redisService.addZScore(AUTOCOMPLETE_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
 
         return ProductResponse.fromEntity(savedProduct);
     }
