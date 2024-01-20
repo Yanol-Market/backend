@@ -22,6 +22,8 @@ public record ProductProgressHistoryResponse(
 		LocalTime checkOutTime,
 		LocalDate checkInDate,
 		LocalDate checkOutDate,
+		int orginPrice,
+		int yanoljaPrice,
 		int goldenPrice,
 		ProgressProductStatus progressProductStatus,
 		List<ProgressChatResponse> progressChatResponseList
@@ -47,6 +49,8 @@ public record ProductProgressHistoryResponse(
 				product.getCheckOutTime(),
 				product.getCheckInDate(),
 				product.getCheckOutDate(),
+				product.getOriginPrice(),
+				product.getYanoljaPrice(),
 				product.getGoldenPrice(),
 				progressProductStatus,
 				progressChatResponseList
