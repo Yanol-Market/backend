@@ -33,8 +33,8 @@ public record WishedProductResponse(
         long nights = DateUtil.daysBetween(checkInDate, checkOutDate);
         long days = DateUtil.daysFromNow(checkInDate);
 
-        Long wishId = isAuthenticated ? product.getWishProducts().get(0).getId() : null;
         boolean isWished = isAuthenticated ? !product.getWishProducts().isEmpty() : false;
+        Long wishId = isWished ? product.getWishProducts().get(0).getId() : null;
 
         return new WishedProductResponse(
                 product.getId(),
