@@ -14,7 +14,7 @@ public record UserResponse(
         Long yanoljaId
 ) {
 
-    public static UserResponse of(User user) {
+    public static UserResponse from(User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())

@@ -9,8 +9,11 @@ import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
 import site.goldenticket.common.entiy.BaseTimeEntity;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.domain.user.wish.entity.WishRegion;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
@@ -26,7 +29,7 @@ import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "users")
 @SQLRestriction("deleted = false")
-@ToString(exclude = {"password", "agreement"})
+@ToString(exclude = {"password", "agreement", "wishRegions"})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -53,6 +56,12 @@ public class User extends BaseTimeEntity {
             cascade = ALL, orphanRemoval = true
     )
     private Agreement agreement;
+
+    @OneToMany(
+            mappedBy = "user", fetch = LAZY,
+            cascade = ALL, orphanRemoval = true
+    )
+    private final Set<WishRegion> wishRegions = new HashSet<>();
 
     @Builder
     private User(
@@ -96,5 +105,14 @@ public class User extends BaseTimeEntity {
     public void removeAccount() {
         this.bankName = null;
         this.accountNumber = null;
+    }
+
+    public void registerWishRegion(WishRegion wishRegion) {
+        wishRegions.add(wishRegion);
+        wishRegion.registerUser(this);
+    }
+
+    public boolean isValidRegionSize(int maxSize) {
+        return wishRegions.size() > maxSize;
     }
 }
