@@ -21,7 +21,6 @@ import site.goldenticket.domain.user.repository.UserRepository;
 import java.util.UUID;
 
 import static site.goldenticket.common.response.ErrorCode.LOGIN_FAIL;
-import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -61,18 +60,13 @@ public class SecurityService implements UserDetailsService {
     }
 
     private YanoljaLoginResponse createYanoljaLoginResponse(YanoljaUserResponse yanoljaUser) {
-        try {
-            User user = findByYanoljaId(yanoljaUser.id());
-            AuthenticationToken token = generateToken(user.getEmail());
-            return YanoljaLoginResponse.loginUser(yanoljaUser, token);
-        } catch (CustomException e) {
-            return YanoljaLoginResponse.firstLoginUser(yanoljaUser);
-        }
-    }
-
-    private User findByYanoljaId(Long yanoljaId) {
-        return userRepository.findByYanoljaId(yanoljaId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        boolean isFirst = userRepository.existsByYanoljaId(yanoljaUser.id());
+        AuthenticationToken token = generateToken(yanoljaUser.email());
+        return YanoljaLoginResponse.builder()
+                .isFirst(isFirst)
+                .userInfo(yanoljaUser)
+                .token(token)
+                .build();
     }
 
     private AuthenticationToken generateToken(String email) {
