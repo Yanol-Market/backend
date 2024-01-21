@@ -15,6 +15,7 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 import site.goldenticket.domain.user.wish.dto.WishRegionRegisterRequest;
 import site.goldenticket.domain.user.wish.entity.WishRegion;
+import site.goldenticket.domain.user.repository.WishRegionRepository;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplateService restTemplateService;
+    private final WishRegionRepository wishRegionRepository;
 
     public boolean isExistEmail(String email) {
         log.info("Duplicated Check Email = {}", email);
@@ -82,6 +84,10 @@ public class UserService {
         if (user.isValidRegionSize(MAXIMUM_REGION_SIZE)) {
             throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
         }
+    }
+
+    public List<WishRegion> findWishRegion(Long userId) {
+        return wishRegionRepository.findByUserId(userId);
     }
 
     @Transactional
