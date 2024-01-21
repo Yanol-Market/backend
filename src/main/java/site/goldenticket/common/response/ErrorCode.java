@@ -17,6 +17,7 @@ public enum ErrorCode {
 
     //Payment,
     PRODUCT_NOT_ON_SALE(NOT_FOUND, "현재 판매중이지 않은 상품입니다"),
+    PRODUCT_CANNOT_BE_PURCHASED(BAD_REQUEST, "판매자는 자신의 상품을 구매할 수 없습니다"),
     IAMPORT_ERROR(INTERNAL_SERVER_ERROR, "PG사 연동 오류입니다"),
     INVALID_PAYMENT_AMOUNT_ERROR(CONFLICT, "주문금액과 실 결제금액이 다릅니다."),
     ORDER_NOT_FOUND(BAD_REQUEST, "주문 정보를 찾을 수 없습니다"),
