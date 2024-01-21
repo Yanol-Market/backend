@@ -66,7 +66,7 @@ public class ProductOrderService {
                 Long orderUserId = order.getUserId();
                 User orderUser = userService.findById(orderUserId);
 
-                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(productId, orderUserId);
+                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(orderUserId, productId);
                 progressChatResponseList.add(
                         new ProgressChatResponse(
                                 chatRoom.getId(),
@@ -102,7 +102,7 @@ public class ProductOrderService {
                     throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
                 }
 
-                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(productId, user.getId());
+                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(user.getId(), productId);
                 progressChatResponseList.add(
                         new ProgressChatResponse(
                                 chatRoom.getId(),
