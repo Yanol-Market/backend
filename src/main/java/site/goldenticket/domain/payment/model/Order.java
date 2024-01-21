@@ -15,7 +15,6 @@ import site.goldenticket.domain.nego.status.NegotiationStatus;
 public class Order extends BaseTimeEntity {
 
     @Id
-    @Column(name = "order_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long productId;
