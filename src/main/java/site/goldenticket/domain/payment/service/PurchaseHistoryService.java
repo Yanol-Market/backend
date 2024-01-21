@@ -9,8 +9,10 @@ import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.service.NegoService;
+import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.dto.response.PurchaseCompletedDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PurchaseCompletedResponse;
+import site.goldenticket.domain.payment.dto.response.PurchaseProgressResponse;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.model.Payment;
 import site.goldenticket.domain.payment.repository.OrderRepository;
@@ -25,7 +27,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,25 +39,57 @@ public class PurchaseHistoryService {
     private final ChatService chatService;
     private final ProductService productService;
 
-    public String getPurchaseProgressHistory(PrincipalDetails principalDetails) {
+    public List<PurchaseProgressResponse> getPurchaseProgressHistory(PrincipalDetails principalDetails) {
 
         Long userId = principalDetails.getUserId();
-        //결제 햇는지 확인
-        List<Order> orders = orderRepository.findByUserId(userId);
+
+        List<Nego> userNego = negoService.getUserNego(userId);
+
+        List<Order> orders = orderRepository.findByUserIdAndStatus(userId, OrderStatus.WAITING_TRANSFER);//양도대기중
+
+        List<PurchaseProgressResponse> purchaseProgressResponses = new ArrayList<>();
+
+        if (orders.isEmpty() && userNego.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         if (!orders.isEmpty()) {
             for (Order order : orders) {
-                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, order.getProductId());
+                Product product = productService.getProduct(order.getProductId());
+                User user = userService.getUser(product.getUserId());
+                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
+                LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
+                PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "양도 대기중", user, chatRoom.getId(), order.getPrice(), lastUpdatedAt);
+                purchaseProgressResponses.add(response);
             }
         }
 
-        //네고 중인지 확인
-        Optional<Nego> nego = negoService.getUserNego(userId);
-
+        if (!userNego.isEmpty()) {
+            for (Nego nego : userNego) {
+                if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
+                    Product product = productService.getProduct(nego.getProductId());
+                    User user = userService.getUser(product.getUserId());
+                    ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
+                    LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
+                    PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "네고중", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
+                    purchaseProgressResponses.add(response);
+                }
+                if (nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
+                    Product product = productService.getProduct(nego.getProductId());
+                    User user = userService.getUser(product.getUserId());
+                    ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
+                    LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
+                    PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "결제 대기", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
+                    purchaseProgressResponses.add(response);
+                }
+            }
+        }
+        return purchaseProgressResponses;
     }
 
     public List<PurchaseCompletedResponse> getPurchaseCompletedHistory(PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
-        List<Order> orders = orderRepository.findByUserIdAndStatus(userId, OrderStatus.COMPLETED_TRANSFER);
+        List<Order> orders = orderRepository.findByUserIdAndStatus(userId, OrderStatus.COMPLETED_TRANSFER);//양도완료
 
         if (orders.isEmpty()) {
             return Collections.emptyList();
