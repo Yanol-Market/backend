@@ -7,35 +7,36 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.domain.user.wish.service.WishService;
 import site.goldenticket.domain.user.wish.dto.WishRegionRegisterRequest;
-import site.goldenticket.domain.user.wish.dto.WishRegionListResponse;
-import site.goldenticket.domain.user.wish.dto.WishRegionResponse;
+import site.goldenticket.domain.user.wish.dto.WishRegionsResponse;
+import site.goldenticket.domain.user.wish.entity.WishRegion;
+import site.goldenticket.domain.user.wish.service.WishRegionService;
 
-//@RestController
+import java.util.List;
+
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/regions")
-public class WishController {
+public class WishRegionController {
 
-    private final WishService wishService;
+    private final WishRegionService wishRegionService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<WishRegionResponse>> registerWishRegion(
+    public ResponseEntity<CommonResponse<Void>> registerWishRegion(
             @Valid @RequestBody WishRegionRegisterRequest wishRegionRegisterRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         Long userId = principalDetails.getUserId();
-        WishRegionResponse response = wishService.createWishRegion(userId, wishRegionRegisterRequest);
-        return ResponseEntity.ok(CommonResponse.ok(response));
+        wishRegionService.registerWishRegion(userId, wishRegionRegisterRequest);
+        return ResponseEntity.ok(CommonResponse.ok());
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<WishRegionListResponse>> getWishRegionList(
+    public ResponseEntity<CommonResponse<WishRegionsResponse>> getWishRegion(
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         Long userId = principalDetails.getUserId();
-        WishRegionListResponse response = wishService.getWishRegionList(userId);
-        return ResponseEntity.ok(CommonResponse.ok(response));
+        List<WishRegion> response = wishRegionService.findWishRegion(userId);
+        return ResponseEntity.ok(CommonResponse.ok(WishRegionsResponse.from(response)));
     }
-
 }

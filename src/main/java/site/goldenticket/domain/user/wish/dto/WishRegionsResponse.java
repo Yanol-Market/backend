@@ -1,7 +1,6 @@
-package site.goldenticket.domain.user.dto;
+package site.goldenticket.domain.user.wish.dto;
 
 import lombok.Builder;
-import org.jetbrains.annotations.NotNull;
 import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 import java.util.List;
