@@ -1,4 +1,4 @@
-package site.goldenticket.domain.product.util;
+package site.goldenticket.common.utils;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

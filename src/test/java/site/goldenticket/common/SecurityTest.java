@@ -4,15 +4,10 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import site.goldenticket.common.config.ApiTest;
-import site.goldenticket.domain.user.entity.User;
-import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.util.Map;
 
@@ -20,22 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static site.goldenticket.common.response.Status.FAIL;
-import static site.goldenticket.common.utils.UserUtils.*;
+import static site.goldenticket.common.utils.UserUtils.EMAIL;
+import static site.goldenticket.common.utils.UserUtils.PASSWORD;
 
 @DisplayName("Security 검증")
 public class SecurityTest extends ApiTest {
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        User user = createUser(passwordEncoder.encode(PASSWORD));
-        userRepository.save(user);
-    }
 
     @Test
     @DisplayName("로그인 성공")

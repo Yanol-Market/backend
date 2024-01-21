@@ -52,37 +52,57 @@ public class Nego {
         this.updatedAt = updatedAt;
     }
 
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
     public void setExpirationTime(LocalDateTime expirationTime) {
         this.expirationTime = expirationTime;
     }
+
     public void setConsent(Boolean consent) {
         this.consent = consent;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
     public Long getProductId() {
         return (product != null) ? product.getId() : null;
     }
+
     public Integer getCount() {
         return (count != null) ? count : 0;
-    }
-    public void setProduct(Product product) {
-        this.product = product;
     }
 
     public void setUser(User user) {
         this.user = user;
     }
+
+    public void updatePrice(Integer price) {
+        this.price = price;
+    }
+
+
+    public void updateNego(Integer count, Integer price, NegotiationStatus status, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean consent) {
+        this.count = count;
+        this.price = price;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.consent = consent;
+    }
+
+    public void payNego(NegotiationStatus status, Boolean consent, LocalDateTime updatedAt) {
+        this.status = status;
+        this.consent = consent;
+        this.updatedAt = updatedAt;
+    }
+
+    public void confirmNego(LocalDateTime updatedAt, NegotiationStatus status, LocalDateTime expirationTime, Boolean consent){
+        this.updatedAt = updatedAt;
+        this.status = status;
+        this.expirationTime = expirationTime;
+        this.consent = consent;
+    }
+
 
     @Builder
     public Nego(Long id, Integer price, Integer count, Long userId, Long productId,

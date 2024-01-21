@@ -1,7 +1,20 @@
 package site.goldenticket.domain.product.service;
 
+import static site.goldenticket.common.redis.constants.RedisConstants.*;
+import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
+import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.RESERVATION_NOT_FOUND;
+import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
+
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -14,28 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.constants.PaginationConstants;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.*;
-import site.goldenticket.domain.product.repository.CustomSlice;
-import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
 import site.goldenticket.dummy.reservation.dto.ReservationResponse;
 import site.goldenticket.dummy.reservation.dto.UpdateReservationStatusRequest;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static site.goldenticket.common.redis.constants.RedisConstants.*;
-import static site.goldenticket.common.response.ErrorCode.*;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
-import static site.goldenticket.dummy.reservation.constants.ReservationStatus.*;
 
 @Slf4j
 @Service
@@ -51,14 +55,18 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Slice<SearchProductResponse> getProductsBySearch(
             AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
-            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, PrincipalDetails principalDetails
     ) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        boolean isAuthenticated = (userId != null);
+
         CustomSlice<Product> productSlice = productRepository.getProductsBySearch(
-                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable, userId
         );
 
         SearchProductResponse searchProductResponse = SearchProductResponse.fromEntity(
-                areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice.getTotalElements(), productSlice
+                areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice.getTotalElements(), productSlice, isAuthenticated
         );
 
         return new SliceImpl<>(
@@ -70,14 +78,18 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Slice<RegionProductResponse> getProductsByAreaCode(
-            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, PrincipalDetails principalDetails
     ) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        boolean isAuthenticated = (userId != null);
+
         CustomSlice<Product> productSlice = productRepository.getProductsByAreaCode(
-                areaCode, cursorCheckInDate, cursorId, pageable
+                areaCode, cursorCheckInDate, cursorId, pageable, userId
         );
 
         RegionProductResponse regionProductResponse = RegionProductResponse.fromEntity(
-                productSlice.getTotalElements(), productSlice
+                productSlice.getTotalElements(), productSlice, isAuthenticated
         );
 
         return new SliceImpl<>(
@@ -121,6 +133,8 @@ public class ProductService {
 
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
 
+        redisService.addZScore(AUTOCOMPLETE_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
+
         return ProductResponse.fromEntity(savedProduct);
     }
 
@@ -128,14 +142,20 @@ public class ProductService {
     public ProductDetailResponse getProduct(
             Long productId, PrincipalDetails principalDetails, HttpServletRequest request, HttpServletResponse response
     ) {
-        Product product = getProduct(productId);
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
 
-        String userKey = (principalDetails != null) ? principalDetails.getUsername() : generateOrRetrieveAnonymousKey(request, response);
-        boolean isSeller = principalDetails != null && principalDetails.getUserId().equals(product.getUserId());
+        Product product = (userId != null) ? getProductWithWishProducts(productId, userId) : getProduct(productId);
+
+        boolean isAuthenticated = (userId != null);
+
+        String userKey = isAuthenticated ? principalDetails.getUsername() : generateOrRetrieveAnonymousKey(request, response);
+
+        boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
 
         updateProductViewCount(userKey, productId.toString());
+        updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
 
-        return ProductDetailResponse.fromEntity(product, isSeller);
+        return ProductDetailResponse.fromEntity(product, isSeller, isAuthenticated);
     }
 
     @Transactional
@@ -148,15 +168,15 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse deleteProduct(Long productId) {
+    public Long deleteProduct(Long productId) {
         Product product = getProduct(productId);
-        productRepository.delete(product);
 
         String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, product.getReservationId());
-
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
 
-        return ProductResponse.fromEntity(product);
+        productRepository.delete(product);
+
+        return productId;
     }
 
     // 4. 기타 유틸 메서드
@@ -165,13 +185,17 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
+    private Product getProductWithWishProducts(Long productId, Long userId) {
+        return productRepository.findProductWithWishProductsByProductIdAndUserId(productId, userId);
+    }
+
     public Product save(Product product) {
         return productRepository.save(product);
     }
 
     private String buildReservationUrl(String endpoint, Long pathVariable) {
         return UriComponentsBuilder
-                .fromUriString(DISTRIBUTE_BAE_URL)
+                .fromUriString(DISTRIBUTE_BASE_URL)
                 .path(endpoint)
                 .buildAndExpand(pathVariable)
                 .encode(StandardCharsets.UTF_8)
@@ -179,18 +203,32 @@ public class ProductService {
     }
 
     private String generateOrRetrieveAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
-        String anonymousKey = Arrays.stream(request.getCookies())
-                .filter(
-                        cookie -> "AnonymousKey".equals(cookie.getName())
-                )
-                .map(
-                        cookie -> cookie.getValue()
-                )
-                .findFirst()
-                .orElse(null);
+        Cookie[] cookies = request.getCookies();
 
-        if (anonymousKey == null) {
-            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", UUID.randomUUID().toString())
+        if (cookies != null) {
+            String anonymousKey = Arrays.stream(cookies)
+                    .filter(cookie -> "AnonymousKey".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+
+            if (anonymousKey == null) {
+                anonymousKey = UUID.randomUUID().toString();
+                ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
+                        .domain(".golden-ticket.site")
+                        .httpOnly(false)
+                        .secure(true)
+                        .path("/")
+                        .sameSite("None")
+                        .build();
+
+                response.addHeader("Set-Cookie", cookie.toString());
+            }
+
+            return anonymousKey;
+        } else {
+            String anonymousKey = UUID.randomUUID().toString();
+            ResponseCookie cookie = ResponseCookie.from("AnonymousKey", anonymousKey)
                     .domain(".golden-ticket.site")
                     .httpOnly(false)
                     .secure(true)
@@ -199,9 +237,9 @@ public class ProductService {
                     .build();
 
             response.addHeader("Set-Cookie", cookie.toString());
-        }
 
-        return anonymousKey;
+            return anonymousKey;
+        }
     }
 
     private void updateProductViewCount(String userKey, String productKey) {
@@ -218,13 +256,23 @@ public class ProductService {
         }
     }
 
-    public HomeProductResponse getHomeProduct() {
+    private void updateAutocompleteCount(String autocompleteKey, String accommodationName) {
+        Double currentAutocompleteCount = redisService.getZScore(autocompleteKey, accommodationName);
+        Double updateAutocompleteCount = (currentAutocompleteCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
+        redisService.addZScore(autocompleteKey, accommodationName, updateAutocompleteCount);
+    }
+
+    public HomeProductResponse getHomeProduct(PrincipalDetails principalDetails) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        boolean isAuthenticated = (userId != null);
+
         Pageable pageable = PageRequest.of(PaginationConstants.DEFAULT_PAGE, PaginationConstants.MIN_PAGE_SIZE);
 
-        List<ProductResponse> goldenPriceTop5 = getProductResponseList(productRepository.findTop5ByGoldenPriceAsc(pageable));
-        List<ProductResponse> viewCountTop5 = getProductResponseList(productRepository.findTop5ByViewCountDesc(pageable));
-        List<ProductResponse> recentRegisteredTop5 = getProductResponseList(productRepository.findTop5ByIdDesc(pageable));
-        List<ProductResponse> dayUseTop5 = getProductResponseList(productRepository.findTop5DayUseProductsCheckInDateAsc(pageable));
+        List<WishedProductResponse> goldenPriceTop5 = getProductResponseList(productRepository.findTop5ByGoldenPriceAsc(userId, pageable), isAuthenticated);
+        List<WishedProductResponse> viewCountTop5 = getProductResponseList(productRepository.findTop5ByViewCountDesc(userId, pageable), isAuthenticated);
+        List<WishedProductResponse> recentRegisteredTop5 = getProductResponseList(productRepository.findTop5ByIdDesc(userId, pageable), isAuthenticated);
+        List<WishedProductResponse> dayUseTop5 = getProductResponseList(productRepository.findTop5DayUseProductsCheckInDateAsc(userId, pageable), isAuthenticated);
 
         return new HomeProductResponse(
                 goldenPriceTop5,
@@ -234,9 +282,27 @@ public class ProductService {
         );
     }
 
-    private List<ProductResponse> getProductResponseList(List<Product> productList) {
+    private List<WishedProductResponse> getProductResponseList(List<Product> productList, boolean isAuthenticated) {
         return productList.stream()
-                .map(ProductResponse::fromEntity)
+                .map(
+                        product -> WishedProductResponse.fromEntity(product, isAuthenticated))
                 .collect(Collectors.toList());
+    }
+
+    public List<Product> findProductListByUserId(Long userId) {
+        return productRepository.findAllByUserId(userId);
+    }
+
+    @Transactional
+    public void updateProductForNego(Product product) {
+        productRepository.save(product);
+    }
+
+    public List<Product> findByProductStatusInAndUserId(List<ProductStatus> productStatusList, Long userId) {
+        return productRepository.findByProductStatusInAndUserId(productStatusList, userId);
+    }
+
+    public Product findByProductStatusAndProductId(ProductStatus productStatus, Long productId) {
+        return productRepository.findByProductStatusAndId(productStatus, productId);
     }
 }

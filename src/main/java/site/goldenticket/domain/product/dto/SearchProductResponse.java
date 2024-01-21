@@ -16,14 +16,17 @@ public record SearchProductResponse(
         LocalDate checkOutDate,
         String priceRange,
         long totalCount,
-        List<ProductResponse> productResponseList
+        List<WishedProductResponse> wishedProductResponseList
 ) {
 
     public static SearchProductResponse fromEntity(
-            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange, long totalCount, Slice<Product> productSlice
-    ) {
-        List<ProductResponse> productResponseList = productSlice.getContent().stream()
-                .map(ProductResponse::fromEntity)
+            AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate,
+            PriceRange priceRange, long totalCount, Slice<Product> productSlice, boolean isAuthenticated) {
+
+        List<WishedProductResponse> wishedProductResponseList = productSlice.getContent().stream()
+                .map(
+                        product -> WishedProductResponse.fromEntity(product, isAuthenticated)
+                )
                 .collect(Collectors.toList());
 
         return new SearchProductResponse(
@@ -33,7 +36,7 @@ public record SearchProductResponse(
                 checkOutDate,
                 priceRange.getLabel(),
                 totalCount,
-                productResponseList
+                wishedProductResponseList
         );
     }
 }

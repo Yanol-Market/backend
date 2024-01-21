@@ -34,7 +34,7 @@ public class SearchService {
 
     @Transactional(readOnly = true)
     public List<String> getAutocompleteKeywords(String searchPrefix) {
-        Set<String> autocompleteSet = redisService.getZRangeByLex(VIEW_RANKING_KEY, searchPrefix, MAX_AUTOCOMPLETE_SIZE);
+        Set<String> autocompleteSet = redisService.getZRangeByLex(AUTOCOMPLETE_KEY, searchPrefix, MAX_AUTOCOMPLETE_SIZE);
 
         return new ArrayList<>(autocompleteSet);
     }

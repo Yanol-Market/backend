@@ -7,4 +7,8 @@ public class DiscountCalculatorUtil {
         double discountPercentage = (double) (originalPrice - discountedPrice) / originalPrice * 100;
         return (int) discountPercentage;
     }
+
+    public static int calculateFee(int goldenPrice) {
+        return (int) Math.round(goldenPrice * 0.05);
+    }
 }
