@@ -62,6 +62,10 @@ public class PaymentService {
             }
         }
 
+        if (product.getUserId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.PRODUCT_CANNOT_BE_PURCHASED);
+        }
+
         Order savedOrder = orderRepository.save(order);
 
         return PaymentDetailResponse.of(savedOrder.getId(), user, product, price);
