@@ -7,7 +7,7 @@ import site.goldenticket.domain.user.wish.entity.WishRegion;
 import java.util.List;
 
 public record WishRegionRegisterRequest(
-    @NotEmpty(message = "지역코드를 필수로 입력하셔야 합니다.")
+    @NotEmpty(message = "지역코드는 필수로 입력하셔야 합니다.")
     List<AreaCode> regions
 ) {
 
