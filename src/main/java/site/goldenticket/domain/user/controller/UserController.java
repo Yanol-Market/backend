@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.domain.user.dto.AccountResponse;
-import site.goldenticket.domain.user.dto.JoinRequest;
-import site.goldenticket.domain.user.dto.RegisterAccountRequest;
-import site.goldenticket.domain.user.dto.UserResponse;
+import site.goldenticket.domain.user.dto.*;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
 
@@ -48,6 +45,16 @@ public class UserController {
     ) {
         User user = userService.findById(principalDetails.getUserId());
         return ResponseEntity.ok(CommonResponse.ok(UserResponse.from(user)));
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<CommonResponse<Void>> changePassword(
+            @RequestBody @Validated ChangePasswordRequest changePasswordRequest,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long userId = principalDetails.getUserId();
+        userService.updatePassword(userId, changePasswordRequest);
+        return ResponseEntity.ok(CommonResponse.ok());
     }
 
     @GetMapping("/account")

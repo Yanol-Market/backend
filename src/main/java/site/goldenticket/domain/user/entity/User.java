@@ -85,6 +85,10 @@ public class User extends BaseTimeEntity {
         this.agreement = agreement;
     }
 
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
     public void registerYanoljaId(Long yanoljaId) {
         if (!Objects.isNull(this.yanoljaId)) {
             throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
