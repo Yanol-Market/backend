@@ -9,10 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import site.goldenticket.common.config.ApiTest;
 import site.goldenticket.domain.user.dto.AgreementRequest;
+import site.goldenticket.domain.user.dto.ChangePasswordRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RegisterAccountRequest;
+import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
-import site.goldenticket.domain.user.wish.repository.WishRegionRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -85,6 +86,32 @@ class UserControllerTest extends ApiTest {
                 () -> assertThat(jsonPath.getString("data.phoneNumber")).isEqualTo(PHONE_NUMBER),
                 () -> assertThat(jsonPath.getLong("data.id")).isEqualTo(YANOLJA_ID)
         );
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 검증")
+    void changePassword() {
+        // given
+        ChangePasswordRequest request = new ChangePasswordRequest(PASSWORD, CHANGE_PASSWORD);
+
+        String url = "/users/password";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .patch(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(OK.value());
+
+        User findUser = userRepository.findById(this.user.getId()).get();
+        assertThat(findUser.getPassword()).isEqualTo(CHANGE_PASSWORD);
     }
 
     @Test
