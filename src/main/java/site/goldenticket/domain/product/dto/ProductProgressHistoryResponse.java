@@ -22,11 +22,11 @@ public record ProductProgressHistoryResponse(
 		LocalTime checkOutTime,
 		LocalDate checkInDate,
 		LocalDate checkOutDate,
-		int orginPrice,
+		int originPrice,
 		int yanoljaPrice,
 		int goldenPrice,
-		ProgressProductStatus progressProductStatus,
-		List<ProgressChatResponse> progressChatResponseList
+		ProgressProductStatus status,
+		List<ProgressChatResponse> chats
 ) {
 
 	public static ProductProgressHistoryResponse fromEntity(
