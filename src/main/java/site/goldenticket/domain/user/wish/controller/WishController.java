@@ -4,19 +4,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.wish.service.WishService;
-import site.goldenticket.domain.user.wish.dto.WishRegionCreateRequest;
+import site.goldenticket.domain.user.wish.dto.WishRegionRegisterRequest;
 import site.goldenticket.domain.user.wish.dto.WishRegionListResponse;
 import site.goldenticket.domain.user.wish.dto.WishRegionResponse;
 
-@RestController
+//@RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/regions")
 public class WishController {
@@ -25,11 +21,11 @@ public class WishController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<WishRegionResponse>> registerWishRegion(
-            @Valid @RequestBody WishRegionCreateRequest wishRegionCreateRequest,
+            @Valid @RequestBody WishRegionRegisterRequest wishRegionRegisterRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         Long userId = principalDetails.getUserId();
-        WishRegionResponse response = wishService.createWishRegion(userId, wishRegionCreateRequest);
+        WishRegionResponse response = wishService.createWishRegion(userId, wishRegionRegisterRequest);
         return ResponseEntity.ok(CommonResponse.ok(response));
     }
 
