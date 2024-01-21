@@ -58,10 +58,10 @@ public class User extends BaseTimeEntity {
     private Agreement agreement;
 
     @OneToMany(
-            mappedBy = "user", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL, orphanRemoval = true
+            mappedBy = "user", fetch = LAZY,
+            cascade = ALL, orphanRemoval = true
     )
-    private Set<WishRegion> wishRegions = new HashSet<>();
+    private final Set<WishRegion> wishRegions = new HashSet<>();
 
     @Builder
     private User(
@@ -105,5 +105,10 @@ public class User extends BaseTimeEntity {
     public void removeAccount() {
         this.bankName = null;
         this.accountNumber = null;
+    }
+
+    public void registerWishRegion(WishRegion wishRegion) {
+        wishRegions.add(wishRegion);
+        wishRegion.registerUser(this);
     }
 }

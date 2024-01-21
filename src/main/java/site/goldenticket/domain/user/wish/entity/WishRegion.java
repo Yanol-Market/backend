@@ -1,10 +1,7 @@
 package site.goldenticket.domain.user.wish.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import site.goldenticket.common.entiy.BaseTimeEntity;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.user.entity.User;
@@ -35,11 +32,19 @@ public class WishRegion extends BaseTimeEntity {
     }
 
     public void registerUser(User user) {
-        if (!Objects.isNull(this.user)) {
-            this.user.getWishRegions().remove(this);
-        }
-
         this.user = user;
-        user.getWishRegions().add(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WishRegion that = (WishRegion) o;
+        return region == that.region;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(region);
     }
 }

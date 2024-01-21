@@ -13,6 +13,10 @@ import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
+import site.goldenticket.domain.user.wish.dto.WishRegionRegisterRequest;
+import site.goldenticket.domain.user.wish.entity.WishRegion;
+
+import java.util.List;
 
 import static site.goldenticket.common.response.ErrorCode.*;
 
@@ -66,6 +70,14 @@ public class UserService {
     }
 
     @Transactional
+    public void registerWishRegion(Long userId, WishRegionRegisterRequest wishRegionRegisterRequest) {
+        log.info("User ID [{}] Register Regions = {}", userId, wishRegionRegisterRequest.regions());
+        User user = findByIdWithWishRegion(userId);
+        List<WishRegion> wishRegions = wishRegionRegisterRequest.toEntity();
+        wishRegions.forEach(user::registerWishRegion);
+    }
+
+    @Transactional
     public Long yanoljaLogin(LoginRequest loginRequest, Long userId) {
         YanoljaUserResponse yanoljaUser = getYanoljaUser(loginRequest);
         User user = findById(userId);
@@ -81,6 +93,11 @@ public class UserService {
         if (isExistNickname(joinRequest.nickname())) {
             throw new CustomException(ALREADY_EXIST_NICKNAME);
         }
+    }
+
+    private User findByIdWithWishRegion(Long userId) {
+        return userRepository.findByIdFetchWishRegion(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     private YanoljaUserResponse getYanoljaUser(LoginRequest loginRequest) {
