@@ -31,6 +31,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.redis.service.RedisService;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
+import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.CustomSlice;
@@ -132,7 +133,7 @@ public class ProductService {
 
         restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
 
-        redisService.addZScore(VIEW_RANKING_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
+        redisService.addZScore(AUTOCOMPLETE_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
 
         return ProductResponse.fromEntity(savedProduct);
     }
@@ -295,5 +296,13 @@ public class ProductService {
     @Transactional
     public void updateProductForNego(Product product) {
         productRepository.save(product);
+    }
+
+    public List<Product> findByProductStatusInAndUserId(List<ProductStatus> productStatusList, Long userId) {
+        return productRepository.findByProductStatusInAndUserId(productStatusList, userId);
+    }
+
+    public Product findByProductStatusAndProductId(ProductStatus productStatus, Long productId) {
+        return productRepository.findByProductStatusAndId(productStatus, productId);
     }
 }

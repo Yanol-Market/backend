@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class PaymentCancelDetail {
 
     @Id
-    @Column(name = "payment_cancel_detail_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String pgTid;

@@ -2,6 +2,7 @@ package site.goldenticket.domain.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.nego.entity.Nego;
@@ -61,6 +62,10 @@ public class PaymentService {
             }
         }
 
+        if (product.getUserId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.PRODUCT_CANNOT_BE_PURCHASED);
+        }
+
         Order savedOrder = orderRepository.save(order);
 
         return PaymentDetailResponse.of(savedOrder.getId(), user, product, price);
@@ -98,7 +103,7 @@ public class PaymentService {
 
         Product product = productService.getProduct(order.getProductId());
 
-        if (payment.isDifferentAmount(order.getPrice())) {
+        if (payment.isDifferentAmount(order.getTotalPrice())) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
         }
 
@@ -129,5 +134,13 @@ public class PaymentService {
         product.setProductStatus(ProductStatus.RESERVED);
         productService.save(product);
         return PaymentResponse.success();
+    }
+
+    public List<Order> findByStatusAndProductId(OrderStatus orderStatus, Long productId) {
+        return orderRepository.findByStatusAndProductId(orderStatus, productId);
+    }
+
+    public Order findByProductId(Long productId) {
+        return orderRepository.findByProductId(productId);
     }
 }
