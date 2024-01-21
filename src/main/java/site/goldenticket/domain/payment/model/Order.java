@@ -26,7 +26,7 @@ public class Order extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private NegotiationStatus negoStatus;
     private Integer price;
-    private Boolean buyerViewCheck;
+    private Boolean customerViewCheck;
 
     private Order(Long productId, Long userId, OrderStatus status, NegotiationStatus negoStatus, Integer price) {
         this.productId = productId;
