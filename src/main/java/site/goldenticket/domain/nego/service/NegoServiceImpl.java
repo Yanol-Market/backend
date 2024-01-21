@@ -1,9 +1,5 @@
 package site.goldenticket.domain.nego.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
@@ -11,11 +7,7 @@ import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.response.HandoverResponse;
-import site.goldenticket.domain.nego.dto.response.NegoAvailableResponse;
-import site.goldenticket.domain.nego.dto.response.NegoResponse;
-import site.goldenticket.domain.nego.dto.response.PayResponse;
-import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
+import site.goldenticket.domain.nego.dto.response.*;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
@@ -25,6 +17,11 @@ import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -216,7 +213,7 @@ public class NegoServiceImpl implements NegoService {
     }
 
     @Override
-    public Optional<Nego> getUserNego(Long userId) {
+    public List<Nego> getUserNego(Long userId) {
         return negoRepository.findNegoByUser_Id(userId);
     }
 
