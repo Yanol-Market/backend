@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.goldenticket.domain.payment.dto.response.PurchaseCompletedDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PurchaseCompletedResponse;
+import site.goldenticket.domain.payment.dto.response.PurchaseProgressResponse;
 import site.goldenticket.domain.payment.service.PurchaseHistoryService;
 import site.goldenticket.domain.security.PrincipalDetails;
 
@@ -20,7 +21,7 @@ public class PurchaseHistoryController {
     private final PurchaseHistoryService purchaseHistoryService;
 
     @GetMapping("/progress")
-    public String getPurchaseProgressHistory(
+    public List<PurchaseProgressResponse> getPurchaseProgressHistory(
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return purchaseHistoryService.getPurchaseProgressHistory(principalDetails);
     }
