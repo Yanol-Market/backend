@@ -9,6 +9,7 @@ import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
+import site.goldenticket.domain.user.dto.ChangePasswordRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.entity.User;
@@ -54,6 +55,15 @@ public class UserService {
     }
 
     @Transactional
+    public void updatePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
+        User user = findById(userId);
+        log.info("Change Password User = {}", user);
+
+        updatePasswordValidate(user, changePasswordRequest);
+        user.updatePassword(changePasswordRequest.changePassword());
+    }
+
+    @Transactional
     public void registerAccount(Long userId, RegisterAccountRequest registerAccountRequest) {
         User user = findById(userId);
         user.registerAccount(registerAccountRequest.bankName(), registerAccountRequest.accountNumber());
@@ -80,6 +90,12 @@ public class UserService {
 
         if (isExistNickname(joinRequest.nickname())) {
             throw new CustomException(ALREADY_EXIST_NICKNAME);
+        }
+    }
+
+    private void updatePasswordValidate(User user, ChangePasswordRequest changePasswordRequest) {
+        if (!passwordEncoder.matches(changePasswordRequest.originPassword(), user.getPassword())) {
+            throw new CustomException(INVALID_PASSWORD);
         }
     }
 

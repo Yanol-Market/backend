@@ -14,6 +14,7 @@ public final class UserUtils {
     public static Long YANOLJA_ID = 1L;
     public static String BANK_NAME = "bankName";
     public static String ACCOUNT_NUMBER = "000000000000";
+    public static final String CHANGE_PASSWORD = "changePassword";
 
     public static User createUser(String encodePassword) {
         return User.builder()
