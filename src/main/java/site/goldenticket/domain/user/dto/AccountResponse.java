@@ -10,7 +10,7 @@ public record AccountResponse(
         String accountNumber
 ) {
 
-    public static AccountResponse of(User user) {
+    public static AccountResponse from(User user) {
         return AccountResponse.builder()
                 .name(user.getName())
                 .bankName(user.getBankName())
