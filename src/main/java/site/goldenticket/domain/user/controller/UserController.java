@@ -1,5 +1,6 @@
 package site.goldenticket.domain.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,11 +10,12 @@ import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.dto.AccountResponse;
-import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
+import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.dto.UserResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
+import site.goldenticket.domain.user.wish.dto.WishRegionRegisterRequest;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -72,6 +74,16 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         userService.removeAccount(principalDetails.getUserId());
+        return ResponseEntity.ok(CommonResponse.ok());
+    }
+
+    @PostMapping("/regions")
+    public ResponseEntity<CommonResponse<Void>> registerWishRegion(
+            @Valid @RequestBody WishRegionRegisterRequest wishRegionRegisterRequest,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long userId = principalDetails.getUserId();
+        userService.registerWishRegion(userId, wishRegionRegisterRequest);
         return ResponseEntity.ok(CommonResponse.ok());
     }
 
