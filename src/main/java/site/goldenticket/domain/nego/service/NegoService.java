@@ -1,14 +1,11 @@
 package site.goldenticket.domain.nego.service;
 
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
-import site.goldenticket.domain.nego.dto.response.HandoverResponse;
-import site.goldenticket.domain.nego.dto.response.NegoAvailableResponse;
-import site.goldenticket.domain.nego.dto.response.NegoResponse;
-import site.goldenticket.domain.nego.dto.response.PayResponse;
-import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
+import site.goldenticket.domain.nego.dto.response.*;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.security.PrincipalDetails;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface NegoService {
@@ -28,7 +25,7 @@ public interface NegoService {
 
     Optional<Nego> getNego(Long userId, Long productId);
 
-    Optional<Nego> getUserNego(Long userId);
+    List<Nego> getUserNego(Long userId);
 
     Nego save(Nego nego);
 
