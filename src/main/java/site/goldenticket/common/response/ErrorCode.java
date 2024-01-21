@@ -61,6 +61,7 @@ public enum ErrorCode {
 
     // Wish
     WISH_PRODUCT_NOT_FOUND(BAD_REQUEST, "존재하지 않는 관심 상품입니다."),
+    WISH_REGION_OVER_MAXIMUM(BAD_REQUEST, "설정 가능한 관심 지역 "),
 
     // Reservation
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),

@@ -26,6 +26,8 @@ import static site.goldenticket.common.response.ErrorCode.*;
 @Transactional(readOnly = true)
 public class UserService {
 
+    public static final int MAXIMUM_REGION_SIZE = 3;
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplateService restTemplateService;
@@ -54,7 +56,7 @@ public class UserService {
     public User findById(Long userId) {
         log.info("Find By ID = {}", userId);
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(WISH_REGION_OVER_MAXIMUM));
     }
 
     @Transactional
@@ -71,10 +73,15 @@ public class UserService {
 
     @Transactional
     public void registerWishRegion(Long userId, WishRegionRegisterRequest wishRegionRegisterRequest) {
-        log.info("User ID [{}] Register Regions = {}", userId, wishRegionRegisterRequest.regions());
         User user = findByIdWithWishRegion(userId);
+        log.info("User ID [{}] Register Regions = {}", userId, wishRegionRegisterRequest.regions());
+
         List<WishRegion> wishRegions = wishRegionRegisterRequest.toEntity();
         wishRegions.forEach(user::registerWishRegion);
+
+        if (user.isValidRegionSize(MAXIMUM_REGION_SIZE)) {
+            throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
+        }
     }
 
     @Transactional

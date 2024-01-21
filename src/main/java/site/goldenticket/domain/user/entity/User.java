@@ -111,4 +111,8 @@ public class User extends BaseTimeEntity {
         wishRegions.add(wishRegion);
         wishRegion.registerUser(this);
     }
+
+    public boolean isValidRegionSize(int maxSize) {
+        return wishRegions.size() > maxSize;
+    }
 }
