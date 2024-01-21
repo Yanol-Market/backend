@@ -99,7 +99,7 @@ public class PaymentService {
 
         Product product = productService.getProduct(order.getProductId());
 
-        if (payment.isDifferentAmount(order.getPrice())) {
+        if (payment.isDifferentAmount(order.getTotalPrice())) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
         }
 
