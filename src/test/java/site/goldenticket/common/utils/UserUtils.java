@@ -1,6 +1,8 @@
 package site.goldenticket.common.utils;
 
+import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.user.entity.User;
+import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 public final class UserUtils {
 
@@ -24,5 +26,9 @@ public final class UserUtils {
                 .build();
     }
 
-
+    public static WishRegion createWishRegion(AreaCode areaCode) {
+        return WishRegion.builder()
+                .areaCode(areaCode)
+                .build();
+    }
 }
