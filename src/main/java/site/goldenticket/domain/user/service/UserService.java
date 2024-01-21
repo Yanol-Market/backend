@@ -13,11 +13,6 @@ import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
-import site.goldenticket.domain.user.wish.dto.WishRegionRegisterRequest;
-import site.goldenticket.domain.user.wish.entity.WishRegion;
-import site.goldenticket.domain.user.repository.WishRegionRepository;
-
-import java.util.List;
 
 import static site.goldenticket.common.response.ErrorCode.*;
 
@@ -27,12 +22,9 @@ import static site.goldenticket.common.response.ErrorCode.*;
 @Transactional(readOnly = true)
 public class UserService {
 
-    public static final int MAXIMUM_REGION_SIZE = 3;
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplateService restTemplateService;
-    private final WishRegionRepository wishRegionRepository;
 
     public boolean isExistEmail(String email) {
         log.info("Duplicated Check Email = {}", email);
@@ -74,23 +66,6 @@ public class UserService {
     }
 
     @Transactional
-    public void registerWishRegion(Long userId, WishRegionRegisterRequest wishRegionRegisterRequest) {
-        User user = findByIdWithWishRegion(userId);
-        log.info("User ID [{}] Register Regions = {}", userId, wishRegionRegisterRequest.regions());
-
-        List<WishRegion> wishRegions = wishRegionRegisterRequest.toEntity();
-        wishRegions.forEach(user::registerWishRegion);
-
-        if (user.isValidRegionSize(MAXIMUM_REGION_SIZE)) {
-            throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
-        }
-    }
-
-    public List<WishRegion> findWishRegion(Long userId) {
-        return wishRegionRepository.findByUserId(userId);
-    }
-
-    @Transactional
     public Long yanoljaLogin(LoginRequest loginRequest, Long userId) {
         YanoljaUserResponse yanoljaUser = getYanoljaUser(loginRequest);
         User user = findById(userId);
@@ -106,11 +81,6 @@ public class UserService {
         if (isExistNickname(joinRequest.nickname())) {
             throw new CustomException(ALREADY_EXIST_NICKNAME);
         }
-    }
-
-    private User findByIdWithWishRegion(Long userId) {
-        return userRepository.findByIdFetchWishRegion(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     private YanoljaUserResponse getYanoljaUser(LoginRequest loginRequest) {
