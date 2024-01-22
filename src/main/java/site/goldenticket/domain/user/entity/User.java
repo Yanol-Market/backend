@@ -12,6 +12,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -111,8 +112,13 @@ public class User extends BaseTimeEntity {
         this.accountNumber = null;
     }
 
-    public void registerWishRegion(WishRegion wishRegion) {
-        wishRegions.add(wishRegion);
+    public void registerWishRegions(List<WishRegion> wishRegions) {
+        this.wishRegions.removeIf(wishRegion -> !wishRegions.contains(wishRegion));
+        wishRegions.forEach(this::addWishRegion);
+    }
+
+    private void addWishRegion(WishRegion wishRegion) {
+        this.wishRegions.add(wishRegion);
         wishRegion.registerUser(this);
     }
 

@@ -60,7 +60,7 @@ public class SecurityService implements UserDetailsService {
     }
 
     private YanoljaLoginResponse createYanoljaLoginResponse(YanoljaUserResponse yanoljaUser) {
-        boolean isFirst = userRepository.existsByYanoljaId(yanoljaUser.id());
+        boolean isFirst = !userRepository.existsByYanoljaId(yanoljaUser.id());
         AuthenticationToken token = generateToken(yanoljaUser.email());
         return YanoljaLoginResponse.builder()
                 .isFirst(isFirst)
