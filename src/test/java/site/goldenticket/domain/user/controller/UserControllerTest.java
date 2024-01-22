@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import site.goldenticket.common.config.ApiTest;
 import site.goldenticket.domain.user.dto.AgreementRequest;
 import site.goldenticket.domain.user.dto.ChangePasswordRequest;
@@ -27,6 +28,9 @@ class UserControllerTest extends ApiTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("회원가입 검증")
@@ -110,8 +114,8 @@ class UserControllerTest extends ApiTest {
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
 
-        User findUser = userRepository.findById(this.user.getId()).get();
-        assertThat(findUser.getPassword()).isEqualTo(CHANGE_PASSWORD);
+        User findUser = userRepository.findById(this.user.getId()).orElseThrow();
+        assertThat(passwordEncoder.matches(CHANGE_PASSWORD, findUser.getPassword())).isTrue();
     }
 
     @Test
