@@ -7,7 +7,6 @@ import static site.goldenticket.common.response.ErrorCode.NEGO_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
-import static site.goldenticket.domain.nego.status.NegotiationStatus.TRANSFER_PENDING;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -212,7 +211,7 @@ public class ChatService {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
             if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING) ||
-                nego.getStatus().equals(TRANSFER_PENDING)) {
+                nego.getStatus().equals(NegotiationStatus.TRANSFER_PENDING)) {
                 price = nego.getPrice();
             }
         } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
@@ -242,18 +241,26 @@ public class ChatService {
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
             if (nego.getStatus().equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
                 chatStatus = "NEGO_TIMEOUT";
+            } else if (nego.getStatus().equals(NegotiationStatus.NEGOTIATING)) {
+                if ((nego.getCount().equals(1) && nego.getConsent().equals(null))
+                    || nego.getCount().equals(2) && nego.getConsent().equals(false)) {
+                    chatStatus = "NEGO_PROPOSE";
+                }
             }
         } else if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
             if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
+                chatStatus = "PAYMENT_PENDING";
+            } else if (nego.getStatus().equals(NegotiationStatus.TRANSFER_PENDING)) {
                 chatStatus = "TRANSFER_PENDING";
             }
         } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
-            if (order.getUserId().equals(buyerId)&&order.getStatus().equals(OrderStatus.COMPLETED_TRANSFER)) {
+            if (order.getUserId().equals(buyerId) && order.getStatus()
+                .equals(OrderStatus.COMPLETED_TRANSFER)) {
                 chatStatus = "TRANSFER_COMPLETED";
             }
         }
