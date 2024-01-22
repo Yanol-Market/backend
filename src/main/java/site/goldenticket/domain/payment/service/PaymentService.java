@@ -2,6 +2,7 @@ package site.goldenticket.domain.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
@@ -31,6 +32,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PaymentService {
 
     private final OrderRepository orderRepository;
@@ -85,9 +87,8 @@ public class PaymentService {
         }
 
         order.requestPayment();
-        Order savedOrder = orderRepository.save(order);
 
-        iamportRepository.prepare(savedOrder.getId(), BigDecimal.valueOf(savedOrder.getTotalPrice()));
+        iamportRepository.prepare(order.getId(), BigDecimal.valueOf(order.getTotalPrice()));
         return PaymentReadyResponse.create(user, product, order);
     }
 
@@ -103,15 +104,14 @@ public class PaymentService {
 
         Product product = productService.getProduct(order.getProductId());
 
+        Payment savedPayment = paymentRepository.save(payment);
+
         if (payment.isDifferentAmount(order.getTotalPrice())) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
         }
 
-        Payment saved = paymentRepository.save(payment);
-
-        if (payment.isNotPaid()) {
+        if (savedPayment.isNotPaid()) {
             order.paymentFailed();
-            orderRepository.save(order);
             return PaymentResponse.failed();
         }
 
@@ -125,14 +125,11 @@ public class PaymentService {
                 return PaymentResponse.timeOver();
             }
             nego.completed();
-            negoService.save(nego);
         }
 
         order.waitTransfer();
-        orderRepository.save(order);
 
         product.setProductStatus(ProductStatus.RESERVED);
-        productService.save(product);
         return PaymentResponse.success();
     }
 
