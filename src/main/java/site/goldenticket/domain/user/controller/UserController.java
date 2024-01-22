@@ -47,6 +47,16 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.ok(UserResponse.from(user)));
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<CommonResponse<Void>> changeProfile(
+            @RequestBody @Validated ChangeProfileRequest changeProfileRequest,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long userId = principalDetails.getUserId();
+        userService.updateProfile(userId, changeProfileRequest);
+        return ResponseEntity.ok(CommonResponse.ok());
+    }
+
     @PatchMapping("/password")
     public ResponseEntity<CommonResponse<Void>> changePassword(
             @RequestBody @Validated ChangePasswordRequest changePasswordRequest,
