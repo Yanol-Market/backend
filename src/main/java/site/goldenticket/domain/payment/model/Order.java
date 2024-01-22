@@ -55,4 +55,8 @@ public class Order extends BaseTimeEntity {
     public void paymentFailed() {
         status = OrderStatus.PAYMENT_FAILED;
     }
+
+    public void changeViewCheck() {
+        buyerViewCheck = true;
+    }
 }
