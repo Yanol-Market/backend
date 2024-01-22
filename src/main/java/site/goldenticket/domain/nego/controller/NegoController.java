@@ -45,15 +45,15 @@ public class NegoController {
         return ResponseEntity.ok(CommonResponse.ok("결제가 진행됩니다", payResponse));
     }
 
-    @PostMapping("/handoverProduct/{negoId}")
-    public ResponseEntity<CommonResponse<HandoverResponse>> handoverProduct(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        HandoverResponse handoverResponse = negoService.handOverProduct(negoId, principalDetails);
+    @PostMapping("/handoverProduct/{productId}")
+    public ResponseEntity<CommonResponse<HandoverResponse>> handoverProduct(@PathVariable Long productId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        HandoverResponse handoverResponse = negoService.handOverProduct(productId, principalDetails);
         return ResponseEntity.ok(CommonResponse.ok("양도가 완료되었습니다", handoverResponse));
     }
 
-    @PatchMapping("/denyhandoverProduct/{negoId}")
-    public ResponseEntity<CommonResponse<NegoResponse>> denyhandoverProduct(@PathVariable Long negoId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        NegoResponse response = negoService.denyHandoverProduct(negoId, principalDetails);
+    @PatchMapping("/denyhandoverProduct/{productId}")
+    public ResponseEntity<CommonResponse<NegoResponse>> denyHandoverProduct(@PathVariable Long productId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        NegoResponse response = negoService.denyHandoverProduct(productId, principalDetails);
         return ResponseEntity.ok(CommonResponse.ok("양도가 거절되었습니다", response));
     }
 

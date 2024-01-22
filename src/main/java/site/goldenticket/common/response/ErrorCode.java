@@ -38,6 +38,7 @@ public enum ErrorCode {
     CANNOT_PROPOSE_NEGO(BAD_REQUEST,"네고를 제안할수 없습니다"),
     NEGO_COMPLETED(BAD_REQUEST, "다른 유저가 네고를 성공해 진행할수 없습니다."),
     NEGO_COUNT_OVER(BAD_REQUEST,"네고를 3회이상 제안하실수 없습니다."),
+    NO_TRANSFER_PENDING_NEGO(BAD_REQUEST, "양도 대기중인 네고가 없습니다."),
 
 
     // Auth
