@@ -57,7 +57,7 @@ public class PurchaseHistoryService {
         if (!orders.isEmpty()) {
             for (Order order : orders) {
                 Product product = productService.getProduct(order.getProductId());
-                User user = userService.getUser(product.getUserId());
+                User user = userService.findById(product.getUserId());
                 ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
                 LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
                 PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "TRANSFER_PENDING", user, chatRoom.getId(), order.getPrice(), lastUpdatedAt);
@@ -69,7 +69,7 @@ public class PurchaseHistoryService {
             for (Nego nego : userNego) {
                 if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
                     Product product = productService.getProduct(nego.getProductId());
-                    User user = userService.getUser(product.getUserId());
+                    User user = userService.findById(product.getUserId());
                     ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
                     LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
                     PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "NEGOTIATING", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
@@ -77,7 +77,7 @@ public class PurchaseHistoryService {
                 }
                 if (nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
                     Product product = productService.getProduct(nego.getProductId());
-                    User user = userService.getUser(product.getUserId());
+                    User user = userService.findById(product.getUserId());
                     ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
                     LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
                     PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "PAYMENT_PENDING", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
@@ -121,7 +121,7 @@ public class PurchaseHistoryService {
         Product product = productService.getProduct(order.getProductId());
         Payment payment = paymentRepository.findByOrderId(order.getId());
         ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, order.getProductId());
-        User seller = userService.getUser(chatRoom.getUserId());
+        User seller = userService.findById(chatRoom.getBuyerId());
         LocalDateTime lastUpdatedAt = chatService.getChatList(userId, chatRoom.getId()).getFirst().getCreatedAt();
         return PurchaseCompletedDetailResponse.create(product, order, payment, seller, chatRoom.getId(), lastUpdatedAt);
     }
@@ -138,7 +138,7 @@ public class PurchaseHistoryService {
             throw new CustomException(ErrorCode.USER_ORDER_NOT_MATCH);
         }
 
-        if(!order.getBuyerViewCheck()){
+        if(!order.isCustomerViewCheck()){
             order.changeViewCheck();
         }
 
