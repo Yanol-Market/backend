@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.domain.product.constants.AreaCode;
-import site.goldenticket.dummy.reservation.constants.ReservationStatus;
 import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
@@ -38,8 +37,6 @@ public class Reservation {
     private LocalDate reservationDate;
     private int originPrice;
     private int yanoljaPrice;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
 
     private Long yaUserId;
 
@@ -60,7 +57,6 @@ public class Reservation {
             LocalDate reservationDate,
             int originPrice,
             int yanoljaPrice,
-            ReservationStatus reservationStatus,
             Long yaUserId
     ) {
         this.areaCode = areaCode;
@@ -78,11 +74,6 @@ public class Reservation {
         this.reservationDate = reservationDate;
         this.originPrice = originPrice;
         this.yanoljaPrice = yanoljaPrice;
-        this.reservationStatus = reservationStatus;
         this.yaUserId = yaUserId;
-    }
-
-    public void setReservationStatus(ReservationStatus reservationStatus) {
-        this.reservationStatus = reservationStatus;
     }
 }

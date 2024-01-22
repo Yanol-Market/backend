@@ -33,29 +33,15 @@ import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.*;
-import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
-import site.goldenticket.dummy.reservation.dto.ReservationResponse;
-import site.goldenticket.dummy.reservation.dto.UpdateReservationStatusRequest;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import site.goldenticket.dummy.reservation.dto.YanoljaProductResponse;
 
 import static site.goldenticket.common.redis.constants.RedisConstants.SCORE_INCREMENT_AMOUNT;
 import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKING_KEY;
-import static site.goldenticket.common.response.ErrorCode.*;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
-import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
-import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
 @Slf4j
 @Service
@@ -116,14 +102,32 @@ public class ProductService {
     }
 
     // 2. 야놀자 예약 정보 조회 메서드
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ReservationResponse> getAllReservations(Long yaUserId) {
         String getUrl = buildReservationUrl(RESERVATIONS_ENDPOINT, yaUserId);
 
-        return restTemplateService.getList(
+        List<YanoljaProductResponse> yanoljaProductResponses = restTemplateService.getList(
                 getUrl,
-                ReservationResponse[].class
+                YanoljaProductResponse[].class
         );
+
+        List<ReservationResponse> reservationResponses = new ArrayList<>();
+
+        for (YanoljaProductResponse yanoljaProductResponse : yanoljaProductResponses) {
+            Long reservationId = yanoljaProductResponse.reservationId();
+            Optional<Product> product = productRepository.findByReservationId(reservationId);
+            reservationResponses.add(getReservationResponse(product, yanoljaProductResponse));
+        }
+
+        return reservationResponses;
+    }
+
+    private static ReservationResponse getReservationResponse(Optional<Product> product, YanoljaProductResponse yanoljaProductResponse) {
+        if (product.isPresent()) {
+            return ReservationResponse.from(yanoljaProductResponse, REGISTERED);
+        }
+
+        return ReservationResponse.from(yanoljaProductResponse, NOT_REGISTERED);
     }
 
     // 3. 상품 생성, 조회, 수정, 삭제 관련 메서드
@@ -144,10 +148,6 @@ public class ProductService {
 
         Product product = productRequest.toEntity(reservationDetailsResponse, principalDetails.getUserId());
         Product savedProduct = productRepository.save(product);
-
-        String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, reservationId);
-
-        restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(REGISTERED));
 
         redisService.addZScore(AUTOCOMPLETE_KEY, product.getAccommodationName(), INITIAL_RANKING_SCORE);
 
@@ -186,9 +186,6 @@ public class ProductService {
     @Transactional
     public Long deleteProduct(Long productId) {
         Product product = getProduct(productId);
-
-        String updateUrl = buildReservationUrl(RESERVATION_UPDATE_STATUS_ENDPOINT, product.getReservationId());
-        restTemplateService.put(updateUrl, new UpdateReservationStatusRequest(NOT_REGISTERED));
 
         productRepository.delete(product);
 

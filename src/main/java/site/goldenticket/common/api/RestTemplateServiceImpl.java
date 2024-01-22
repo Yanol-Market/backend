@@ -63,21 +63,4 @@ public class RestTemplateServiceImpl implements RestTemplateService {
             throw new CustomException(COMMON_SYSTEM_ERROR);
         }
     }
-
-    @Override
-    public <R> void put(String url, R request) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        HttpEntity<R> entity = new HttpEntity<>(request, headers);
-
-        try {
-            restTemplate.put(url, entity);
-        } catch (HttpClientErrorException e) {
-            log.error("RestTemplate Put Exception Message = {}", e.getMessage());
-            throw new CustomException(COMMON_SYSTEM_ERROR);
-        } catch (Exception e) {
-            log.error("RestTemplate Put Exception", e);
-            throw new CustomException(COMMON_SYSTEM_ERROR);
-        }
-    }
 }
