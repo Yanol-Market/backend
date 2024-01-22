@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.domain.home.dto.HomeResponse;
 import site.goldenticket.domain.product.dto.HomeProductResponse;
 import site.goldenticket.domain.product.service.ProductService;
+import site.goldenticket.domain.security.PrincipalDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +17,9 @@ public class HomeService {
     private final ProductService productService;
 
     @Transactional(readOnly = true)
-    public HomeResponse getHome() {
+    public HomeResponse getHome(PrincipalDetails principalDetails) {
 
-        HomeProductResponse homeProductResponse = productService.getHomeProduct();
+        HomeProductResponse homeProductResponse = productService.getHomeProduct(principalDetails);
 
         return HomeResponse.builder()
                 .homeProductResponse(homeProductResponse)

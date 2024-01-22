@@ -15,7 +15,6 @@ import site.goldenticket.domain.nego.status.NegotiationStatus;
 public class Order extends BaseTimeEntity {
 
     @Id
-    @Column(name = "order_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long productId;
@@ -26,7 +25,7 @@ public class Order extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private NegotiationStatus negoStatus;
     private Integer price;
-    private Boolean buyerViewCheck;
+    private boolean customerViewCheck;
 
     private Order(Long productId, Long userId, OrderStatus status, NegotiationStatus negoStatus, Integer price) {
         this.productId = productId;
@@ -54,5 +53,9 @@ public class Order extends BaseTimeEntity {
 
     public void paymentFailed() {
         status = OrderStatus.PAYMENT_FAILED;
+    }
+
+    public void changeViewCheck() {
+        customerViewCheck = true;
     }
 }

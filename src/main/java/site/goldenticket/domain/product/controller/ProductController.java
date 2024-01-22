@@ -12,15 +12,15 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.constants.PaginationConstants;
+import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
-import site.goldenticket.domain.product.dto.ProductDetailResponse;
-import site.goldenticket.domain.product.dto.ProductRequest;
-import site.goldenticket.domain.product.dto.ProductResponse;
-import site.goldenticket.domain.product.dto.RegionProductResponse;
-import site.goldenticket.domain.product.dto.SearchProductResponse;
+import site.goldenticket.domain.product.constants.ProductStatus;
+import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.search.service.SearchService;
+import site.goldenticket.domain.product.service.ProductOrderService;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationResponse;
@@ -38,6 +38,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final SearchService searchService;
+    private final ProductOrderService productOrderService;
 
     @GetMapping
     public CompletableFuture<ResponseEntity<CommonResponse<Slice<SearchProductResponse>>>> getProductsBySearch(
@@ -57,7 +58,7 @@ public class ProductController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         CompletableFuture<Slice<SearchProductResponse>> searchProductFuture = CompletableFuture.supplyAsync(() ->
-                productService.getProductsBySearch(areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable)
+                productService.getProductsBySearch(areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable, principalDetails)
         );
 
         CompletableFuture<Void> searchHistoryFuture = CompletableFuture.runAsync(() ->
@@ -82,10 +83,11 @@ public class ProductController {
                     size = PaginationConstants.DEFAULT_PAGE_SIZE,
                     sort = PaginationConstants.DEFAULT_SORT_FIELD,
                     direction = Sort.Direction.ASC
-            ) Pageable pageable
+            ) Pageable pageable,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         CompletableFuture<Slice<RegionProductResponse>> regionProductFuture = CompletableFuture.supplyAsync(() ->
-                productService.getProductsByAreaCode(areaCode, cursorCheckInDate, cursorId, pageable)
+                productService.getProductsByAreaCode(areaCode, cursorCheckInDate, cursorId, pageable, principalDetails)
         );
 
         CompletableFuture<Void> updateSearchAreaRankingFuture = CompletableFuture.runAsync(() ->
@@ -135,5 +137,41 @@ public class ProductController {
             @PathVariable Long productId
     ) {
         return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 삭제가 완료되었습니다.", productService.deleteProduct(productId)));
+    }
+
+    @GetMapping("/history/progress")
+    public ResponseEntity<CommonResponse<List<ProductProgressHistoryResponse>>> getProgressProducts(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("판매중인 상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getProgressProducts(principalDetails.getUserId())));
+    }
+
+    @GetMapping("/history/completed")
+    public ResponseEntity<CommonResponse<List<ProductCompletedHistoryResponse>>> getAllCompletedProducts(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("판매완료 된 상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getAllCompletedProducts(principalDetails.getUserId())));
+    }
+
+    @GetMapping("/history/completed/{productId}")
+    public ResponseEntity<CommonResponse<?>> getCompletedProductDetails(
+            @RequestParam ProductStatus productStatus,
+            @PathVariable Long productId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        if (productStatus == ProductStatus.SOLD_OUT) {
+            return ResponseEntity.ok(CommonResponse.ok(productOrderService.getSoldOutCaseProductDetails(productId)));
+        } else if(productStatus == ProductStatus.EXPIRED) {
+            return ResponseEntity.ok(CommonResponse.ok(productOrderService.getExpiredCaseProductDetails(productId)));
+        } else {
+            throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
+        }
+    }
+
+    @DeleteMapping("/history/completed/{productId}")
+    public ResponseEntity<CommonResponse<Long>> deleteCompletedProduct(
+            @PathVariable Long productId
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("판매 내역의 상품 정보가 성공적으로 삭제가 완료되었습니다.", productOrderService.deleteCompletedProduct(productId)));
     }
 }

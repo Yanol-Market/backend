@@ -18,7 +18,7 @@ import static site.goldenticket.common.response.ErrorCode.WISH_PRODUCT_NOT_FOUND
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class WishService {
+public class WishProductService {
 
     private final WishProductRepository wishProductRepository;
     private final ProductService productService;
@@ -41,13 +41,13 @@ public class WishService {
     }
 
     @Transactional
-    public void deleteWishProduct(Long id) {
-        WishProduct wishProduct = findProductById(id);
+    public void deleteWishProduct(Long userId, Long productId) {
+        WishProduct wishProduct = findByUserIdAndProductId(userId, productId);
         wishProductRepository.delete(wishProduct);
     }
 
-    private WishProduct findProductById(Long id) {
-        return wishProductRepository.findById(id)
+    private WishProduct findByUserIdAndProductId(Long userId, Long productId) {
+        return wishProductRepository.findByUserIdAndProductId(userId, productId)
                 .orElseThrow(() -> new CustomException(WISH_PRODUCT_NOT_FOUND));
     }
 

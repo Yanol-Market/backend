@@ -1,4 +1,4 @@
-package site.goldenticket.domain.user.wish.controller;
+package site.goldenticket.domain.product.wish.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
@@ -84,9 +84,9 @@ class WishProductControllerTest extends ApiTest {
     void deleteWishProduct() {
         // given
         Product product = saveProduct();
-        WishProduct wishProduct = saveWishProduct(product);
+        saveWishProduct(product);
 
-        String url = "/products/wish/" + wishProduct.getId();
+        String url = "/products/wish/" + product.getId();
 
         // when
         ExtractableResponse<Response> result = RestAssured
@@ -110,7 +110,7 @@ class WishProductControllerTest extends ApiTest {
 
     private WishProduct createWishProduct(Product product) {
         return WishProduct.builder()
-                .userId(userId)
+                .userId(user.getId())
                 .product(product)
                 .build();
     }

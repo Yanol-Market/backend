@@ -8,17 +8,19 @@ import java.util.stream.Collectors;
 
 public record RegionProductResponse(
         long totalCount,
-        List<ProductResponse> productResponseList
+        List<WishedProductResponse> wishedProductResponseList
 ) {
+    public static RegionProductResponse fromEntity(long totalCount, Slice<Product> productSlice, boolean isAuthenticated) {
 
-    public static RegionProductResponse fromEntity(long totalCount, Slice<Product> productSlice) {
-        List<ProductResponse> productResponseList = productSlice.getContent().stream()
-                .map(ProductResponse::fromEntity)
+        List<WishedProductResponse> wishedProductResponseList = productSlice.getContent().stream()
+                .map(
+                        product -> WishedProductResponse.fromEntity(product, isAuthenticated)
+                )
                 .collect(Collectors.toList());
 
         return new RegionProductResponse(
                 totalCount,
-                productResponseList
+                wishedProductResponseList
         );
     }
 }

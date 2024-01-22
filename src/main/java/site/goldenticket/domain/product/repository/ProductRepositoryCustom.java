@@ -10,10 +10,10 @@ import java.time.LocalDate;
 public interface ProductRepositoryCustom {
     CustomSlice<Product> getProductsBySearch(
             AreaCode region, String keyword, LocalDate checkInDate, LocalDate checkOutDate, PriceRange priceRange,
-            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, Long userId
     );
 
     CustomSlice<Product> getProductsByAreaCode(
-            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, Long userId
     );
 }

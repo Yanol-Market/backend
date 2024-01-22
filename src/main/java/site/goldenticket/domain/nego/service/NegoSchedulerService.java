@@ -24,13 +24,12 @@ public class NegoSchedulerService {
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
-        //List<Nego> transferNegos = negoRepository.findByStatus(TRANSFER_PENDING);
+        List<Nego> transferNegos = negoRepository.findByStatus(TRANSFER_PENDING);
 
         for (Nego nego : pendingNegos) {
             Product product = productService.getProduct(nego.getProductId());
             LocalDateTime updatedAt = nego.getUpdatedAt();
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
-                productService.updateProductForNego(product);
                 product.setProductStatus(ProductStatus.SELLING);
                 productService.updateProductForNego(product);
                 nego.setStatus(NEGOTIATION_TIMEOUT);
@@ -38,17 +37,18 @@ public class NegoSchedulerService {
             }
         } //상품 상태 판매중
 
-//        for (Nego transferNego : transferNegos) {
-//            Product product = productService.getProduct(transferNego.getProductId());
-//            LocalDateTime updatedAt = transferNego.getUpdatedAt();
-//            if (updatedAt != null && currentTime.isAfter(updatedAt.plusSeconds(30))) {
-//                transferNego.setStatus(NEGOTIATION_COMPLETED);
-//                transferNego.setUpdatedAt(currentTime);
-//                product.setProductStatus(ProductStatus.SOLD_OUT);
-//                productService.updateProductForNego(product);
-//            }
-//        }   // 3시간 뒤 자동양도
-        //negoRepository.saveAll(transferNegos);
+        for (Nego transferNego : transferNegos) {
+            Product product = productService.getProduct(transferNego.getProductId());
+            LocalDateTime updatedAt = transferNego.getUpdatedAt();
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
+                transferNego.setStatus(NEGOTIATION_COMPLETED);
+                transferNego.setUpdatedAt(currentTime);
+                product.setProductStatus(ProductStatus.SOLD_OUT);
+                productService.updateProductForNego(product);
+            }
+        }   // 3시간 뒤 자동양도
+
+        negoRepository.saveAll(transferNegos);
         negoRepository.saveAll(pendingNegos);
     }
 

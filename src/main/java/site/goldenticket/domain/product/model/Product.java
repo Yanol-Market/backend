@@ -6,10 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.ProductStatus;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
 import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -47,6 +49,14 @@ public class Product {
 
     private Long reservationId;
     private Long userId;
+
+    @OneToMany(
+            mappedBy = "product",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<WishProduct> wishProducts;
 
     @Builder
     private Product(
@@ -120,5 +130,9 @@ public class Product {
 
     public void setGoldenPrice(int goldenPrice) {
         this.goldenPrice = goldenPrice;
+    }
+
+    public void setIsSellerViewCheck(boolean b) {
+        this.sellerViewCheck = b;
     }
 }

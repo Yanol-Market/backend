@@ -13,6 +13,7 @@ import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.common.security.authentication.token.TokenService;
 import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.security.dto.ReissueRequest;
+import site.goldenticket.domain.security.dto.YanoljaLoginResponse;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
@@ -43,7 +44,14 @@ public class SecurityService implements UserDetailsService {
         return tokenService.reissueToken(reissueRequest.refreshToken());
     }
 
-    public YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
+    public YanoljaLoginResponse yanoljaLogin(LoginRequest loginRequest) {
+        YanoljaUserResponse yanoljaUser = fetchYanoljaUser(loginRequest);
+        log.info("Yanolja Login Info = {}", yanoljaUser);
+
+        return createYanoljaLoginResponse(yanoljaUser);
+    }
+
+    private YanoljaUserResponse fetchYanoljaUser(LoginRequest loginRequest) {
         return restTemplateService.post(
                 "http://localhost:8080/dummy/yauser",
                 loginRequest,
@@ -51,13 +59,18 @@ public class SecurityService implements UserDetailsService {
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
     }
 
-    public AuthenticationToken generateToken(Long yanoljaId) {
-        User user = userRepository.findByYanoljaId(yanoljaId)
-                .orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    private YanoljaLoginResponse createYanoljaLoginResponse(YanoljaUserResponse yanoljaUser) {
+        boolean isFirst = !userRepository.existsByYanoljaId(yanoljaUser.id());
+        AuthenticationToken token = generateToken(yanoljaUser.email());
+        return YanoljaLoginResponse.builder()
+                .isFirst(isFirst)
+                .userInfo(yanoljaUser)
+                .token(token)
+                .build();
+    }
 
-        String email = user.getEmail();
+    private AuthenticationToken generateToken(String email) {
         log.info("Yanolja Login Email = {}", email);
-
         String randomToken = UUID.randomUUID().toString();
         return tokenService.generatedToken(randomToken, email);
     }

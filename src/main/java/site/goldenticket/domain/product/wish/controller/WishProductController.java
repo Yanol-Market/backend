@@ -9,7 +9,7 @@ import site.goldenticket.domain.product.wish.dto.WishProductSaveRequest;
 import site.goldenticket.domain.product.wish.dto.WishProductSaveResponse;
 import site.goldenticket.domain.product.wish.dto.WishProductsResponse;
 import site.goldenticket.domain.product.wish.entity.WishProduct;
-import site.goldenticket.domain.product.wish.service.WishService;
+import site.goldenticket.domain.product.wish.service.WishProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
 
 import java.util.List;
@@ -17,16 +17,16 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/products/wish")
-public class WishController {
+public class WishProductController {
 
-    private final WishService wishService;
+    private final WishProductService wishProductService;
 
     @GetMapping
     public ResponseEntity<CommonResponse<WishProductsResponse>> getWishProducts(
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         Long userId = principalDetails.getUserId();
-        List<WishProduct> response = wishService.findWishProduct(userId);
+        List<WishProduct> response = wishProductService.findWishProduct(userId);
         return ResponseEntity.ok(CommonResponse.ok(WishProductsResponse.of(response)));
     }
 
@@ -36,13 +36,17 @@ public class WishController {
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         Long userId = principalDetails.getUserId();
-        WishProduct response = wishService.saveWishProduct(userId, wishProductSaveRequest.productId());
+        WishProduct response = wishProductService.saveWishProduct(userId, wishProductSaveRequest.productId());
         return ResponseEntity.ok(CommonResponse.ok(WishProductSaveResponse.of(response)));
     }
 
-    @DeleteMapping("/{wishId}")
-    public ResponseEntity<CommonResponse<Void>> deleteWishProduct(@PathVariable Long wishId) {
-        wishService.deleteWishProduct(wishId);
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<CommonResponse<Void>> deleteWishProduct(
+            @PathVariable Long productId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long userId = principalDetails.getUserId();
+        wishProductService.deleteWishProduct(userId, productId);
         return ResponseEntity.ok(CommonResponse.ok());
     }
 }
