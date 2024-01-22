@@ -23,7 +23,7 @@ import site.goldenticket.domain.product.search.service.SearchService;
 import site.goldenticket.domain.product.service.ProductOrderService;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.dummy.reservation.dto.ReservationResponse;
+import site.goldenticket.dummy.reservation.dto.YanoljaProductResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -102,7 +102,7 @@ public class ProductController {
     public ResponseEntity<CommonResponse<List<ReservationResponse>>> getAllReservations(
             @PathVariable Long yaUserId
     ) {
-        return ResponseEntity.ok(CommonResponse.ok("예약 정보 조회가 완료되었습니다.",  productService.getAllReservations(yaUserId)));
+        return ResponseEntity.ok(CommonResponse.ok("예약 정보 조회가 완료되었습니다.", productService.getAllReservations(yaUserId)));
     }
 
     @PostMapping("/{reservationId}")
