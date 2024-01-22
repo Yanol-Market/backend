@@ -8,6 +8,7 @@ public record PaymentReadyResponse(
         Long orderId,
         String roomName,
         Integer price,
+        Integer savingPrice,
         String email,
         String userName,
         String phoneNumber
@@ -18,9 +19,14 @@ public record PaymentReadyResponse(
                 order.getId(),
                 product.getRoomName(),
                 order.getTotalPrice(),
+                calculateSavingPrice(product.getYanoljaPrice(), order.getTotalPrice()),
                 user.getEmail(),
                 user.getName(),
                 user.getPhoneNumber()
         );
+    }
+
+    public static Integer calculateSavingPrice(Integer yanoljaPrice, Integer orderPrice) {
+        return yanoljaPrice - orderPrice;
     }
 }
