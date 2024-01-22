@@ -16,6 +16,7 @@ import site.goldenticket.domain.product.constants.PriceRange;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.model.QProduct;
+import site.goldenticket.domain.product.wish.entity.QWishProduct;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,9 +34,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     @Override
     public CustomSlice<Product> getProductsBySearch(
             AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate,
-            PriceRange priceRange, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            PriceRange priceRange, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, Long userId
     ) {
         QProduct product = QProduct.product;
+        QWishProduct wishProduct = QWishProduct.wishProduct;
 
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(buildRegionCondition(product, areaCode));
@@ -54,12 +56,25 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         OrderSpecifier[] orderSpecifiers = createOrderSpecifier(product, pageable);
 
-        QueryResults<Product> results = jpaQueryFactory
-                .selectFrom(product)
-                .where(predicate)
-                .orderBy(orderSpecifiers)
-                .limit(pageable.getPageSize() + 1)
-                .fetchResults();
+        QueryResults<Product> results;
+
+        if (userId != null) {
+            results = jpaQueryFactory
+                    .selectFrom(product)
+                    .leftJoin(product.wishProducts, wishProduct)
+                    .on(wishProduct.userId.eq(userId))
+                    .where(predicate)
+                    .orderBy(orderSpecifiers)
+                    .limit(pageable.getPageSize() + 1)
+                    .fetchResults();
+        } else {
+            results = jpaQueryFactory
+                    .selectFrom(product)
+                    .where(predicate)
+                    .orderBy(orderSpecifiers)
+                    .limit(pageable.getPageSize() + 1)
+                    .fetchResults();
+        }
 
         List<Product> content = results.getResults();
         boolean hasNext = results.getTotal() > pageable.getPageSize();
@@ -73,9 +88,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     @Override
     public CustomSlice<Product> getProductsByAreaCode(
-            AreaCode areaCode,  LocalDate cursorCheckInDate, Long cursorId, Pageable pageable
+            AreaCode areaCode,  LocalDate cursorCheckInDate, Long cursorId, Pageable pageable, Long userId
     ) {
         QProduct product = QProduct.product;
+        QWishProduct wishProduct = QWishProduct.wishProduct;
 
         BooleanBuilder predicate = new BooleanBuilder();
         predicate.and(buildRegionCondition(product, areaCode));
@@ -90,13 +106,27 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         OrderSpecifier[] orderSpecifiers = createOrderSpecifier(product, pageable);
 
-        List<Product> content = jpaQueryFactory
-                .selectFrom(product)
-                .where(predicate)
-                .orderBy(orderSpecifiers)
-                .limit(pageable.getPageSize() + 1)
-                .fetch();
+        QueryResults<Product> results;
 
+        if (userId != null) {
+            results = jpaQueryFactory
+                    .selectFrom(product)
+                    .leftJoin(product.wishProducts, wishProduct)
+                    .on(wishProduct.userId.eq(userId))
+                    .where(predicate)
+                    .orderBy(orderSpecifiers)
+                    .limit(pageable.getPageSize() + 1)
+                    .fetchResults();
+        } else {
+            results = jpaQueryFactory
+                    .selectFrom(product)
+                    .where(predicate)
+                    .orderBy(orderSpecifiers)
+                    .limit(pageable.getPageSize() + 1)
+                    .fetchResults();
+        }
+
+        List<Product> content = results.getResults();
         boolean hasNext = content.size() > pageable.getPageSize();
         if (hasNext) {
             content.remove(pageable.getPageSize());

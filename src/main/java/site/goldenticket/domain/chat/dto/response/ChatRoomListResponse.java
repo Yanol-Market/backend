@@ -1,4 +1,4 @@
-package site.goldenticket.domain.chat.dto;
+package site.goldenticket.domain.chat.dto.response;
 
 import java.util.List;
 import lombok.Builder;

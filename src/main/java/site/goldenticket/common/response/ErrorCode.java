@@ -23,15 +23,23 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(BAD_REQUEST, "주문 정보를 찾을 수 없습니다."),
     USER_ORDER_NOT_MATCH(BAD_REQUEST,"해당 유저의 주문 정보가 아닙니다."),
 
-    COMMON_CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
-    COMMON_NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
-    COMMON_CANNOT_CONFIRM_NEGO(BAD_REQUEST,"네고를 승인할수 없습니다."),
-    COMMON_NEGO_APPROVAL_REQUIRED(BAD_REQUEST, "네고 승인이 필요합니다."),
-    COMMON_ONLY_CAN_DENY_WHEN_NEGOTIATING(BAD_REQUEST,"네고 중인 경우에만 거절할 수 있습니다."),
-    COMMON_NEGO_TIMEOUT(BAD_REQUEST,"20분이 지나 제안할수 없습니다"),
-    COMMON_NEGO_ALREADY_NEGOTIATING(BAD_REQUEST,"이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
-    COMMON_CANNOT_HANDOVER(BAD_REQUEST,"양도가 불가능한 상태입니다."),
-    NEGO_NOT_FOUND(NOT_FOUND,"네고 정보를 찾을 수 없습니다"),
+    //Nego
+    CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
+    NEGO_ALREADY_APPROVED(BAD_REQUEST, "승인된 네고는 가격 제안을 할 수 없습니다."),
+    CANNOT_CONFIRM_NEGO(BAD_REQUEST, "네고를 승인할수 없습니다."),
+    NEGO_APPROVAL_REQUIRED(BAD_REQUEST, "네고 승인이 필요합니다."),
+    NEGO_ALREADY_CONFIRMED(BAD_REQUEST,"승인한 다른 네고가 있어 승인할수 없습니다."),
+    ONLY_CAN_DENY_WHEN_NEGOTIATING(BAD_REQUEST, "네고 중인 경우에만 거절할 수 있습니다."),
+    NEGO_TIMEOUT(BAD_REQUEST, "20분이 지나 제안할수 없습니다"),
+    NEGO_ALREADY_NEGOTIATING(BAD_REQUEST, "이미 네고 중인 상품에 대해서는 가격 제안을 할 수 없습니다."),
+    CANNOT_HANDOVER(BAD_REQUEST, "양도가 불가능한 상태입니다."),
+    NEGO_NOT_FOUND(NOT_FOUND, "네고 정보를 찾을 수 없습니다"),
+    NEGO_NOT_COMPLETED(BAD_REQUEST, "네고가 완료되지 않았습니다."),
+    CANNOT_PROPOSE_NEGO(BAD_REQUEST,"네고를 제안할수 없습니다"),
+    NEGO_COMPLETED(BAD_REQUEST, "다른 유저가 네고를 성공해 진행할수 없습니다."),
+    NEGO_COUNT_OVER(BAD_REQUEST,"네고를 3회이상 제안하실수 없습니다."),
+    NO_TRANSFER_PENDING_NEGO(BAD_REQUEST, "양도 대기중인 네고가 없습니다."),
+
 
     // Auth
     EMPTY_EMAIL(BAD_REQUEST, "이메일은 필수 값 입니다."),
@@ -49,9 +57,14 @@ public enum ErrorCode {
     // User
     ALREADY_EXIST_EMAIL(BAD_REQUEST, "이미 사용중인 이메일입니다. 이미 가입하신 적이 있다면 로그인을 시도해주세요"),
     ALREADY_EXIST_NICKNAME(BAD_REQUEST, "이미 사용중인 아이디입니다."),
-    USER_NOT_FOUND(NOT_FOUND,"유저 정보가 존재하지 않습니다"),
-    NOT_FOUND_USER(BAD_REQUEST, "존재하지 않는 사용자입니다."),
+    USER_NOT_FOUND(NOT_FOUND, "유저 정보가 존재하지 않습니다"),
     ALREADY_REGISTER_YANOLJA_ID(BAD_REQUEST, "이미 등록된 야놀자 아이디가 존재합니다."),
+    ALREADY_REGISTER_ACCOUNT(BAD_REQUEST, "이미 등록된 계좌가 존재합니다."),
+    INVALID_PASSWORD(BAD_REQUEST, "비밀번호를 확인해 주세요."),
+
+    // Wish
+    WISH_PRODUCT_NOT_FOUND(BAD_REQUEST, "존재하지 않는 관심 상품입니다."),
+    WISH_REGION_OVER_MAXIMUM(BAD_REQUEST, "설정 가능한 관심 지역 "),
 
     // Reservation
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
@@ -66,8 +79,7 @@ public enum ErrorCode {
     //Chat
     CHAT_ROOM_NOT_FOUND(NOT_FOUND, "존재하지 않는 채팅방입니다."),
     INVALID_USER_TYPE(BAD_REQUEST, "userType이 올바르지 않습니다. (userType: all, seller, buyer)"),
-    INVALID_SENDER_TYPE(BAD_REQUEST, "SenderType이 올바르지 않습니다. (SenderType: SYSTEM, SELLER, BUYER)")
-    ;
+    INVALID_SENDER_TYPE(BAD_REQUEST, "SenderType이 올바르지 않습니다. (SenderType: SYSTEM, SELLER, BUYER)");
 
     private final HttpStatus httpStatus;
     private final String message;

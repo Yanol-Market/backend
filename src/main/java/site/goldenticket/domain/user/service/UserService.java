@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.exception.CustomException;
-import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
+import site.goldenticket.domain.user.dto.ChangePasswordRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
-import site.goldenticket.domain.user.dto.JoinResponse;
+import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
@@ -37,21 +37,43 @@ public class UserService {
         return userRepository.existsByNickname(nickname);
     }
 
-    public User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
-    }
-
     @Transactional
-    public JoinResponse join(JoinRequest joinRequest) {
+    public Long join(JoinRequest joinRequest) {
         joinValidate(joinRequest);
         log.info("Join User Info = {}", joinRequest);
 
         String encodePassword = passwordEncoder.encode(joinRequest.password());
         User user = joinRequest.toEntity(encodePassword);
         userRepository.save(user);
-        return JoinResponse.from(user);
+        return user.getId();
+    }
+
+    public User findById(Long userId) {
+        log.info("Find By ID = {}", userId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(WISH_REGION_OVER_MAXIMUM));
+    }
+
+    @Transactional
+    public void updatePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
+        User user = findById(userId);
+        log.info("Change Password User = {}", user);
+
+        updatePasswordValidate(user, changePasswordRequest);
+        String encodePassword = passwordEncoder.encode(changePasswordRequest.changePassword());
+        user.updatePassword(encodePassword);
+    }
+
+    @Transactional
+    public void registerAccount(Long userId, RegisterAccountRequest registerAccountRequest) {
+        User user = findById(userId);
+        user.registerAccount(registerAccountRequest.bankName(), registerAccountRequest.accountNumber());
+    }
+
+    @Transactional
+    public void removeAccount(Long userId) {
+        User user = findById(userId);
+        user.removeAccount();
     }
 
     @Transactional
@@ -72,16 +94,17 @@ public class UserService {
         }
     }
 
+    private void updatePasswordValidate(User user, ChangePasswordRequest changePasswordRequest) {
+        if (!passwordEncoder.matches(changePasswordRequest.originPassword(), user.getPassword())) {
+            throw new CustomException(INVALID_PASSWORD);
+        }
+    }
+
     private YanoljaUserResponse getYanoljaUser(LoginRequest loginRequest) {
         return restTemplateService.post(
                 "http://localhost:8080/dummy/yauser",
                 loginRequest,
                 YanoljaUserResponse.class
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
-    }
-
-    public User findById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(NOT_FOUND_USER));
     }
 }

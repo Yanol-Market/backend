@@ -30,9 +30,15 @@ public class ProductSchedulerService {
             String productKey = String.valueOf(product.getId());
 
             Double currentViewCount = redisService.getZScore(VIEW_RANKING_KEY, productKey);
-            product.setViewCount(Integer.parseInt(String.valueOf(currentViewCount)));
 
-            log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", product.getId(), currentViewCount);
+            if (currentViewCount != null) {
+                int intValue = (int) Math.floor(currentViewCount);
+                product.setViewCount(intValue);
+
+                log.info("Product ViewCount Update 완료. 상품 아이디: {}, 조회수: {}", product.getId(), intValue);
+            } else {
+                log.warn("상품 ID {}의 현재 조회수가 존재하지 않습니다.", product.getId());
+            }
         }
 
         productRepository.saveAll(productList);

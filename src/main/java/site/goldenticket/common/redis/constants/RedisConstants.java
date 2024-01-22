@@ -13,6 +13,7 @@ public class RedisConstants {
     public static final String KEYWORD_RANKING_KEY = "keywordRanking";
     public static final String AREA_RANKING_KEY = "areaRanking";
     public static final String VIEW_RANKING_KEY = "viewRanking";
+    public static final String AUTOCOMPLETE_KEY = "autocomplete";
     public static final int MAX_KEYWORD_RANKING_SIZE = 10;
     public static final int MAX_AREA_RANKING_SIZE = 5;
 }

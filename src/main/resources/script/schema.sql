@@ -87,7 +87,7 @@ CREATE TABLE `wish_region`
                  DEFAULT CHARSET = utf8mb4
                  COLLATE = utf8mb4_bin;
 
-CREATE TABLE `wish`
+CREATE TABLE `wish_product`
 (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '찜 ID',
     user_id    BIGINT NOT NULL COMMENT '사용자 ID',
@@ -197,12 +197,13 @@ CREATE TABLE `payment_cancel_detail`
 
 CREATE TABLE `chat`
 (
-    id           BIGINT       NOT NULL COMMENT '채팅 ID',
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '채팅 ID',
     chat_room_id BIGINT       NOT NULL COMMENT '채팅 방 ID',
     sender_type  VARCHAR(50)  NOT NULL COMMENT '작성자 타입',
     user_id      BIGINT       NULL COMMENT '사용자 ID',
     content      VARCHAR(500) NOT NULL COMMENT '채팅 내용',
-    viewed       BOOLEAN      NOT NULL COMMENT '읽음 여부',
+    viewed_by_seller BOOLEAN      NOT NULL COMMENT '판매자 읽음 여부',
+    viewed_by_buyer  BOOLEAN      NOT NULL COMMENT '구매자 읽음 여부',
     created_at   DATETIME     NOT NULL COMMENT '생성 일시',
     updated_at   DATETIME     NOT NULL COMMENT '수정 일시'
 ) COMMENT '채팅' ENGINE = InnoDB
@@ -211,9 +212,9 @@ CREATE TABLE `chat`
 
 CREATE TABLE `chat_room`
 (
-    id         BIGINT   NOT NULL COMMENT '채팅 방 ID',
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '채팅 방 ID',
     product_id BIGINT   NOT NULL COMMENT '상품 ID',
-    buyer_id   BIGINT   NOT NULL COMMENT '구매자',
+    buyer_id   BIGINT   NOT NULL COMMENT '구매자 ID',
     created_at DATETIME NOT NULL COMMENT '생성 일시',
     updated_at DATETIME NOT NULL COMMENT '수정 일시'
 ) COMMENT '채팅방' ENGINE = InnoDB
