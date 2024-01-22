@@ -56,6 +56,6 @@ public class Order extends BaseTimeEntity {
     }
 
     public void changeViewCheck() {
-        buyerViewCheck = true;
+        customerViewCheck = true;
     }
 }
