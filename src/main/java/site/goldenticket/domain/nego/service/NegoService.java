@@ -26,6 +26,8 @@ public interface NegoService {
 
     Optional<Nego> getNego(Long userId, Long productId);
 
+    List<Nego> getUserNego(Long userId);
+
     Nego save(Nego nego);
 
     NegoAvailableResponse isAvailableNego(Long userId, Long productId); //네고 가능 여부 조회

@@ -16,12 +16,13 @@ public enum ErrorCode {
     COMMON_JSON_PROCESSING_ERROR(BAD_REQUEST, "Json 변환 중 오류"),
 
     //Payment,
-    PRODUCT_NOT_ON_SALE(NOT_FOUND, "현재 판매중이지 않은 상품입니다"),
-    PRODUCT_CANNOT_BE_PURCHASED(BAD_REQUEST, "판매자는 자신의 상품을 구매할 수 없습니다"),
-    IAMPORT_ERROR(INTERNAL_SERVER_ERROR, "PG사 연동 오류입니다"),
-    INVALID_PAYMENT_AMOUNT_ERROR(CONFLICT, "주문금액과 실 결제금액이 다릅니다."),
-    ORDER_NOT_FOUND(BAD_REQUEST, "주문 정보를 찾을 수 없습니다"),
-    PAYMENT_NOT_FOUND(BAD_REQUEST, "결제 정보를 찾을 수 없습니다"),
+    PRODUCT_NOT_ON_SALE(NOT_FOUND, "현재 판매중이지 않은 상품입니다."),
+    IAMPORT_ERROR(INTERNAL_SERVER_ERROR, "PG사 연동 오류입니다."),
+    INVALID_PAYMENT_AMOUNT_ERROR(CONFLICT,"주문금액과 실 결제금액이 다릅니다."),
+    PAYMENT_NOT_FOUND(BAD_REQUEST, "결제 정보를 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(BAD_REQUEST, "주문 정보를 찾을 수 없습니다."),
+    USER_ORDER_NOT_MATCH(BAD_REQUEST,"해당 유저의 주문 정보가 아닙니다."),
+    PRODUCT_CANNOT_BE_PURCHASED(BAD_REQUEST, "자신의 상품은 살 수 없습니다."),
 
     //Nego
     CANNOT_NEGOTIATE(BAD_REQUEST, "더 이상 네고할 수 없습니다."),
