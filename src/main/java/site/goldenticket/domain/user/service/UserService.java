@@ -60,7 +60,8 @@ public class UserService {
         log.info("Change Password User = {}", user);
 
         updatePasswordValidate(user, changePasswordRequest);
-        user.updatePassword(changePasswordRequest.changePassword());
+        String encodePassword = passwordEncoder.encode(changePasswordRequest.changePassword());
+        user.updatePassword(encodePassword);
     }
 
     @Transactional
