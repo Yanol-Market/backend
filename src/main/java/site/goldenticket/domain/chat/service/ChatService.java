@@ -146,6 +146,8 @@ public class ChatService {
 
         ChatRoomInfoResponse chatRoomInfoResponse = ChatRoomInfoResponse.builder()
             .chatRoomId(chatRoomId)
+            .sellerId(sellerId)
+            .buyerId(buyerId)
             .productId(product.getId())
             .accommodationName(product.getAccommodationName())
             .roomName(product.getRoomName())
