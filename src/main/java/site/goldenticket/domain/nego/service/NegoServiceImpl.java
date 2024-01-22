@@ -62,7 +62,6 @@ public class NegoServiceImpl implements NegoService {
         return NegoResponse.fromEntity(nego);
     }
 
-
     @Override
     public NegoResponse denyPrice(Long negoId, PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
@@ -135,7 +134,7 @@ public class NegoServiceImpl implements NegoService {
         }
 
         // 네고 엔터티 업데이트
-        userNego.updateNego(newCount, request.price(), NegotiationStatus.NEGOTIATING, LocalDateTime.now(), LocalDateTime.now(), null);
+        userNego.updateNego(newCount, request.price(), NegotiationStatus.NEGOTIATING, LocalDateTime.now(), LocalDateTime.now(), Boolean.FALSE);
 
         // 네고 저장
         negoRepository.save(userNego);

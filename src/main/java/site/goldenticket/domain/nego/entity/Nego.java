@@ -36,7 +36,6 @@ public class Nego {
 
     @Nullable
     private Boolean consent; // 승낙여부
-
     private LocalDateTime expirationTime; // 만료일시
     private LocalDateTime createdAt; // 생성일시
     private LocalDateTime updatedAt; // 수정일시
