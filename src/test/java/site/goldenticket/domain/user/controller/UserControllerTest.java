@@ -9,10 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import site.goldenticket.common.config.ApiTest;
-import site.goldenticket.domain.user.dto.AgreementRequest;
-import site.goldenticket.domain.user.dto.ChangePasswordRequest;
-import site.goldenticket.domain.user.dto.JoinRequest;
-import site.goldenticket.domain.user.dto.RegisterAccountRequest;
+import site.goldenticket.domain.user.dto.*;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
@@ -89,6 +86,42 @@ class UserControllerTest extends ApiTest {
                 () -> assertThat(jsonPath.getString("data.imageUrl")).isNull(),
                 () -> assertThat(jsonPath.getString("data.phoneNumber")).isEqualTo(PHONE_NUMBER),
                 () -> assertThat(jsonPath.getLong("data.id")).isEqualTo(YANOLJA_ID)
+        );
+    }
+
+    @Test
+    @DisplayName("사용자 프로필 수정 검증")
+    void changeProfile() {
+        // given
+        String changeNickname = "changeNickname";
+        ChangeProfileRequest request = new ChangeProfileRequest(changeNickname);
+
+        String url = "/users/me";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .put(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(OK.value());
+
+        User findUser = userRepository.findById(user.getId()).orElseThrow();
+
+        assertAll(
+                () -> assertThat(findUser.getId()).isEqualTo(user.getId()),
+                () -> assertThat(findUser.getEmail()).isEqualTo(EMAIL),
+                () -> assertThat(findUser.getName()).isEqualTo(NAME),
+                () -> assertThat(findUser.getNickname()).isEqualTo(changeNickname),
+                () -> assertThat(findUser.getImageUrl()).isNull(),
+                () -> assertThat(findUser.getPhoneNumber()).isEqualTo(PHONE_NUMBER),
+                () -> assertThat(findUser.getYanoljaId()).isEqualTo(YANOLJA_ID)
         );
     }
 

@@ -10,6 +10,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.dto.ChangePasswordRequest;
+import site.goldenticket.domain.user.dto.ChangeProfileRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RegisterAccountRequest;
 import site.goldenticket.domain.user.entity.User;
@@ -55,6 +56,14 @@ public class UserService {
     }
 
     @Transactional
+    public void updateProfile(Long userId, ChangeProfileRequest changeProfileRequest) {
+        log.info("User ID [{}] Change Profile = {}", userId, changeProfileRequest);
+        updateProfileValidate(changeProfileRequest);
+        User user = findById(userId);
+        user.updateProfile(changeProfileRequest.nickname());
+    }
+
+    @Transactional
     public void updatePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
         User user = findById(userId);
         log.info("Change Password User = {}", user);
@@ -89,7 +98,15 @@ public class UserService {
             throw new CustomException(ALREADY_EXIST_EMAIL);
         }
 
-        if (isExistNickname(joinRequest.nickname())) {
+        duplicateNickname(joinRequest.nickname());
+    }
+
+    private void updateProfileValidate(ChangeProfileRequest changeProfileRequest) {
+        duplicateNickname(changeProfileRequest.nickname());
+    }
+
+    private void duplicateNickname(String nickname) {
+        if (isExistNickname(nickname)) {
             throw new CustomException(ALREADY_EXIST_NICKNAME);
         }
     }
