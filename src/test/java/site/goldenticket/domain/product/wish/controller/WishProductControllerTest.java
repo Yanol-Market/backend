@@ -84,9 +84,9 @@ class WishProductControllerTest extends ApiTest {
     void deleteWishProduct() {
         // given
         Product product = saveProduct();
-        WishProduct wishProduct = saveWishProduct(product);
+        saveWishProduct(product);
 
-        String url = "/products/wish/" + wishProduct.getId();
+        String url = "/products/wish/" + product.getId();
 
         // when
         ExtractableResponse<Response> result = RestAssured
