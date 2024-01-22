@@ -1,4 +1,4 @@
-package site.goldenticket.domain.user.wish.controller;
+package site.goldenticket.domain.product.wish.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
