@@ -78,7 +78,12 @@ public enum ErrorCode {
     //Chat
     CHAT_ROOM_NOT_FOUND(NOT_FOUND, "존재하지 않는 채팅방입니다."),
     INVALID_USER_TYPE(BAD_REQUEST, "userType이 올바르지 않습니다. (userType: all, seller, buyer)"),
-    INVALID_SENDER_TYPE(BAD_REQUEST, "SenderType이 올바르지 않습니다. (SenderType: SYSTEM, SELLER, BUYER)");
+    INVALID_SENDER_TYPE(BAD_REQUEST, "SenderType이 올바르지 않습니다. (SenderType: SYSTEM, SELLER, BUYER)"),
+    INVALID_BUYER_ID(BAD_REQUEST, "유효하지 않은 구매자 ID입니다: 본인이 등록한 상품은 구매할 수 없습니다."),
+    INVALID_USER_ID_IN_CHAT_ROOM(BAD_REQUEST, "해당 채팅방에서 사용할 수 없는 회원 ID입니다."),
+    MISMATCHED_USER_ID_WITH_SENDER_TYPE(BAD_REQUEST, "송신자타입과 일치하지 않는 회원 ID입니다."),
+    ALREADY_EXISTS_CHAT_ROOM(BAD_REQUEST, "이미 존재하는 채팅방입니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String message;

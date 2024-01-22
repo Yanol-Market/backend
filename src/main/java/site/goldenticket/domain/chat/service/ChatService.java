@@ -1,8 +1,12 @@
 package site.goldenticket.domain.chat.service;
 
+import static site.goldenticket.common.response.ErrorCode.ALREADY_EXISTS_CHAT_ROOM;
 import static site.goldenticket.common.response.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.INVALID_BUYER_ID;
 import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
+import static site.goldenticket.common.response.ErrorCode.INVALID_USER_ID_IN_CHAT_ROOM;
 import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
+import static site.goldenticket.common.response.ErrorCode.MISMATCHED_USER_ID_WITH_SENDER_TYPE;
 import static site.goldenticket.common.response.ErrorCode.NEGO_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
@@ -58,19 +62,38 @@ public class ChatService {
      * @return 채팅 응답 DTO
      */
     public ChatResponse createChat(ChatRequest chatRequest) {
+        if (getChatRoom(chatRequest.chatRoomId()).equals(null)) {
+            throw new CustomException(CHAT_ROOM_NOT_FOUND);
+        }
+        if (userService.findById(chatRequest.userId()).equals(null)) {
+            throw new CustomException(USER_NOT_FOUND);
+        }
         SenderType senderType;
+        ChatRoom chatRoom = getChatRoom(chatRequest.chatRoomId());
+        Long productIdOfChatRoomId = chatRoom.getProductId();
+        if (productService.getProduct(productIdOfChatRoomId).equals(null)) {
+            throw new CustomException(PRODUCT_NOT_FOUND);
+        }
+        Long sellerIdOfProduct = productService.getProduct(productIdOfChatRoomId).getUserId();
+        Long buyerIdOfChatRoom = chatRoom.getBuyerId();
+        if (!chatRequest.userId().equals(sellerIdOfProduct) && !chatRequest.userId()
+            .equals(buyerIdOfChatRoom)) {
+            throw new CustomException(INVALID_USER_ID_IN_CHAT_ROOM);
+        }
         if (chatRequest.senderType().equals("SYSTEM")) {
             senderType = SenderType.SYSTEM;
         } else if (chatRequest.senderType().equals("BUYER")) {
+            if (!chatRequest.userId().equals(buyerIdOfChatRoom)) {
+                throw new CustomException(MISMATCHED_USER_ID_WITH_SENDER_TYPE);
+            }
             senderType = SenderType.BUYER;
         } else if (chatRequest.senderType().equals("SELLER")) {
+            if (!chatRequest.userId().equals(sellerIdOfProduct)) {
+                throw new CustomException(MISMATCHED_USER_ID_WITH_SENDER_TYPE);
+            }
             senderType = SenderType.SELLER;
         } else {
             throw new CustomException(INVALID_SENDER_TYPE);
-        }
-
-        if (getChatRoom(chatRequest.chatRoomId()).equals(null)) {
-            throw new CustomException(CHAT_ROOM_NOT_FOUND);
         }
 
         Chat chat = Chat.builder()
@@ -105,6 +128,13 @@ public class ChatService {
         }
         if (productService.getProduct(productId).equals(null)) {
             throw new CustomException(PRODUCT_NOT_FOUND);
+        }
+        Product product = productService.getProduct(productId);
+        if (product.getUserId().equals(buyerId)) {
+            throw new CustomException(INVALID_BUYER_ID);
+        }
+        if (existsChatRoomByBuyerIdAndProductId(buyerId, productId)) {
+            throw new CustomException(ALREADY_EXISTS_CHAT_ROOM);
         }
         ChatRoom chatRoom = ChatRoom.builder()
             .buyerId(buyerId)
