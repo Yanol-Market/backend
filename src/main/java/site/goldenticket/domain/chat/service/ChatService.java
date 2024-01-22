@@ -146,6 +146,8 @@ public class ChatService {
 
         ChatRoomInfoResponse chatRoomInfoResponse = ChatRoomInfoResponse.builder()
             .chatRoomId(chatRoomId)
+            .sellerId(sellerId)
+            .buyerId(buyerId)
             .productId(product.getId())
             .accommodationName(product.getAccommodationName())
             .roomName(product.getRoomName())
@@ -163,7 +165,7 @@ public class ChatService {
             .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
             .build();
 
-        List<Chat> chatList = getChatList(chatRoomId, userId);
+        List<Chat> chatList = getChatListAll(chatRoomId, userId);
         List<ChatResponse> chatResponseList = new ArrayList<>();
 
         for (Chat chat : chatList) {
@@ -342,7 +344,7 @@ public class ChatService {
     }
 
     /***
-     * 채팅 목록 조회
+     * 채팅 목록 조회: 시스템 메세지 필터, 최신순
      * @param chatRoomId 채팅방 ID
      * @param userId 회원 ID
      * @return 채팅 Entity List
@@ -355,6 +357,16 @@ public class ChatService {
                 .equals(userId));
 
         return chatList;
+    }
+
+    /***
+     * 채팅 목록 조회 : 시스템 메세지 필터X, 등록순
+     * @param chatRoomId 채팅방 ID
+     * @param userId 회원 ID
+     * @return 채팅 Entity List
+     */
+    public List<Chat> getChatListAll(Long chatRoomId, Long userId) {
+        return chatRepository.findAllByChatRoomIdOrderByCreatedAt(chatRoomId);
     }
 
     /***
