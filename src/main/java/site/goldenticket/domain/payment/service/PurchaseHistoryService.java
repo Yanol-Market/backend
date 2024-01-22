@@ -2,6 +2,7 @@ package site.goldenticket.domain.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
@@ -30,6 +31,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PurchaseHistoryService {
 
     private final OrderRepository orderRepository;
@@ -40,7 +42,6 @@ public class PurchaseHistoryService {
     private final ProductService productService;
 
     public List<PurchaseProgressResponse> getPurchaseProgressHistory(PrincipalDetails principalDetails) {
-
         Long userId = principalDetails.getUserId();
 
         List<Nego> userNego = negoService.getUserNego(userId);
@@ -123,5 +124,24 @@ public class PurchaseHistoryService {
         User seller = userService.getUser(chatRoom.getUserId());
         LocalDateTime lastUpdatedAt = chatService.getChatList(userId, chatRoom.getId()).getFirst().getCreatedAt();
         return PurchaseCompletedDetailResponse.create(product, order, payment, seller, chatRoom.getId(), lastUpdatedAt);
+    }
+
+    @Transactional
+    public Long deletePurchaseCompletedHistory(Long orderId, PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getUserId();
+
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+
+        if (!order.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.USER_ORDER_NOT_MATCH);
+        }
+
+        if(!order.getBuyerViewCheck()){
+            order.changeViewCheck();
+        }
+
+        return orderId;
     }
 }
