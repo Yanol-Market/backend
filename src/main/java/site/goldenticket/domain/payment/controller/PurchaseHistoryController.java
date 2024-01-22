@@ -1,11 +1,10 @@
 package site.goldenticket.domain.payment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.payment.dto.response.PurchaseCompletedDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PurchaseCompletedResponse;
 import site.goldenticket.domain.payment.dto.response.PurchaseProgressResponse;
@@ -21,22 +20,30 @@ public class PurchaseHistoryController {
     private final PurchaseHistoryService purchaseHistoryService;
 
     @GetMapping("/progress")
-    public List<PurchaseProgressResponse> getPurchaseProgressHistory(
+    public ResponseEntity<CommonResponse<List<PurchaseProgressResponse>>> getPurchaseProgressHistory(
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return purchaseHistoryService.getPurchaseProgressHistory(principalDetails);
+        return ResponseEntity.ok(CommonResponse.ok("구매중 내역이 성공적으로 조회되었습니다",purchaseHistoryService.getPurchaseProgressHistory(principalDetails)));
     }
 
     @GetMapping("/completed")
-    public List<PurchaseCompletedResponse> getPurchaseCompletedHistory(
+    public ResponseEntity<CommonResponse<List<PurchaseCompletedResponse>>> getPurchaseCompletedHistory(
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return purchaseHistoryService.getPurchaseCompletedHistory(principalDetails);
+        return ResponseEntity.ok(CommonResponse.ok("구매완료 내역이 성공적으로 조회되었습니다",purchaseHistoryService.getPurchaseCompletedHistory(principalDetails)));
     }
 
     @GetMapping("/completed/{orderId}")
-    public PurchaseCompletedDetailResponse getPurchaseCompletedHistoryDetail(
+    public ResponseEntity<CommonResponse<PurchaseCompletedDetailResponse>> getPurchaseCompletedHistoryDetail(
             @PathVariable(name = "orderId") final Long orderId,
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return purchaseHistoryService.getPurchaseCompletedHistoryDetail(orderId,principalDetails);
+        return ResponseEntity.ok(CommonResponse.ok("구매완료 상세 내역이 성공적으로 조회되었습니다.",purchaseHistoryService.getPurchaseCompletedHistoryDetail(orderId,principalDetails)));
+    }
+
+    @DeleteMapping("/completed/{orderId}")
+    public ResponseEntity<CommonResponse<Long>> deletePurchaseCompletedHistory(
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        return ResponseEntity.ok(CommonResponse.ok("구매완료 내역이 성공적으로 삭제되었습니다.", purchaseHistoryService.deletePurchaseCompletedHistory(orderId, principalDetails)));
     }
 
 }
