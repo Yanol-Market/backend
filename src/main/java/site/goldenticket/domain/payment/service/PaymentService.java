@@ -70,7 +70,7 @@ public class PaymentService {
 
         Order savedOrder = orderRepository.save(order);
 
-        return PaymentDetailResponse.of(savedOrder.getId(), user, product, price);
+        return PaymentDetailResponse.of(savedOrder.getId(), user, product, price, product.getYanoljaPrice());
     }
 
     public PaymentReadyResponse preparePayment(Long orderId, PrincipalDetails principalDetails) {

@@ -40,7 +40,7 @@ public class Order extends BaseTimeEntity {
     }
 
     public Integer getTotalPrice() {
-        return (int) (this.price * 1.05);
+        return (int) (this.price * 1.035);
     }
 
     public void requestPayment() {

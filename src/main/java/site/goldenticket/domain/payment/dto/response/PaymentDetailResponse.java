@@ -27,9 +27,10 @@ public record PaymentDetailResponse(
         String email,
         Integer price,
         Integer fee,
-        Integer totalPrice
+        Integer totalPrice,
+        Integer savingPrice
 ) {
-    public static PaymentDetailResponse of(Long orderId, User user, Product product, int price) {
+    public static PaymentDetailResponse of(Long orderId, User user, Product product, int price, int yanoljaPrice) {
 
         return new PaymentDetailResponse(
                 orderId,
@@ -48,8 +49,13 @@ public record PaymentDetailResponse(
                 user.getPhoneNumber(),
                 user.getEmail(),
                 price,
-                (int) (price * 0.05),
-                (int) (price * 1.05)
+                (int) (price * 0.035),
+                (int) (price * 1.035),
+                calculateSavingPrice(yanoljaPrice, (int) (price * 1.035))
         );
+    }
+
+    public static Integer calculateSavingPrice(Integer yanoljaPrice, Integer orderPrice) {
+        return yanoljaPrice - orderPrice;
     }
 }
