@@ -241,7 +241,7 @@ CREATE TABLE reservation
     reservation_type      VARCHAR(50) NOT NULL COMMENT '예약 유형',
     room_name             VARCHAR(255) COMMENT '방 이름',
     standard_number       INT         NOT NULL COMMENT '표준 수용 가능 인원',
-    ya_user_id            MEDIUMTEXT COMMENT '야놀자 사용자 ID',
+    ya_user_id            MEDIUMTEXT COMMENT '야놀자 사용자 ID'
 );
 
 CREATE TABLE ya_user
