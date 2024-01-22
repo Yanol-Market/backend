@@ -60,7 +60,7 @@ public class PurchaseHistoryService {
                 User user = userService.getUser(product.getUserId());
                 ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
                 LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
-                PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "양도 대기중", user, chatRoom.getId(), order.getPrice(), lastUpdatedAt);
+                PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "TRANSFER_PENDING", user, chatRoom.getId(), order.getPrice(), lastUpdatedAt);
                 purchaseProgressResponses.add(response);
             }
         }
@@ -72,7 +72,7 @@ public class PurchaseHistoryService {
                     User user = userService.getUser(product.getUserId());
                     ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
                     LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
-                    PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "네고중", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
+                    PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "NEGOTIATING", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
                     purchaseProgressResponses.add(response);
                 }
                 if (nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
@@ -80,7 +80,7 @@ public class PurchaseHistoryService {
                     User user = userService.getUser(product.getUserId());
                     ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
                     LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), userId).getFirst().getCreatedAt();
-                    PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "결제 대기", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
+                    PurchaseProgressResponse response = PurchaseProgressResponse.create(product, "PAYMENT_PENDING", user, chatRoom.getId(), nego.getPrice(), lastUpdatedAt);
                     purchaseProgressResponses.add(response);
                 }
             }
