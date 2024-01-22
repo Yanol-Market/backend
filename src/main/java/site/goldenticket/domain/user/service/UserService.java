@@ -2,6 +2,7 @@ package site.goldenticket.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +14,13 @@ import site.goldenticket.domain.user.dto.ChangePasswordRequest;
 import site.goldenticket.domain.user.dto.ChangeProfileRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RegisterAccountRequest;
+import site.goldenticket.domain.user.dto.ResetPasswordRequest;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
+
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.NoSuchElementException;
 
 import static site.goldenticket.common.response.ErrorCode.*;
 
@@ -27,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplateService restTemplateService;
+    private final EmailService emailService;
 
     public boolean isExistEmail(String email) {
         log.info("Duplicated Check Email = {}", email);
@@ -123,5 +130,32 @@ public class UserService {
                 loginRequest,
                 YanoljaUserResponse.class
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    }
+
+    @Transactional
+    public void resetPasswordAndSendEmail(ResetPasswordRequest resetPasswordRequest) {
+        String newPassword = getTempPassword();
+        String hashedPassword = passwordEncoder.encode(newPassword);
+
+        User user = userRepository.findByEmail(resetPasswordRequest.getEmail())
+                .orElseThrow(() -> new CustomException("존재하지 않는 유저입니다.",USER_NOT_FOUND));
+
+        user.setPassword(hashedPassword);
+
+        emailService.sendPasswordResetEmail(resetPasswordRequest.getEmail(), newPassword);
+    }
+
+    public String getTempPassword(){
+        char[] charSet = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+
+        String str = "";
+
+        int idx = 0;
+        for (int i = 0; i < 10; i++) {
+            idx = (int) (charSet.length * Math.random());
+            str += charSet[idx];
+        }
+        return str;
     }
 }

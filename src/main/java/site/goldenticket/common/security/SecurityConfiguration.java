@@ -85,6 +85,7 @@ public class SecurityConfiguration {
                         .requestMatchers(PERMIT_ALL_URLS).permitAll()
                         .requestMatchers(GET, PERMIT_ALL_GET_URLS).permitAll()
                         .requestMatchers(POST, PERMIT_ALL_POST_URLS).permitAll()
+                        .requestMatchers(POST, "/users/reset-password").permitAll()
                         .anyRequest().authenticated()
                 )
                 .logout(logoutConfigurer -> logoutConfigurer

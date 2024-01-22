@@ -100,4 +100,14 @@ public class UserController {
         Long response = userService.yanoljaLogin(loginRequest, principalDetails.getUserId());
         return ResponseEntity.ok(CommonResponse.ok(response));
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<CommonResponse<ResetPasswordResponse>> resetPassword(
+            @RequestBody
+            @Validated ResetPasswordRequest resetPasswordRequest
+    ){
+        userService.resetPasswordAndSendEmail(resetPasswordRequest);
+        return ResponseEntity.ok(CommonResponse.ok(new ResetPasswordResponse()));
+    }
+
 }
