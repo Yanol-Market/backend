@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import site.goldenticket.domain.product.wish.entity.WishProduct;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface WishProductRepository extends JpaRepository<WishProduct, Long> {
 
@@ -16,4 +17,6 @@ public interface WishProductRepository extends JpaRepository<WishProduct, Long> 
                     "WHERE wp.userId = :userId"
     )
     List<WishProduct> findByUserIdWithProduct(@Param("userId") Long userId);
+
+    Optional<WishProduct> findByUserIdAndProductId(Long userId, Long product_id);
 }

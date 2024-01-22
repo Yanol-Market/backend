@@ -1,5 +1,6 @@
 package site.goldenticket.domain.nego.entity;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +34,7 @@ public class Nego {
     @Enumerated(EnumType.STRING)
     private NegotiationStatus status; // 네고 상태
 
+    @Nullable
     private Boolean consent; // 승낙여부
     private LocalDateTime expirationTime; // 만료일시
     private LocalDateTime createdAt; // 생성일시
