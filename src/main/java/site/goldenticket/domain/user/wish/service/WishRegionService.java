@@ -33,7 +33,7 @@ public class WishRegionService {
         log.info("User ID [{}] Register Regions = {}", userId, wishRegionRegisterRequest.regions());
 
         List<WishRegion> wishRegions = wishRegionRegisterRequest.toEntity();
-        wishRegions.forEach(user::registerWishRegion);
+        user.registerWishRegions(wishRegions);
 
         if (user.isValidRegionSize(MAXIMUM_REGION_SIZE)) {
             throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
