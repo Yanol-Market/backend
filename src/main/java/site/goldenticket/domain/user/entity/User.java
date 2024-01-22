@@ -119,4 +119,8 @@ public class User extends BaseTimeEntity {
     public boolean isValidRegionSize(int maxSize) {
         return wishRegions.size() > maxSize;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
