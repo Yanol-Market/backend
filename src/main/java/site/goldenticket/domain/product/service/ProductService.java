@@ -33,6 +33,7 @@ import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.*;
+import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
@@ -40,6 +41,21 @@ import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
 import site.goldenticket.dummy.reservation.dto.ReservationResponse;
 import site.goldenticket.dummy.reservation.dto.UpdateReservationStatusRequest;
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static site.goldenticket.common.redis.constants.RedisConstants.SCORE_INCREMENT_AMOUNT;
+import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKING_KEY;
+import static site.goldenticket.common.response.ErrorCode.*;
+import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
 @Slf4j
 @Service
