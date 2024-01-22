@@ -121,7 +121,7 @@ CREATE TABLE `nego`
     price           INTEGER     NOT NULL COMMENT '네고 가격',
     count           INTEGER     NOT NULL COMMENT '네고 횟수',
     status          VARCHAR(50) NOT NULL COMMENT '네고 상태',
-    consent         BOOLEAN     NOT NULL COMMENT '승낙 여부',
+    consent         BOOLEAN COMMENT '승낙 여부',
     expiration_time DATETIME COMMENT '만료 일시',
     created_at      DATETIME COMMENT '생성 일시',
     updated_at      DATETIME COMMENT '수정 일시',
@@ -242,7 +242,6 @@ CREATE TABLE reservation
     room_name             VARCHAR(255) COMMENT '방 이름',
     standard_number       INT         NOT NULL COMMENT '표준 수용 가능 인원',
     ya_user_id            MEDIUMTEXT COMMENT '야놀자 사용자 ID',
-    reservation_status    VARCHAR(50) NOT NULL COMMENT '예약 상태'
 );
 
 CREATE TABLE ya_user
