@@ -21,7 +21,7 @@ public class AlertService {
 
     private final AlertRepository alertRepository;
 
-    public AlertResponse createAlert(AlertRequest alertRequest) {
+    public AlertResponse createAlertForTest(AlertRequest alertRequest) {
         Alert alert = Alert.builder()
             .userId(alertRequest.userId())
             .content(alertRequest.content())
@@ -36,6 +36,11 @@ public class AlertService {
             .build();
     }
 
+    public void createAlert(Long userId, String content) {
+        alertRepository.save(Alert.builder()
+            .userId(userId).content(content)
+            .viewed(false).build());
+    }
 
     public AlertUnSeenResponse getExistsNewAlert(Long userId) {
         return AlertUnSeenResponse.builder()
