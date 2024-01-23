@@ -1,5 +1,6 @@
 package site.goldenticket.domain.nego.service;
 
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
@@ -436,6 +437,20 @@ public class NegoServiceImpl implements NegoService {
                 .negoAvailable(negoAvailable)
                 .chatRoomId(chatRoomId)
                 .build();
+    }
+
+    /***
+     * 테스트용 네고 기록 조회  (프론트 DB 확인용)
+     * @return 네고 Entity List 응답 DTO
+     */
+    public NegoListResponse getNegoListForTest() {
+        List<Nego> negoList = negoRepository.findAll();
+        List<NegoResponse> negoResponseList = new ArrayList<>();
+        for(Nego nego: negoList) {
+            negoResponseList.add(NegoResponse.fromEntity(nego));
+        }
+        return NegoListResponse.builder()
+            .negoResponseList(negoResponseList).build();
     }
 
     public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList,

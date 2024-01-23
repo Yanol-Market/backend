@@ -22,10 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.chat.dto.request.ChatRequest;
+import site.goldenticket.domain.chat.dto.response.ChatListResponse;
 import site.goldenticket.domain.chat.dto.response.ChatResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomDetailResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomInfoResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomListResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomShortListResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomShortResponse;
 import site.goldenticket.domain.chat.entity.Chat;
@@ -57,21 +59,63 @@ public class ChatService {
     private final OrderRepository orderRepository;
 
     /***
+     * 모든 채팅 기록 조회
+     * @return 채팅 목록 응답 DTO
+     */
+    public ChatListResponse getChatListAll() {
+        List<Chat> chatList = chatRepository.findAll();
+        List<ChatResponse> chatResponseList = new ArrayList<>();
+        for (Chat chat : chatList) {
+            chatResponseList.add(ChatResponse.builder()
+                .chatId(chat.getId())
+                .senderType(chat.getSenderType())
+                .userId(chat.getUserId())
+                .content(chat.getContent())
+                .viewed(false)
+                .createdAt(chat.getCreatedAt())
+                .build()
+            );
+        }
+        return ChatListResponse.builder()
+            .chatResponseList(chatResponseList).build();
+    }
+
+    /***
+     * 모든 채팅방 기록 조회
+     * @return 채팅방 목록 응답 DTO
+     */
+    public ChatRoomListResponse getChatRoomListAll() {
+        List<ChatRoom> chatRoomList = chatRoomRepository.findAll();
+        List<ChatRoomResponse> chatRoomResponseList = new ArrayList<>();
+        for(ChatRoom chatRoom : chatRoomList) {
+            chatRoomResponseList.add(
+                ChatRoomResponse.builder()
+                    .chatRoomId(chatRoom.getId())
+                    .userId(chatRoom.getBuyerId())
+                    .productId(chatRoom.getProductId())
+                    .build()
+            );
+        }
+        return ChatRoomListResponse.builder()
+            .chatRoomResponseList(chatRoomResponseList).build();
+    }
+
+    /***
      * 채팅 생성
      * @param chatRequest 채팅 생성 요청 DTO
      * @return 채팅 응답 DTO
      */
     public ChatResponse createChat(ChatRequest chatRequest) {
-        if (getChatRoom(chatRequest.chatRoomId())==null) {
+        if (getChatRoom(chatRequest.chatRoomId()) == null) {
             throw new CustomException(CHAT_ROOM_NOT_FOUND);
         }
-        if (userService.findById(chatRequest.userId())==null) {
+        if (userService.findById(chatRequest.userId()) == null) {
             throw new CustomException(USER_NOT_FOUND);
         }
         SenderType senderType;
         ChatRoom chatRoom = getChatRoom(chatRequest.chatRoomId());
         Long productIdOfChatRoomId = chatRoom.getProductId();
-        if (productService.getProduct(productIdOfChatRoomId)==null) {
+        if (productService.getProduct(productIdOfChatRoomId) == null) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         Long sellerIdOfProduct = productService.getProduct(productIdOfChatRoomId).getUserId();
@@ -123,10 +167,10 @@ public class ChatService {
      * @return 채팅방 응답 DTO
      */
     public ChatRoomResponse createChatRoom(Long buyerId, Long productId) {
-        if (userService.findById(buyerId)==null) {
+        if (userService.findById(buyerId) == null) {
             throw new CustomException(USER_NOT_FOUND);
         }
-        if (productService.getProduct(productId)==null) {
+        if (productService.getProduct(productId) == null) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         Product product = productService.getProduct(productId);
@@ -192,6 +236,7 @@ public class ChatService {
             .price(product.getGoldenPrice())
             .productStatus(product.getProductStatus())
             .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
+            .negoId(getNegoIdOfChatRoom(buyerId, product.getId()))
             .build();
 
         List<Chat> chatList = getChatListAll(chatRoomId, userId);
@@ -218,6 +263,24 @@ public class ChatService {
         return ChatRoomDetailResponse.builder()
             .chatRoomInfoResponse(chatRoomInfoResponse)
             .chatResponseList(chatResponseList).build();
+    }
+
+    /***
+     * 채팅방 네고 ID 조회
+     * @param buyerId 구매자 ID
+     * @param productId 상품 ID
+     * @return 네고 ID
+     */
+    private Long getNegoIdOfChatRoom(Long buyerId, Long productId) {
+        Product product = productService.getProduct(productId);
+        Boolean existsNego = negoRepository.existsByUser_IdAndProduct_Id(buyerId, product.getId());
+        Long negoId = -1L;
+        if (existsNego) {
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
+                product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
+            negoId = nego.getId();
+        }
+        return negoId;
     }
 
     /***
@@ -272,7 +335,7 @@ public class ChatService {
             if (nego.getStatus().equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
                 chatStatus = "NEGO_TIMEOUT";
             } else if (nego.getStatus().equals(NegotiationStatus.NEGOTIATING)) {
-                if ((nego.getCount().equals(1) && nego.getConsent()==null)
+                if ((nego.getCount().equals(1) && nego.getConsent() == null)
                     || (nego.getCount().equals(2) && nego.getConsent().equals(false))) {
                     chatStatus = "NEGO_PROPOSE";
                 }
@@ -303,7 +366,7 @@ public class ChatService {
      * @param userType 회원타입: all(전체), seller(판매내역), buyer(구매내역)
      * @return 채팅방 목록 응답 DTO
      */
-    public ChatRoomListResponse getChatRoomList(Long userId, String userType) {
+    public ChatRoomShortListResponse getChatRoomShortList(Long userId, String userType) {
         List<ChatRoomShortResponse> chatRoomShortResponseList = new ArrayList<>();
         //모든 채팅 조회 = 판매자인 경우 + 구매자인 경우
         if (userType.equals("all")) {
@@ -316,7 +379,7 @@ public class ChatService {
         }
         Collections.sort(chatRoomShortResponseList,
             Comparator.comparing(ChatRoomShortResponse::lastMessageCreatedAt).reversed());
-        return ChatRoomListResponse.builder().
+        return ChatRoomShortListResponse.builder().
             chatRoomShortList(chatRoomShortResponseList)
             .build();
     }
@@ -341,7 +404,7 @@ public class ChatService {
                 // *채팅 내역이 비어 있을 경우 예외 처리 확인 필요
                 List<Chat> chatList = getChatList(chatRoom.getId(), userId);
                 Chat lastChat = Chat.builder().build();
-                if(!chatList.isEmpty()) {
+                if (!chatList.isEmpty()) {
                     lastChat = chatList.get(0);
                 }
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
@@ -370,7 +433,7 @@ public class ChatService {
                 Product product = productService.getProduct(chatRoom.getProductId());
                 List<Chat> chatList = getChatList(chatRoom.getId(), userId);
                 Chat lastChat = Chat.builder().build();
-                if(!chatList.isEmpty()) {
+                if (!chatList.isEmpty()) {
                     lastChat = chatList.get(0);
                 }
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()

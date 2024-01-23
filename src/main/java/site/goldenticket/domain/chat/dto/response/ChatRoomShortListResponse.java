@@ -4,8 +4,8 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record ChatRoomListResponse(
-    List<ChatRoomResponse> chatRoomResponseList
+public record ChatRoomShortListResponse(
+    List<ChatRoomShortResponse> chatRoomShortList
 ) {
 
 }

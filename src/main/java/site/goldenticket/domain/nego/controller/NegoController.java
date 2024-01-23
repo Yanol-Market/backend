@@ -8,6 +8,7 @@ import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
 import site.goldenticket.domain.nego.dto.response.HandoverResponse;
 import site.goldenticket.domain.nego.dto.response.NegoAvailableResponse;
+import site.goldenticket.domain.nego.dto.response.NegoListResponse;
 import site.goldenticket.domain.nego.dto.response.NegoResponse;
 import site.goldenticket.domain.nego.dto.response.PayResponse;
 import site.goldenticket.domain.nego.dto.response.PriceProposeResponse;
@@ -19,6 +20,7 @@ import site.goldenticket.domain.security.PrincipalDetails;
 @RequiredArgsConstructor
 
 public class NegoController {
+
     private final NegoService negoService;
 
     @PostMapping("/proposePrice/{productId}")
@@ -63,5 +65,11 @@ public class NegoController {
         @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(CommonResponse.ok("네고 가능 여부가 조회되었습니다",
             negoService.isAvailableNego(principalDetails.getUserId(), productId)));
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<CommonResponse<NegoListResponse>> getNegoListForTest() {
+        return ResponseEntity.ok(
+            CommonResponse.ok("(테스트용) 모든 네고 기록이 조회되었습니다.", negoService.getNegoListForTest()));
     }
 }

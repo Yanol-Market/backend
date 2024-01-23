@@ -23,7 +23,8 @@ public record ChatRoomInfoResponse(
     LocalTime checkOutTime,
     ProductStatus productStatus,
     Integer price,
-    String chatStatus
+    String chatStatus,
+    Long negoId
 ) {
 
 }

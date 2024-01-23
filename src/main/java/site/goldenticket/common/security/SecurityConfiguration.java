@@ -53,7 +53,8 @@ public class SecurityConfiguration {
             "/products",
             "/products/region",
             "/products/{productId}",
-            "/products/search"
+            "/products/search",
+            "/nego/test"
     };
 
     private static final String[] PERMIT_ALL_POST_URLS = new String[]{
