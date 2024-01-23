@@ -11,10 +11,7 @@ import site.goldenticket.common.entiy.BaseTimeEntity;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.user.wish.entity.WishRegion;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
@@ -30,7 +27,7 @@ import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "users")
 @SQLRestriction("deleted = false")
-@ToString(exclude = {"password", "agreement", "wishRegions"})
+@ToString(exclude = {"password", "agreement", "wishRegions", "deleteReasons"})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -50,7 +47,6 @@ public class User extends BaseTimeEntity {
     private RoleType role;
 
     private Long yanoljaId;
-    private boolean deleted;
 
     @OneToOne(
             mappedBy = "user", fetch = LAZY,
@@ -63,6 +59,14 @@ public class User extends BaseTimeEntity {
             cascade = ALL, orphanRemoval = true
     )
     private final Set<WishRegion> wishRegions = new HashSet<>();
+
+    private boolean deleted;
+
+    @OneToMany(
+            mappedBy = "user", fetch = LAZY,
+            cascade = ALL, orphanRemoval = true
+    )
+    private final List<DeleteReason> deleteReasons = new ArrayList<>();
 
     @Builder
     private User(
