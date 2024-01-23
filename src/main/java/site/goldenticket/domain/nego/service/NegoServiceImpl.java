@@ -400,6 +400,7 @@ public class NegoServiceImpl implements NegoService {
      */
     public NegoAvailableResponse isAvailableNego(Long userId, Long productId) {
         Boolean negoAvailable = true;
+        Boolean isNewChatRoom = false;
         Long chatRoomId = -1L;
         Product product = productService.getProduct(productId);
         //본인이 판매하는 상품이면 네고 불가
@@ -416,6 +417,7 @@ public class NegoServiceImpl implements NegoService {
                 if (!chatService.existsChatRoomByBuyerIdAndProductId(userId, productId)) {
                     chatService.createChatRoom(userId, productId);
                     negoAvailable = true;
+                    isNewChatRoom = true;
                 }
             } else {
                 //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
@@ -435,6 +437,7 @@ public class NegoServiceImpl implements NegoService {
         }
         return NegoAvailableResponse.builder()
                 .negoAvailable(negoAvailable)
+                .isNewChatRoom(isNewChatRoom)
                 .chatRoomId(chatRoomId)
                 .build();
     }
