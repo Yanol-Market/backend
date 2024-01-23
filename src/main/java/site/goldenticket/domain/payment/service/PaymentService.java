@@ -60,7 +60,7 @@ public class PaymentService {
         Order order = Order.of(product.getId(), user.getId(), null, price);
 
         if (nego.isPresent()) {
-            if (nego.get().getConsent()) {
+            if (Boolean.TRUE.equals(nego.get().getConsent())) {
                 price = nego.get().getPrice();
                 order = Order.of(product.getId(), user.getId(), nego.get().getStatus(), price);
             }
