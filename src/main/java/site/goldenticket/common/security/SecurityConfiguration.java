@@ -43,7 +43,8 @@ public class SecurityConfiguration {
             "/h2-console/**",
             "/dummy/**",
             "/payments/**",
-            "/home"
+            "/home",
+            "/chats/test/**"
     };
 
     private static final String[] PERMIT_ALL_GET_URLS = new String[]{
@@ -61,8 +62,7 @@ public class SecurityConfiguration {
             "/users",
             "/reissue",
             "/yanolja-login",
-            "/alerts/test",
-            "/chats/test/**"
+            "/alerts/test"
     };
 
     private final ObjectMapper objectMapper;

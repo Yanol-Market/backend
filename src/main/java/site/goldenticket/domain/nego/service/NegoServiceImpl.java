@@ -443,14 +443,14 @@ public class NegoServiceImpl implements NegoService {
      * 테스트용 네고 기록 조회  (프론트 DB 확인용)
      * @return 네고 Entity List 응답 DTO
      */
-    public NegoListResponse getNegoListForTest() {
+    public NegoTestListResponse getNegoListForTest() {
         List<Nego> negoList = negoRepository.findAll();
-        List<NegoResponse> negoResponseList = new ArrayList<>();
+        List<NegoTestResponse> negoTestResponseList = new ArrayList<>();
         for(Nego nego: negoList) {
-            negoResponseList.add(NegoResponse.fromEntity(nego));
+            negoTestResponseList.add(NegoTestResponse.fromEntity(nego));
         }
-        return NegoListResponse.builder()
-            .negoResponseList(negoResponseList).build();
+        return NegoTestListResponse.builder()
+            .negoTestResponseList(negoTestResponseList).build();
     }
 
     public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList,

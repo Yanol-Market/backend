@@ -4,8 +4,8 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record NegoListResponse(
-    List<NegoResponse> negoResponseList
+public record NegoTestListResponse(
+    List<NegoTestResponse> negoTestResponseList
 ) {
 
 }
