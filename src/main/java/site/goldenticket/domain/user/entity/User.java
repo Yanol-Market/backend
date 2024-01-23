@@ -18,8 +18,7 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
-import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_ACCOUNT;
-import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_YANOLJA_ID;
+import static site.goldenticket.common.response.ErrorCode.*;
 import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 
 @Getter
@@ -130,6 +129,10 @@ public class User extends BaseTimeEntity {
     }
 
     public void deleted(DeleteReason deleteReason) {
+        if (this.deleted) {
+            throw new CustomException(ALREADY_DELETE_USER);
+        }
+
         this.deleted = true;
         deleteReasons.add(deleteReason);
         deleteReason.registerUser(this);
