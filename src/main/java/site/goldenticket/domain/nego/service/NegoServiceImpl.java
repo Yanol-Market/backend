@@ -192,39 +192,45 @@ public class NegoServiceImpl implements NegoService {
 
         // 네고가 없는 경우, 바로 결제 처리
         if (transferPendingNego.isEmpty()) {
+            checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
-            // 해당 Product에 대한 모든 네고 상태를 변경
-            for (Nego otherNego : allNegosForProduct) {
-                // 다른 네고는 양도 완료 상태로 변경
-                otherNego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-                otherNego.setConsent(Boolean.FALSE);
-                negoRepository.save(otherNego);
-            }
+            handleNegos(allNegosForProduct);
         }
 
         if (transferPendingNego.isPresent()) {
+            checkAccountAndThrowException(user);
             Nego nego = transferPendingNego.get();
-            nego.setUpdatedAt(LocalDateTime.now());
-            nego.setConsent(Boolean.TRUE);
-            nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-            product.setProductStatus(ProductStatus.SOLD_OUT);
-            product.setGoldenPrice(nego.getPrice());
-            productService.updateProductForNego(product);
-            negoRepository.save(nego);
-            // 해당 Product에 대한 모든 네고 상태를 변경
-            for (Nego otherNego : allNegosForProduct) {
-                // 다른 네고는 양도 완료 상태로 변경
-                otherNego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-                otherNego.setConsent(Boolean.FALSE);
-                negoRepository.save(otherNego);
-            }
-            // 양도 작업이 완료된 경우에는 양도 정보와 함께 반환
+            completeTransfer(product,nego);
+            handleNegos(allNegosForProduct);
             return HandoverResponse.fromEntity(product, nego);
         }
         return null;
     }
 
+    private void handleNegos(List<Nego> allNegosForProduct) {
+        for (Nego otherNego : allNegosForProduct) {
+            otherNego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+            otherNego.setConsent(Boolean.FALSE);
+            negoRepository.save(otherNego);
+        }
+    }
+
+    private void completeTransfer(Product product, Nego nego) {
+        nego.setUpdatedAt(LocalDateTime.now());
+        nego.setConsent(Boolean.TRUE);
+        nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+        product.setProductStatus(ProductStatus.SOLD_OUT);
+        product.setGoldenPrice(nego.getPrice());
+        productService.updateProductForNego(product);
+        negoRepository.save(nego);
+    }
+
+    private void checkAccountAndThrowException(User user) {
+        if (user.getAccountNumber()==null) {
+            throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+        }
+    }
 
     @Override
     public NegoResponse denyHandoverProduct(Long productId, PrincipalDetails principalDetails) {
