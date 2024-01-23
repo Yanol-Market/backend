@@ -14,6 +14,9 @@ import site.goldenticket.domain.user.entity.DeleteReason;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
+import java.util.Objects;
+import java.util.UUID;
+
 import static site.goldenticket.common.response.ErrorCode.*;
 
 @Slf4j
@@ -42,7 +45,7 @@ public class UserService {
         joinValidate(joinRequest);
         log.info("Join User Info = {}", joinRequest);
 
-        String encodePassword = passwordEncoder.encode(joinRequest.password());
+        String encodePassword = getJoinPassword(joinRequest);
         User user = joinRequest.toEntity(encodePassword);
         userRepository.save(user);
         return user.getId();
@@ -96,6 +99,7 @@ public class UserService {
     @Transactional
     public Long yanoljaLogin(LoginRequest loginRequest, Long userId) {
         YanoljaUserResponse yanoljaUser = getYanoljaUser(loginRequest);
+        yanoljaLoginValidate(userId, yanoljaUser);
         User user = findById(userId);
         user.registerYanoljaId(yanoljaUser.id());
         return yanoljaUser.id();
@@ -107,6 +111,13 @@ public class UserService {
         }
 
         duplicateNickname(joinRequest.nickname());
+    }
+
+    private String getJoinPassword(JoinRequest joinRequest) {
+        if (Objects.isNull(joinRequest.yanoljaId())) {
+            return passwordEncoder.encode(joinRequest.password());
+        }
+        return passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
     private void updateProfileValidate(ChangeProfileRequest changeProfileRequest) {
@@ -131,6 +142,14 @@ public class UserService {
                 loginRequest,
                 YanoljaUserResponse.class
         ).orElseThrow(() -> new CustomException(LOGIN_FAIL));
+    }
+
+    private void yanoljaLoginValidate(Long userId, YanoljaUserResponse yanoljaUser) {
+        userRepository.findByYanoljaId(yanoljaUser.id()).ifPresent(user -> {
+            if (!Objects.equals(userId, user.getId())) {
+                throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
+            }
+        });
     }
 
     @Transactional
