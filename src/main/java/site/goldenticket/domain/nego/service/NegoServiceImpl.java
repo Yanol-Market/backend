@@ -238,6 +238,63 @@ public class NegoServiceImpl implements NegoService {
         return null;
     }
 
+    @Override
+    public NegoResponse denyHandoverProduct(Long productId, PrincipalDetails principalDetails) {
+        Long userId = principalDetails.getUserId();
+
+        // 해당 Product ID로 Product 정보 가져오기
+        Product product = productService.getProduct(productId);
+
+        // Product에 대한 모든 네고 가져오기
+        List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
+
+        // 양도 대기 중인 네고 찾기
+        Optional<Nego> transferPendingNego = allNegosForProduct.stream()
+            .filter(nego -> nego.getStatus() == NegotiationStatus.TRANSFER_PENDING)
+            .findFirst();
+
+        if (transferPendingNego.isEmpty()) {
+            Order order = orderRepository.findByProductId(productId);
+            updateProductForDenyHandOver(product);
+            //구매자에게 양도 취소 알림 전송
+            alertService.createAlert(order.getUserId(),
+                    "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
+            //판매자에게 양도 취소 알림 전송
+            alertService.createAlert(product.getUserId(),
+                    "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
+        }
+
+        if (transferPendingNego.isPresent()) {
+            Nego nego = transferPendingNego.get();
+
+            // 양도 대기 중인 네고를 찾았을 경우 거절 처리
+            if (nego.getCount() < 2) {
+                nego.setStatus(NegotiationStatus.NEGOTIATING);
+            } else {
+                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+            }
+            nego.setConsent(Boolean.FALSE);
+            nego.setExpirationTime(LocalDateTime.now());
+            updateProductForDenyHandOver(product);
+            negoRepository.save(nego);
+
+            //구매자에게 양도 취소 알림 전송
+            alertService.createAlert(nego.getUser().getId(),
+                "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
+            //판매자에게 양도 취소 알림 전송
+            alertService.createAlert(product.getUserId(),
+                "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
+
+            return NegoResponse.fromEntity(nego);
+        }
+        return null;
+    }
+
+    // 메서드
+    private void updateProductForDenyHandOver(Product product){
+        product.setProductStatus(ProductStatus.SELLING);
+        productService.updateProductForNego(product);
+    }
     private void handleNegos(List<Nego> allNegosForProduct) {
         for (Nego otherNego : allNegosForProduct) {
             otherNego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
@@ -245,7 +302,6 @@ public class NegoServiceImpl implements NegoService {
             negoRepository.save(otherNego);
         }
     }
-
     private void completeTransfer(Product product, Nego nego) {
         nego.setUpdatedAt(LocalDateTime.now());
         nego.setConsent(Boolean.TRUE);
@@ -255,13 +311,11 @@ public class NegoServiceImpl implements NegoService {
         productService.updateProductForNego(product);
         negoRepository.save(nego);
     }
-
     private void checkAccountAndThrowException(User user) {
         if (user.getAccountNumber()==null) {
             throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
         }
     }
-
     private void sendTransferCompleteAlerts(Nego nego, Product product, User user) {
         // 구매자에게 양도 완료 알림 전송
         alertService.createAlert(nego.getUser().getId(),
@@ -282,7 +336,6 @@ public class NegoServiceImpl implements NegoService {
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
         }
     }
-
     private void sendTransferCompleteAlertsForNotNego(Order order, Product product, User user) {
         // 구매자에게 양도 완료 알림 전송
         alertService.createAlert(order.getUserId(),
@@ -303,55 +356,6 @@ public class NegoServiceImpl implements NegoService {
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
         }
     }
-
-
-    @Override
-    public NegoResponse denyHandoverProduct(Long productId, PrincipalDetails principalDetails) {
-        Long userId = principalDetails.getUserId();
-
-        // 해당 Product ID로 Product 정보 가져오기
-        Product product = productService.getProduct(productId);
-
-        // Product에 대한 모든 네고 가져오기
-        List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
-
-        // 양도 대기 중인 네고 찾기
-        Optional<Nego> transferPendingNego = allNegosForProduct.stream()
-            .filter(nego -> nego.getStatus() == NegotiationStatus.TRANSFER_PENDING)
-            .findFirst();
-
-        if (transferPendingNego.isEmpty()) {
-            product.setProductStatus(ProductStatus.SELLING);
-            productService.updateProductForNego(product);
-        }
-
-        if (transferPendingNego.isPresent()) {
-            Nego nego = transferPendingNego.get();
-
-            // 양도 대기 중인 네고를 찾았을 경우 거절 처리
-            if (nego.getCount() < 2) {
-                nego.setStatus(NegotiationStatus.NEGOTIATING);
-            } else {
-                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
-            }
-            nego.setConsent(Boolean.FALSE);
-            nego.setExpirationTime(LocalDateTime.now());
-            product.setProductStatus(ProductStatus.SELLING);
-            productService.updateProductForNego(product);
-            negoRepository.save(nego);
-
-            //구매자에게 양도 취소 알림 전송
-            alertService.createAlert(nego.getUser().getId(),
-                "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다ㅏ.");
-            //판매자에게 양도 취소 알림 전송
-            alertService.createAlert(product.getUserId(),
-                "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
-
-            return NegoResponse.fromEntity(nego);
-        }
-        return null;
-    }
-
 
     @Override
     public Optional<Nego> getNego(Long userId, Long productId) {

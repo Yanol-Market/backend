@@ -82,7 +82,7 @@ public class NegoSchedulerService {
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
                 }
             }
-        }   // 3시간 뒤 자동양도
+        }   // 20분 뒤 자동양도
 
         negoRepository.saveAll(transferNegos);
         negoRepository.saveAll(pendingNegos);
