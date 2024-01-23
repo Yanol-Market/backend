@@ -264,7 +264,7 @@ public class ProductService {
             redisService.leftPush(viewProductKey, productKey);
 
             Double currentViewCount = redisService.getZScore(VIEW_RANKING_KEY, productKey);
-            Double updateViewCount = (currentViewCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
+            Double updateViewCount = (currentViewCount != null) ? currentViewCount + 1 : SCORE_INCREMENT_AMOUNT;
             redisService.addZScore(VIEW_RANKING_KEY, productKey, updateViewCount);
         }
     }
