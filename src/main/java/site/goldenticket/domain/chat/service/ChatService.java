@@ -62,16 +62,16 @@ public class ChatService {
      * @return 채팅 응답 DTO
      */
     public ChatResponse createChat(ChatRequest chatRequest) {
-        if (getChatRoom(chatRequest.chatRoomId()).equals(null)) {
+        if (getChatRoom(chatRequest.chatRoomId())==null) {
             throw new CustomException(CHAT_ROOM_NOT_FOUND);
         }
-        if (userService.findById(chatRequest.userId()).equals(null)) {
+        if (userService.findById(chatRequest.userId())==null) {
             throw new CustomException(USER_NOT_FOUND);
         }
         SenderType senderType;
         ChatRoom chatRoom = getChatRoom(chatRequest.chatRoomId());
         Long productIdOfChatRoomId = chatRoom.getProductId();
-        if (productService.getProduct(productIdOfChatRoomId).equals(null)) {
+        if (productService.getProduct(productIdOfChatRoomId)==null) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         Long sellerIdOfProduct = productService.getProduct(productIdOfChatRoomId).getUserId();
@@ -123,10 +123,10 @@ public class ChatService {
      * @return 채팅방 응답 DTO
      */
     public ChatRoomResponse createChatRoom(Long buyerId, Long productId) {
-        if (userService.findById(buyerId).equals(null)) {
+        if (userService.findById(buyerId)==null) {
             throw new CustomException(USER_NOT_FOUND);
         }
-        if (productService.getProduct(productId).equals(null)) {
+        if (productService.getProduct(productId)==null) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         Product product = productService.getProduct(productId);
@@ -272,8 +272,8 @@ public class ChatService {
             if (nego.getStatus().equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
                 chatStatus = "NEGO_TIMEOUT";
             } else if (nego.getStatus().equals(NegotiationStatus.NEGOTIATING)) {
-                if ((nego.getCount().equals(1) && nego.getConsent().equals(null))
-                    || nego.getCount().equals(2) && nego.getConsent().equals(false)) {
+                if ((nego.getCount().equals(1) && nego.getConsent()==null)
+                    || (nego.getCount().equals(2) && nego.getConsent().equals(false))) {
                     chatStatus = "NEGO_PROPOSE";
                 }
             }
@@ -338,8 +338,12 @@ public class ChatService {
             for (ChatRoom chatRoom : chatRoomList) {
                 Product product = productService.getProduct(chatRoom.getProductId());
                 User receiver = userService.findById(product.getUserId());
-                // *채팅 내역이 비어 있을 경우 예외 처리 추가 예정
-                Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
+                // *채팅 내역이 비어 있을 경우 예외 처리 확인 필요
+                List<Chat> chatList = getChatList(chatRoom.getId(), userId);
+                Chat lastChat = Chat.builder().build();
+                if(!chatList.isEmpty()) {
+                    lastChat = chatList.get(0);
+                }
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .receiverNickname(receiver.getNickname())
@@ -364,7 +368,11 @@ public class ChatService {
             for (ChatRoom chatRoom : chatRoomList) {
                 User receiver = userService.findById(chatRoom.getBuyerId());
                 Product product = productService.getProduct(chatRoom.getProductId());
-                Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
+                List<Chat> chatList = getChatList(chatRoom.getId(), userId);
+                Chat lastChat = Chat.builder().build();
+                if(!chatList.isEmpty()) {
+                    lastChat = chatList.get(0);
+                }
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .receiverNickname(receiver.getNickname())
