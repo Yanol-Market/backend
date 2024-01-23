@@ -1,20 +1,8 @@
 package site.goldenticket.domain.product.service;
 
-import static site.goldenticket.common.redis.constants.RedisConstants.*;
-import static site.goldenticket.common.response.ErrorCode.PRODUCT_ALREADY_EXISTS;
-import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
-import static site.goldenticket.common.response.ErrorCode.RESERVATION_NOT_FOUND;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
-import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
-import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -40,8 +28,16 @@ import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
 import site.goldenticket.dummy.reservation.dto.YanoljaProductResponse;
 
-import static site.goldenticket.common.redis.constants.RedisConstants.SCORE_INCREMENT_AMOUNT;
-import static site.goldenticket.common.redis.constants.RedisConstants.VIEW_RANKING_KEY;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static site.goldenticket.common.redis.constants.RedisConstants.*;
+import static site.goldenticket.common.response.ErrorCode.*;
+import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
+import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
 @Slf4j
 @Service
@@ -154,26 +150,6 @@ public class ProductService {
         return ProductResponse.fromEntity(savedProduct);
     }
 
-    @Transactional(readOnly = true)
-    public ProductDetailResponse getProduct(
-            Long productId, PrincipalDetails principalDetails, HttpServletRequest request, HttpServletResponse response
-    ) {
-        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
-
-        Product product = (userId != null) ? getProductWithWishProducts(productId, userId) : getProduct(productId);
-
-        boolean isAuthenticated = (userId != null);
-
-        String userKey = isAuthenticated ? principalDetails.getUsername() : generateOrRetrieveAnonymousKey(request, response);
-
-        boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
-
-        updateProductViewCount(userKey, productId.toString());
-        updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
-
-        return ProductDetailResponse.fromEntity(product, isSeller, isAuthenticated);
-    }
-
     @Transactional
     public ProductResponse updateProduct(ProductRequest productRequest, Long productId) {
         Product product = getProduct(productId);
@@ -198,7 +174,7 @@ public class ProductService {
                 .orElseThrow(() -> new CustomException(PRODUCT_NOT_FOUND));
     }
 
-    private Product getProductWithWishProducts(Long productId, Long userId) {
+    Product getProductWithWishProducts(Long productId, Long userId) {
         return productRepository.findProductWithWishProductsByProductIdAndUserId(productId, userId);
     }
 
@@ -215,7 +191,7 @@ public class ProductService {
                 .toUriString();
     }
 
-    private String generateOrRetrieveAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
+    public String generateOrRetrieveAnonymousKey(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
@@ -255,7 +231,7 @@ public class ProductService {
         }
     }
 
-    private void updateProductViewCount(String userKey, String productKey) {
+    public void updateProductViewCount(String userKey, String productKey) {
         String viewProductKey = userKey.concat(":").concat("viewProductList");
 
         List<String> viewProductList = redisService.getList(viewProductKey, String.class);
@@ -269,7 +245,7 @@ public class ProductService {
         }
     }
 
-    private void updateAutocompleteCount(String autocompleteKey, String accommodationName) {
+    public void updateAutocompleteCount(String autocompleteKey, String accommodationName) {
         Double currentAutocompleteCount = redisService.getZScore(autocompleteKey, accommodationName);
         Double updateAutocompleteCount = (currentAutocompleteCount != null) ? SCORE_INCREMENT_AMOUNT + 1 : SCORE_INCREMENT_AMOUNT;
         redisService.addZScore(autocompleteKey, accommodationName, updateAutocompleteCount);

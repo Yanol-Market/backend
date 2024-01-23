@@ -31,11 +31,12 @@ public record ProductDetailResponse(
         String content,
         ProductStatus productStatus,
         boolean isSeller,
+        boolean isTrading,
         Long wishId,
         boolean isWished
 ) {
 
-    public static ProductDetailResponse fromEntity(Product product, boolean isSeller, boolean isAuthenticated) {
+    public static ProductDetailResponse fromEntity(Product product, boolean isSeller, boolean isTrading, boolean isAuthenticated) {
         LocalDate checkInDate = product.getCheckInDate();
         LocalDate checkOutDate = product.getCheckOutDate();
 
@@ -74,6 +75,7 @@ public record ProductDetailResponse(
                 product.getContent(),
                 product.getProductStatus(),
                 isSeller,
+                isTrading,
                 wishId,
                 isWished
         );
