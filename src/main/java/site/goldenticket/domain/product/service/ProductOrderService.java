@@ -73,7 +73,7 @@ public class ProductOrderService {
                                 orderUser.getNickname(),
                                 orderUser.getImageUrl(),
                                 order.getPrice(),
-                                ChatRoomStatus.ACTIVE,
+                                ChatRoomStatus.YELLOW_DOT,
                                 chatService.getChatList(chatRoom.getId(), orderUser.getId()).get(0).getUpdatedAt()
                         )
                 );
@@ -94,7 +94,9 @@ public class ProductOrderService {
                 User user = nego.getUser();
 
                 ChatRoomStatus chatRoomStatus;
-                if (negotiationStatus == NegotiationStatus.NEGOTIATING || negotiationStatus == NegotiationStatus.PAYMENT_PENDING) {
+                if (negotiationStatus == NegotiationStatus.NEGOTIATING) {
+                    chatRoomStatus = ChatRoomStatus.ACTIVE;
+                } else if (negotiationStatus == NegotiationStatus.PAYMENT_PENDING) {
                     chatRoomStatus = ChatRoomStatus.YELLOW_DOT;
                 } else if (negotiationStatus == NegotiationStatus.NEGOTIATION_CANCELLED) {
                     chatRoomStatus = ChatRoomStatus.INACTIVE;
