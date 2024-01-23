@@ -14,7 +14,7 @@ public class SchedulerService {
 
     private final ProductSchedulerService productSchedulerService;
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "*/10 * * * * *")
     public void updateViewCountsScheduler() {
         log.info("매 10분마다 실행 되는 Product ViewCount Update Scheduler.");
         productSchedulerService.updateViewCounts();
