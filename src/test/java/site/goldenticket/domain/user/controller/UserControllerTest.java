@@ -90,6 +90,30 @@ class UserControllerTest extends ApiTest {
     }
 
     @Test
+    @DisplayName("사용자 삭제 검증")
+    void removeUser() {
+        // given
+        RemoveUserRequest request = new RemoveUserRequest("delete reason");
+
+        String url = "/users";
+
+        // when
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(result.statusCode()).isEqualTo(OK.value());
+        assertThat(userRepository.findById(user.getId()).isPresent()).isFalse();
+    }
+
+    @Test
     @DisplayName("사용자 프로필 수정 검증")
     void changeProfile() {
         // given
