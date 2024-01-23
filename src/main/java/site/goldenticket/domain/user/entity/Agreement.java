@@ -16,7 +16,7 @@ public class Agreement extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -29,6 +29,6 @@ public class Agreement extends BaseTimeEntity {
 
     public void registerUser(User user) {
         this.user = user;
-        user.registerAlertSetting(this);
+        user.registerAgreement(this);
     }
 }

@@ -26,7 +26,7 @@ import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "users")
 @SQLRestriction("deleted = false")
-@ToString(exclude = {"password", "agreement", "wishRegions", "deleteReasons"})
+@ToString(exclude = {"password", "agreements", "wishRegions", "deleteReasons"})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -47,11 +47,11 @@ public class User extends BaseTimeEntity {
 
     private Long yanoljaId;
 
-    @OneToOne(
+    @OneToMany(
             mappedBy = "user", fetch = LAZY,
             cascade = ALL, orphanRemoval = true
     )
-    private Agreement agreement;
+    private final List<Agreement> agreements = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "user", fetch = LAZY,
@@ -85,8 +85,8 @@ public class User extends BaseTimeEntity {
         this.yanoljaId = yanoljaId;
     }
 
-    public void registerAlertSetting(Agreement agreement) {
-        this.agreement = agreement;
+    public void registerAgreement(Agreement agreement) {
+        this.agreements.add(agreement);
     }
 
     public void updateProfile(String nickname) {
