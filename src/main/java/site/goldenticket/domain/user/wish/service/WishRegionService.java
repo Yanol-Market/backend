@@ -13,8 +13,7 @@ import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 import java.util.List;
 
-import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_YANOLJA_ID;
-import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
+import static site.goldenticket.common.response.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -36,7 +35,7 @@ public class WishRegionService {
         user.registerWishRegions(wishRegions);
 
         if (user.isValidRegionSize(MAXIMUM_REGION_SIZE)) {
-            throw new CustomException(ALREADY_REGISTER_YANOLJA_ID);
+            throw new CustomException(WISH_REGION_OVER_MAXIMUM);
         }
     }
 

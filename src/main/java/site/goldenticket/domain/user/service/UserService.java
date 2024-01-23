@@ -2,7 +2,6 @@ package site.goldenticket.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,17 +9,9 @@ import site.goldenticket.common.api.RestTemplateService;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
-import site.goldenticket.domain.user.dto.ChangePasswordRequest;
-import site.goldenticket.domain.user.dto.ChangeProfileRequest;
-import site.goldenticket.domain.user.dto.JoinRequest;
-import site.goldenticket.domain.user.dto.RegisterAccountRequest;
-import site.goldenticket.domain.user.dto.ResetPasswordRequest;
+import site.goldenticket.domain.user.dto.*;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
-
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.NoSuchElementException;
 
 import static site.goldenticket.common.response.ErrorCode.*;
 
@@ -59,7 +50,7 @@ public class UserService {
     public User findById(Long userId) {
         log.info("Find By ID = {}", userId);
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(WISH_REGION_OVER_MAXIMUM));
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
     }
 
     @Transactional

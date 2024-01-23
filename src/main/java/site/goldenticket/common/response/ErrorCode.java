@@ -40,6 +40,7 @@ public enum ErrorCode {
     NEGO_COMPLETED(BAD_REQUEST, "다른 유저가 네고를 성공해 진행할수 없습니다."),
     NEGO_COUNT_OVER(BAD_REQUEST,"네고를 3회이상 제안하실수 없습니다."),
     NO_TRANSFER_PENDING_NEGO(BAD_REQUEST, "양도 대기중인 네고가 없습니다."),
+    NO_REGISTERED_ACCOUNT(NOT_FOUND, "등록된 계좌가 없습니다"),
 
 
     // Auth
@@ -65,7 +66,7 @@ public enum ErrorCode {
 
     // Wish
     WISH_PRODUCT_NOT_FOUND(BAD_REQUEST, "존재하지 않는 관심 상품입니다."),
-    WISH_REGION_OVER_MAXIMUM(BAD_REQUEST, "설정 가능한 관심 지역 "),
+    WISH_REGION_OVER_MAXIMUM(BAD_REQUEST, "설정 가능한 관심 지역 수를 초과하였습니다."),
 
     // Reservation
     RESERVATION_NOT_FOUND(NOT_FOUND, "예약 정보가 존재하지 않습니다."),
