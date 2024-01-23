@@ -32,6 +32,6 @@ public interface NegoService {
 
     NegoAvailableResponse isAvailableNego(Long userId, Long productId); //네고 가능 여부 조회
 
-    NegoListResponse getNegoListForTest(); // 테스트용 모든 네고 기록 조회
+    NegoTestListResponse getNegoListForTest(); // 테스트용 모든 네고 기록 조회
     List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList, Product product);
 }
