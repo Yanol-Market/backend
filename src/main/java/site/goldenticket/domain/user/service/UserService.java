@@ -10,6 +10,7 @@ import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.security.authentication.dto.LoginRequest;
 import site.goldenticket.domain.security.dto.YanoljaUserResponse;
 import site.goldenticket.domain.user.dto.*;
+import site.goldenticket.domain.user.entity.DeleteReason;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
@@ -131,7 +132,7 @@ public class UserService {
         User user = userRepository.findByEmail(resetPasswordRequest.getEmail())
                 .orElseThrow(() -> new CustomException("존재하지 않는 유저입니다.",USER_NOT_FOUND));
 
-        user.setPassword(hashedPassword);
+        user.updatePassword(hashedPassword);
 
         emailService.sendPasswordResetEmail(resetPasswordRequest.getEmail(), newPassword);
     }

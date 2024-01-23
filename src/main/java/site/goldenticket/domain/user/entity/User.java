@@ -125,16 +125,12 @@ public class User extends BaseTimeEntity {
         wishRegions.forEach(this::addWishRegion);
     }
 
-    private void addWishRegion(WishRegion wishRegion) {
-        this.wishRegions.add(wishRegion);
-        wishRegion.registerUser(this);
-    }
-
     public boolean isValidRegionSize(int maxSize) {
         return wishRegions.size() > maxSize;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    private void addWishRegion(WishRegion wishRegion) {
+        this.wishRegions.add(wishRegion);
+        wishRegion.registerUser(this);
     }
 }
