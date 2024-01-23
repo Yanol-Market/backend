@@ -129,6 +129,12 @@ public class User extends BaseTimeEntity {
         return wishRegions.size() > maxSize;
     }
 
+    public void deleted(DeleteReason deleteReason) {
+        this.deleted = true;
+        deleteReasons.add(deleteReason);
+        deleteReason.registerUser(this);
+    }
+
     private void addWishRegion(WishRegion wishRegion) {
         this.wishRegions.add(wishRegion);
         wishRegion.registerUser(this);

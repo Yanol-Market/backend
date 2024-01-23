@@ -55,6 +55,15 @@ public class UserService {
     }
 
     @Transactional
+    public void deleteUser(Long userId, RemoveUserRequest removeUserRequest) {
+        User user = findById(userId);
+        log.info("User [{}] Delete Reason = {}", user.getEmail(), removeUserRequest);
+
+        DeleteReason deleteReason = removeUserRequest.toEntity();
+        user.deleted(deleteReason);
+    }
+
+    @Transactional
     public void updateProfile(Long userId, ChangeProfileRequest changeProfileRequest) {
         log.info("User ID [{}] Change Profile = {}", userId, changeProfileRequest);
         updateProfileValidate(changeProfileRequest);
