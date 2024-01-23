@@ -338,8 +338,12 @@ public class ChatService {
             for (ChatRoom chatRoom : chatRoomList) {
                 Product product = productService.getProduct(chatRoom.getProductId());
                 User receiver = userService.findById(product.getUserId());
-                // *채팅 내역이 비어 있을 경우 예외 처리 추가 예정
-                Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
+                // *채팅 내역이 비어 있을 경우 예외 처리 확인 필요
+                List<Chat> chatList = getChatList(chatRoom.getId(), userId);
+                Chat lastChat = Chat.builder().build();
+                if(!chatList.isEmpty()) {
+                    lastChat = chatList.get(0);
+                }
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .receiverNickname(receiver.getNickname())
@@ -364,7 +368,11 @@ public class ChatService {
             for (ChatRoom chatRoom : chatRoomList) {
                 User receiver = userService.findById(chatRoom.getBuyerId());
                 Product product = productService.getProduct(chatRoom.getProductId());
-                Chat lastChat = getChatList(chatRoom.getId(), userId).get(0);
+                List<Chat> chatList = getChatList(chatRoom.getId(), userId);
+                Chat lastChat = Chat.builder().build();
+                if(!chatList.isEmpty()) {
+                    lastChat = chatList.get(0);
+                }
                 chatRoomShortResponseList.add(ChatRoomShortResponse.builder()
                     .chatRoomId(chatRoom.getId())
                     .receiverNickname(receiver.getNickname())
