@@ -121,7 +121,7 @@ public class ProductController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 조회가 완료되었습니다.", productService.getProduct(productId, principalDetails, request, response)));
+        return ResponseEntity.ok(CommonResponse.ok("상품이 성공적으로 조회가 완료되었습니다.", productOrderService.getProduct(productId, principalDetails, request, response)));
     }
 
     @PutMapping("/{productId}")

@@ -1,5 +1,7 @@
 package site.goldenticket.domain.product.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,17 +20,17 @@ import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.constants.ProgressProductStatus;
-import site.goldenticket.domain.product.dto.ProductCompletedExpiredResponse;
-import site.goldenticket.domain.product.dto.ProductCompletedHistoryResponse;
-import site.goldenticket.domain.product.dto.ProductCompletedSoldOutResponse;
-import site.goldenticket.domain.product.dto.ProductProgressHistoryResponse;
+import site.goldenticket.domain.product.dto.*;
 import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static site.goldenticket.common.redis.constants.RedisConstants.AUTOCOMPLETE_KEY;
 
 @Slf4j
 @Service
@@ -40,6 +42,27 @@ public class ProductOrderService {
     private final ChatService chatService;
     private final NegoService negoService;
     private final PaymentService paymentService;
+
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProduct(
+            Long productId, PrincipalDetails principalDetails, HttpServletRequest request, HttpServletResponse response
+    ) {
+        Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
+
+        Product product = (userId != null) ? productService.getProductWithWishProducts(productId, userId) : productService.getProduct(productId);
+
+        boolean isAuthenticated = (userId != null);
+
+        String userKey = isAuthenticated ? principalDetails.getUsername() : productService.generateOrRetrieveAnonymousKey(request, response);
+
+        boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
+        boolean isTrading = !getOrdersForProduct(userId).isEmpty() || !getNegotiationsForProduct(product).isEmpty();
+
+        productService.updateProductViewCount(userKey, productId.toString());
+        productService.updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
+
+        return ProductDetailResponse.fromEntity(product, isSeller, isTrading, isAuthenticated);
+    }
 
     @Transactional(readOnly = true)
     public List<ProductProgressHistoryResponse> getProgressProducts(Long userId) {
@@ -57,7 +80,7 @@ public class ProductOrderService {
             List<ProgressChatResponse> progressChatResponseList = new ArrayList<>();
 
             // 2.1 주문
-            List<Order> orderList = paymentService.findByStatusAndProductId(OrderStatus.WAITING_TRANSFER, productId);
+            List<Order> orderList = getOrdersForProduct(productId);
 
             for (Order order : orderList) {
                 ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(order.getStatus()));
@@ -80,8 +103,7 @@ public class ProductOrderService {
             }
 
             // 2.2 네고
-            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED);
-            List<Nego> negoList = negoService.findByStatusInAndProduct(negotiationStatusList, product);
+            List<Nego> negoList = getNegotiationsForProduct(product);
 
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();
@@ -168,5 +190,14 @@ public class ProductOrderService {
         Product product = productService.getProduct(productId);
         product.setIsSellerViewCheck(true);
         return productId;
+    }
+
+    public List<Order> getOrdersForProduct(Long productId) {
+        return paymentService.findByStatusAndProductId(OrderStatus.WAITING_TRANSFER, productId);
+    }
+
+    private List<Nego> getNegotiationsForProduct(Product product) {
+        List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED);
+        return negoService.findByStatusInAndProduct(negotiationStatusList, product);
     }
 }
