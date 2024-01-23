@@ -22,6 +22,14 @@ spring:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
 
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+      hibernate: ERROR
+    root: INFO
+
 jwt:
   secret: ${SECRET_KEY}
   grant-type: ${GRANT_TYPE}
