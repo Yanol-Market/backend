@@ -11,6 +11,9 @@ import site.goldenticket.domain.nego.dto.response.*;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
+import site.goldenticket.domain.payment.model.Order;
+import site.goldenticket.domain.payment.repository.OrderRepository;
+import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
@@ -32,6 +35,7 @@ public class NegoServiceImpl implements NegoService {
     private final UserRepository userRepository;
     private final ChatService chatService;
     private final AlertService alertService;
+    private final PaymentService paymentService;
 
     @Override
     public NegoResponse confirmPrice(Long negoId, PrincipalDetails principalDetails) {
@@ -215,12 +219,13 @@ public class NegoServiceImpl implements NegoService {
                 .filter(nego -> nego.getStatus() == NegotiationStatus.TRANSFER_PENDING)
                 .findFirst();
 
-        // 네고가 없는 경우, 바로 결제 처리
         if (transferPendingNego.isEmpty()) {
+            Order order = paymentService.findByProductId(productId);
             checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
             handleNegos(allNegosForProduct);
+            sendTransferCompleteAlertsForNotNego(order, product, user);
         }
 
         if (transferPendingNego.isPresent()) {
@@ -261,6 +266,27 @@ public class NegoServiceImpl implements NegoService {
     private void sendTransferCompleteAlerts(Nego nego, Product product, User user) {
         // 구매자에게 양도 완료 알림 전송
         alertService.createAlert(nego.getUser().getId(),
+                "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                        + ")'상품 양도가 완료되었습니다. "
+                        + "양도 완료에 따른 체크인 정보는 '마이페이지 > 구매내역 > 구매 완료'에서 확인하실 수 있습니다.");
+
+        // 판매자에게 정산 요청 알림 전송
+        alertService.createAlert(product.getUserId(),
+                "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                        + ")'상품 양도가 완료되었습니다. 영업일 1일 이내 등록한 계좌 정보로 정산 금액이 입금됩니다."
+                        + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
+
+        // 판매자에게 계좌 등록 알림 전송
+        if (user.getAccountNumber() == null) {
+            alertService.createAlert(product.getUserId(),
+                    "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                            + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
+        }
+    }
+
+    private void sendTransferCompleteAlertsForNotNego(Order order, Product product, User user) {
+        // 구매자에게 양도 완료 알림 전송
+        alertService.createAlert(order.getUserId(),
                 "'" + product.getAccommodationName() + "(" + product.getRoomName()
                         + ")'상품 양도가 완료되었습니다. "
                         + "양도 완료에 따른 체크인 정보는 '마이페이지 > 구매내역 > 구매 완료'에서 확인하실 수 있습니다.");
