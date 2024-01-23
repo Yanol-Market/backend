@@ -11,18 +11,14 @@ import site.goldenticket.common.entiy.BaseTimeEntity;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.user.wish.entity.WishRegion;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
-import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_ACCOUNT;
-import static site.goldenticket.common.response.ErrorCode.ALREADY_REGISTER_YANOLJA_ID;
+import static site.goldenticket.common.response.ErrorCode.*;
 import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 
 @Getter
@@ -30,7 +26,7 @@ import static site.goldenticket.domain.user.entity.RoleType.ROLE_USER;
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "users")
 @SQLRestriction("deleted = false")
-@ToString(exclude = {"password", "agreement", "wishRegions"})
+@ToString(exclude = {"password", "agreements", "wishRegions", "deleteReasons"})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -50,19 +46,26 @@ public class User extends BaseTimeEntity {
     private RoleType role;
 
     private Long yanoljaId;
-    private boolean deleted;
 
-    @OneToOne(
+    @OneToMany(
             mappedBy = "user", fetch = LAZY,
             cascade = ALL, orphanRemoval = true
     )
-    private Agreement agreement;
+    private final List<Agreement> agreements = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "user", fetch = LAZY,
             cascade = ALL, orphanRemoval = true
     )
     private final Set<WishRegion> wishRegions = new HashSet<>();
+
+    private boolean deleted;
+
+    @OneToMany(
+            mappedBy = "user", fetch = LAZY,
+            cascade = ALL, orphanRemoval = true
+    )
+    private final List<DeleteReason> deleteReasons = new ArrayList<>();
 
     @Builder
     private User(
@@ -82,8 +85,8 @@ public class User extends BaseTimeEntity {
         this.yanoljaId = yanoljaId;
     }
 
-    public void registerAlertSetting(Agreement agreement) {
-        this.agreement = agreement;
+    public void registerAgreement(Agreement agreement) {
+        this.agreements.add(agreement);
     }
 
     public void updateProfile(String nickname) {
@@ -121,16 +124,22 @@ public class User extends BaseTimeEntity {
         wishRegions.forEach(this::addWishRegion);
     }
 
-    private void addWishRegion(WishRegion wishRegion) {
-        this.wishRegions.add(wishRegion);
-        wishRegion.registerUser(this);
-    }
-
     public boolean isValidRegionSize(int maxSize) {
         return wishRegions.size() > maxSize;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void deleted(DeleteReason deleteReason) {
+        if (this.deleted) {
+            throw new CustomException(ALREADY_DELETE_USER);
+        }
+
+        this.deleted = true;
+        deleteReasons.add(deleteReason);
+        deleteReason.registerUser(this);
+    }
+
+    private void addWishRegion(WishRegion wishRegion) {
+        this.wishRegions.add(wishRegion);
+        wishRegion.registerUser(this);
     }
 }

@@ -47,6 +47,16 @@ public class UserController {
         return ResponseEntity.ok(CommonResponse.ok(UserResponse.from(user)));
     }
 
+    @DeleteMapping
+    public ResponseEntity<CommonResponse<Void>> removeUser(
+            @RequestBody @Validated RemoveUserRequest removeUserRequest,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        Long userId = principalDetails.getUserId();
+        userService.deleteUser(userId, removeUserRequest);
+        return ResponseEntity.ok(CommonResponse.ok());
+    }
+
     @PutMapping("/me")
     public ResponseEntity<CommonResponse<Void>> changeProfile(
             @RequestBody @Validated ChangeProfileRequest changeProfileRequest,

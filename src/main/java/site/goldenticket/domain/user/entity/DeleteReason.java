@@ -7,23 +7,30 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.common.entiy.BaseTimeEntity;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "deleted")
-public class Delete extends BaseTimeEntity {
+public class DeleteReason extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
     private String reason;
 
-    @Builder
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "userId")
+    private User user;
 
-    public Delete(Long userId, String reason) {
-        this.userId = userId;
+    @Builder
+    private DeleteReason(String reason) {
         this.reason = reason;
+    }
+
+    public void registerUser(User user) {
+        this.user = user;
     }
 }
