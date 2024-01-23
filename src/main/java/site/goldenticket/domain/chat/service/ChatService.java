@@ -62,16 +62,16 @@ public class ChatService {
      * @return 채팅 응답 DTO
      */
     public ChatResponse createChat(ChatRequest chatRequest) {
-        if (getChatRoom(chatRequest.chatRoomId()).equals(null)) {
+        if (getChatRoom(chatRequest.chatRoomId())==null) {
             throw new CustomException(CHAT_ROOM_NOT_FOUND);
         }
-        if (userService.findById(chatRequest.userId()).equals(null)) {
+        if (userService.findById(chatRequest.userId())==null) {
             throw new CustomException(USER_NOT_FOUND);
         }
         SenderType senderType;
         ChatRoom chatRoom = getChatRoom(chatRequest.chatRoomId());
         Long productIdOfChatRoomId = chatRoom.getProductId();
-        if (productService.getProduct(productIdOfChatRoomId).equals(null)) {
+        if (productService.getProduct(productIdOfChatRoomId)==null) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         Long sellerIdOfProduct = productService.getProduct(productIdOfChatRoomId).getUserId();
@@ -123,10 +123,10 @@ public class ChatService {
      * @return 채팅방 응답 DTO
      */
     public ChatRoomResponse createChatRoom(Long buyerId, Long productId) {
-        if (userService.findById(buyerId).equals(null)) {
+        if (userService.findById(buyerId)==null) {
             throw new CustomException(USER_NOT_FOUND);
         }
-        if (productService.getProduct(productId).equals(null)) {
+        if (productService.getProduct(productId)==null) {
             throw new CustomException(PRODUCT_NOT_FOUND);
         }
         Product product = productService.getProduct(productId);
@@ -272,8 +272,8 @@ public class ChatService {
             if (nego.getStatus().equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
                 chatStatus = "NEGO_TIMEOUT";
             } else if (nego.getStatus().equals(NegotiationStatus.NEGOTIATING)) {
-                if ((nego.getCount().equals(1) && nego.getConsent().equals(null))
-                    || nego.getCount().equals(2) && nego.getConsent().equals(false)) {
+                if ((nego.getCount().equals(1) && nego.getConsent()==null)
+                    || (nego.getCount().equals(2) && nego.getConsent().equals(false))) {
                     chatStatus = "NEGO_PROPOSE";
                 }
             }
