@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
+import site.goldenticket.domain.alert.service.AlertService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.service.NegoService;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
@@ -42,6 +43,7 @@ public class PaymentService {
     private final UserService userService;
     private final NegoService negoService;
     private final ProductService productService;
+    private final AlertService alertService;
 
     public PaymentDetailResponse getPaymentDetail(Long productId, PrincipalDetails principalDetails) {
         User user = userService.findById(principalDetails.getUserId());
@@ -58,7 +60,7 @@ public class PaymentService {
         Order order = Order.of(product.getId(), user.getId(), null, price);
 
         if (nego.isPresent()) {
-            if (nego.get().getConsent()) {
+            if (Boolean.TRUE.equals(nego.get().getConsent())) {
                 price = nego.get().getPrice();
                 order = Order.of(product.getId(), user.getId(), nego.get().getStatus(), price);
             }
@@ -115,7 +117,7 @@ public class PaymentService {
             return PaymentResponse.failed();
         }
 
-        if (order.getNegoStatus()!=null) {
+        if (order.getNegoStatus() != null) {
             Nego nego = negoService.getNego(userId, order.getProductId()).orElseThrow(
                     () -> new CustomException(ErrorCode.NEGO_NOT_FOUND)
             );
@@ -128,8 +130,12 @@ public class PaymentService {
         }
 
         order.waitTransfer();
-
         product.setProductStatus(ProductStatus.RESERVED);
+        alertService.createAlert(product.getUserId(),
+                product.getAccommodationName() + "(" + product.getRoomName() + ") "
+                        + "상품이 결제완료되었습니다." + order.getUpdatedAt().plusHours(3)
+                        + "까지 양도 신청을 완료해주세요. 양도 미신청 시, 자동 양도 신청됩니다.");
+
         return PaymentResponse.success();
     }
 
