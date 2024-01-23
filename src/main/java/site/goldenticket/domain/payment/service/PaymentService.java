@@ -7,6 +7,7 @@ import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
+import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.service.NegoService;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
@@ -44,6 +45,7 @@ public class PaymentService {
     private final NegoService negoService;
     private final ProductService productService;
     private final AlertService alertService;
+    private final ChatService chatService;
 
     public PaymentDetailResponse getPaymentDetail(Long productId, PrincipalDetails principalDetails) {
         User user = userService.findById(principalDetails.getUserId());
@@ -135,6 +137,10 @@ public class PaymentService {
                 product.getAccommodationName() + "(" + product.getRoomName() + ") "
                         + "상품이 결제완료되었습니다." + order.getUpdatedAt().plusHours(3)
                         + "까지 양도 신청을 완료해주세요. 양도 미신청 시, 자동 양도 신청됩니다.");
+        //채팅방 생성
+        if(!chatService.existsChatRoomByBuyerIdAndProductId(userId, product.getId())) {
+            chatService.createChatRoom(userId, product.getId());
+        }
 
         return PaymentResponse.success();
     }
