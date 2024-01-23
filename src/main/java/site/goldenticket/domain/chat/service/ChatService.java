@@ -192,6 +192,7 @@ public class ChatService {
             .price(product.getGoldenPrice())
             .productStatus(product.getProductStatus())
             .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
+            .negoId(getNegoIdOfChatRoom(buyerId, product.getId()))
             .build();
 
         List<Chat> chatList = getChatListAll(chatRoomId, userId);
@@ -218,6 +219,24 @@ public class ChatService {
         return ChatRoomDetailResponse.builder()
             .chatRoomInfoResponse(chatRoomInfoResponse)
             .chatResponseList(chatResponseList).build();
+    }
+
+    /***
+     * 채팅방 네고 ID 조회
+     * @param buyerId 구매자 ID
+     * @param productId 상품 ID
+     * @return 네고 ID
+     */
+    private Long getNegoIdOfChatRoom(Long buyerId, Long productId) {
+        Product product = productService.getProduct(productId);
+        Boolean existsNego = negoRepository.existsByUser_IdAndProduct_Id(buyerId, product.getId());
+        Long negoId = -1L;
+        if(existsNego) {
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
+                product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
+            negoId = nego.getId();
+        }
+        return negoId;
     }
 
     /***
