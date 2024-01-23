@@ -13,7 +13,6 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.repository.OrderRepository;
-import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
@@ -35,7 +34,7 @@ public class NegoServiceImpl implements NegoService {
     private final UserRepository userRepository;
     private final ChatService chatService;
     private final AlertService alertService;
-    private final PaymentService paymentService;
+    private final OrderRepository orderRepository;
 
     @Override
     public NegoResponse confirmPrice(Long negoId, PrincipalDetails principalDetails) {
@@ -220,7 +219,7 @@ public class NegoServiceImpl implements NegoService {
                 .findFirst();
 
         if (transferPendingNego.isEmpty()) {
-            Order order = paymentService.findByProductId(productId);
+            Order order = orderRepository.findByProductId(productId);
             checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
