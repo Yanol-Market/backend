@@ -27,7 +27,9 @@ logging:
     org:
       springframework:
         security: DEBUG
-      hibernate: ERROR
+      hibernate:
+        SQL: DEBUG
+        type: DEBUG
     root: INFO
 
 jwt:
