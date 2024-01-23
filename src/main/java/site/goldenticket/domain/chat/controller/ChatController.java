@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.goldenticket.common.response.CommonResponse;
 import site.goldenticket.domain.chat.dto.request.ChatRequest;
+import site.goldenticket.domain.chat.dto.response.ChatListResponse;
 import site.goldenticket.domain.chat.dto.response.ChatResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomDetailResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomListResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomShortListResponse;
 import site.goldenticket.domain.chat.dto.request.ChatRoomRequest;
 import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.service.ChatService;
@@ -27,6 +29,18 @@ import site.goldenticket.domain.security.PrincipalDetails;
 public class ChatController {
 
     private final ChatService chatService;
+
+    @GetMapping("/test")
+    public ResponseEntity<CommonResponse<ChatListResponse>> getChatListForTest() {
+        return ResponseEntity.ok(
+            CommonResponse.ok("테스트용 모든 채팅 기록이 조회되었습니다.", chatService.getChatListAll()));
+    }
+
+    @GetMapping("/test/chat-room")
+    public ResponseEntity<CommonResponse<ChatRoomListResponse>> getChatRoomListForTest() {
+        return ResponseEntity.ok(
+            CommonResponse.ok("테스트용 모든 채팅방 기록이 조회되었습니다.", chatService.getChatRoomListAll()));
+    }
 
     @PostMapping("/test")
     public ResponseEntity<CommonResponse<ChatResponse>> createChatForTest(
@@ -45,6 +59,7 @@ public class ChatController {
             CommonResponse.ok("새로운 채팅방이 생성되었습니다.",
                 chatService.createChatRoom(chatRoomRequest.userId(), chatRoomRequest.productId())));
     }
+
     @GetMapping("/{chatRoomId}")
     public ResponseEntity<CommonResponse<ChatRoomDetailResponse>> getChatRoom(
         @PathVariable(name = "chatRoomId") Long chatRoomId,
@@ -54,10 +69,10 @@ public class ChatController {
     }
 
     @GetMapping()
-    public ResponseEntity<CommonResponse<ChatRoomListResponse>> getChatRoomList(
+    public ResponseEntity<CommonResponse<ChatRoomShortListResponse>> getChatRoomList(
         @RequestParam(name = "userType") String userType,
         @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(CommonResponse.ok("채팅방 목록(거래 내역)이 조회되었습니다",
-            chatService.getChatRoomList(principalDetails.getUserId(), userType)));
+            chatService.getChatRoomShortList(principalDetails.getUserId(), userType)));
     }
 }
