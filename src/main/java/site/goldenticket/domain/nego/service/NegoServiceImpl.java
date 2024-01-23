@@ -41,10 +41,10 @@ public class NegoServiceImpl implements NegoService {
 
         Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
         Nego nego = negoRepository.findById(negoId)
-            .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + negoId));
 
         Product product = productService.getProduct(nego.getProductId());
 
@@ -54,16 +54,16 @@ public class NegoServiceImpl implements NegoService {
 
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
             nego.confirmNego(LocalDateTime.now(), NegotiationStatus.PAYMENT_PENDING,
-                LocalDateTime.now().plusMinutes(20), Boolean.TRUE);
+                    LocalDateTime.now().plusMinutes(20), Boolean.TRUE);
             product.setProductStatus(ProductStatus.RESERVED);
             productService.updateProductForNego(product);
             negoRepository.save(nego);
 
             //구매자에게 네고 승인 및 결제 안내 알림 전송
             alertService.createAlert(nego.getUser().getId(),
-                "'" + nego.getProduct().getAccommodationName() +
-                    "(" + nego.getProduct().getRoomName() + ")'상품에 대한 네고 요청이 승인되었습니다. 해당상품을 "
-                    + nego.getExpirationTime() + "까지 결제를 완료해주세요.");
+                    "'" + nego.getProduct().getAccommodationName() +
+                            "(" + nego.getProduct().getRoomName() + ")'상품에 대한 네고 요청이 승인되었습니다. 해당상품을 "
+                            + nego.getExpirationTime() + "까지 결제를 완료해주세요.");
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
@@ -78,13 +78,13 @@ public class NegoServiceImpl implements NegoService {
     public NegoResponse denyPrice(Long negoId, PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
         Nego nego = negoRepository.findById(negoId)
-            .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
+                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
         if (nego.getStatus() == NegotiationStatus.NEGOTIATING
-            || nego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
+                || nego.getStatus() == NegotiationStatus.NEGOTIATION_CANCELLED) {
             nego.setUpdatedAt(LocalDateTime.now());
             nego.setConsent(Boolean.FALSE);
 
@@ -97,22 +97,22 @@ public class NegoServiceImpl implements NegoService {
 
             //구매자에게 네고 거절 알림 전송
             alertService.createAlert(nego.getUser().getId(),
-                "'" + nego.getProduct().getAccommodationName() +
-                    "(" + nego.getProduct().getRoomName() + ")'상품에 대한 네고 요청이 거절되었습니다.");
+                    "'" + nego.getProduct().getAccommodationName() +
+                            "(" + nego.getProduct().getRoomName() + ")'상품에 대한 네고 요청이 거절되었습니다.");
 
             return NegoResponse.fromEntity(nego);
         } else {
             // NEGOTIATING 상태가 아닌 경우 거절 처리 불가
             throw new CustomException("네고 중인 경우에만 거절할 수 있습니다.",
-                ErrorCode.ONLY_CAN_DENY_WHEN_NEGOTIATING);
+                    ErrorCode.ONLY_CAN_DENY_WHEN_NEGOTIATING);
         }
     }
 
     public PriceProposeResponse proposePrice(Long productId, PriceProposeRequest request,
-        PrincipalDetails principalDetails) {
+                                             PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
         Product product = productService.getProduct(productId);
 
@@ -127,13 +127,13 @@ public class NegoServiceImpl implements NegoService {
 
             if (nego != null && nego.getStatus() == NegotiationStatus.PAYMENT_PENDING) {
                 throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.",
-                    ErrorCode.NEGO_ALREADY_APPROVED);
+                        ErrorCode.NEGO_ALREADY_APPROVED);
             }   //OK
         }
 
         // 사용자별 상품에 대한 네고 조회
         Nego userNego = negoRepository.findByUserAndProduct(user, product)
-            .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
+                .orElse(new Nego(user, product)); // 네고가 없으면 새로 생성
 
         if (userNego.getProduct().getProductStatus() == ProductStatus.SOLD_OUT) {
             throw new CustomException("승인된 네고는 가격 제안을 할 수 없습니다.", ErrorCode.NEGO_ALREADY_APPROVED);
@@ -155,17 +155,30 @@ public class NegoServiceImpl implements NegoService {
             throw new CustomException("더 이상 네고할 수 없습니다.", ErrorCode.CANNOT_NEGOTIATE);
         }
 
-        // 네고 엔터티 업데이트
-        userNego.updateNego(newCount, request.price(), NegotiationStatus.NEGOTIATING,
-            LocalDateTime.now(), LocalDateTime.now(), null);
+        //
+        /****
+         * 네고를 한적이 있는 사람
+         * FALSE인 이유
+         네고를 다시 제안한다는것은 네고를 거절했거나 양도를 거절한 케이스
+         네고거절, 양도거절을 하면 consent == False가 됨
+         => 사용자별 상품에 대한 네고 조회를 한 후 승인여부가 FALSE이면 이전에 네고를 한적이 있는 사람
+         */
+        if (userNego.getConsent() == Boolean.FALSE) {
+            userNego.updateNego(newCount, request.price(), NegotiationStatus.NEGOTIATING,
+                    LocalDateTime.now(), LocalDateTime.now(), Boolean.FALSE);
+
+        } else {
+            userNego.updateNego(newCount, request.price(), NegotiationStatus.NEGOTIATING,
+                    LocalDateTime.now(), LocalDateTime.now(), null);
+        }// 처음 네고
 
         // 네고 저장
         negoRepository.save(userNego);
 
         //판매자에게 네고 제안 알림 전송
         alertService.createAlert(product.getUserId(),
-            "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                + ")'상품에 대한 네고 요청이 들어왔습니다.");
+                "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                        + ")'상품에 대한 네고 요청이 들어왔습니다.");
 
         return PriceProposeResponse.fromEntity(userNego);
     }
@@ -176,15 +189,15 @@ public class NegoServiceImpl implements NegoService {
         Long userId = principalDetails.getUserId();
 
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
+                .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
         Nego nego = negoRepository.findById(negoId)
-            .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
+                .orElseThrow(() -> new NoSuchElementException("해당 ID의 네고를 찾을 수 없습니다: " + negoId));
 
         Product product = productService.getProduct(nego.getProductId());
 
         if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED
-            || nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
+                || nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
         }
 
@@ -230,7 +243,7 @@ public class NegoServiceImpl implements NegoService {
         if (transferPendingNego.isPresent()) {
             checkAccountAndThrowException(user);
             Nego nego = transferPendingNego.get();
-            completeTransfer(product,nego);
+            completeTransfer(product, nego);
             handleNegos(allNegosForProduct);
             sendTransferCompleteAlerts(nego, product, user);
             return HandoverResponse.fromEntity(product, nego);
@@ -250,8 +263,8 @@ public class NegoServiceImpl implements NegoService {
 
         // 양도 대기 중인 네고 찾기
         Optional<Nego> transferPendingNego = allNegosForProduct.stream()
-            .filter(nego -> nego.getStatus() == NegotiationStatus.TRANSFER_PENDING)
-            .findFirst();
+                .filter(nego -> nego.getStatus() == NegotiationStatus.TRANSFER_PENDING)
+                .findFirst();
 
         if (transferPendingNego.isEmpty()) {
             Order order = orderRepository.findByProductId(productId);
@@ -280,10 +293,10 @@ public class NegoServiceImpl implements NegoService {
 
             //구매자에게 양도 취소 알림 전송
             alertService.createAlert(nego.getUser().getId(),
-                "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
+                    "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
             //판매자에게 양도 취소 알림 전송
             alertService.createAlert(product.getUserId(),
-                "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
+                    "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
 
             return NegoResponse.fromEntity(nego);
         }
@@ -291,10 +304,11 @@ public class NegoServiceImpl implements NegoService {
     }
 
     // 메서드
-    private void updateProductForDenyHandOver(Product product){
+    private void updateProductForDenyHandOver(Product product) {
         product.setProductStatus(ProductStatus.SELLING);
         productService.updateProductForNego(product);
     }
+
     private void handleNegos(List<Nego> allNegosForProduct) {
         for (Nego otherNego : allNegosForProduct) {
             otherNego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
@@ -302,6 +316,7 @@ public class NegoServiceImpl implements NegoService {
             negoRepository.save(otherNego);
         }
     }
+
     private void completeTransfer(Product product, Nego nego) {
         nego.setUpdatedAt(LocalDateTime.now());
         nego.setConsent(Boolean.TRUE);
@@ -311,11 +326,13 @@ public class NegoServiceImpl implements NegoService {
         productService.updateProductForNego(product);
         negoRepository.save(nego);
     }
+
     private void checkAccountAndThrowException(User user) {
-        if (user.getAccountNumber()==null) {
+        if (user.getAccountNumber() == null) {
             throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
         }
     }
+
     private void sendTransferCompleteAlerts(Nego nego, Product product, User user) {
         // 구매자에게 양도 완료 알림 전송
         alertService.createAlert(nego.getUser().getId(),
@@ -336,6 +353,7 @@ public class NegoServiceImpl implements NegoService {
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
         }
     }
+
     private void sendTransferCompleteAlertsForNotNego(Order order, Product product, User user) {
         // 구매자에게 양도 완료 알림 전송
         alertService.createAlert(order.getUserId(),
@@ -360,7 +378,7 @@ public class NegoServiceImpl implements NegoService {
     @Override
     public Optional<Nego> getNego(Long userId, Long productId) {
         return negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId,
-            productId);
+                productId);
     }
 
     @Override
@@ -401,10 +419,10 @@ public class NegoServiceImpl implements NegoService {
             } else {
                 //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
                 List<Nego> negoList = negoRepository.findAllByUser_IdAndProduct_Id(userId,
-                    productId);
+                        productId);
                 for (Nego nego : negoList) {
                     if (nego.getCount().equals(2) || nego.getStatus()
-                        .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
+                            .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
                         negoAvailable = false;
                         break;
                     }
@@ -415,13 +433,13 @@ public class NegoServiceImpl implements NegoService {
             chatRoomId = chatService.getChatRoomByBuyerIdAndProductId(userId, productId).getId();
         }
         return NegoAvailableResponse.builder()
-            .negoAvailable(negoAvailable)
-            .chatRoomId(chatRoomId)
-            .build();
+                .negoAvailable(negoAvailable)
+                .chatRoomId(chatRoomId)
+                .build();
     }
 
     public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList,
-        Product product) {
+                                               Product product) {
         return negoRepository.findByStatusInAndProduct(negotiationStatusList, product);
     }
 }
