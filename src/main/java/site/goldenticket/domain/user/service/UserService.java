@@ -15,6 +15,7 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static site.goldenticket.common.response.ErrorCode.*;
 
@@ -44,7 +45,7 @@ public class UserService {
         joinValidate(joinRequest);
         log.info("Join User Info = {}", joinRequest);
 
-        String encodePassword = passwordEncoder.encode(joinRequest.password());
+        String encodePassword = getJoinPassword(joinRequest);
         User user = joinRequest.toEntity(encodePassword);
         userRepository.save(user);
         return user.getId();
@@ -110,6 +111,13 @@ public class UserService {
         }
 
         duplicateNickname(joinRequest.nickname());
+    }
+
+    private String getJoinPassword(JoinRequest joinRequest) {
+        if (Objects.isNull(joinRequest.yanoljaId())) {
+            return passwordEncoder.encode(joinRequest.password());
+        }
+        return passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
     private void updateProfileValidate(ChangeProfileRequest changeProfileRequest) {
