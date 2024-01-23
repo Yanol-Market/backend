@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record NegoAvailableResponse(
     Boolean negoAvailable,
+    Boolean isNewChatRoom,
     Long chatRoomId
 ) {
 
