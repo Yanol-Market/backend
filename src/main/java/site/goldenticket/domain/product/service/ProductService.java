@@ -160,12 +160,7 @@ public class ProductService {
             INITIAL_RANKING_SCORE);
 
         //해당 지역 찜한 회원들에게 알림 전송
-        AreaCode areaCode = product.getAreaCode();
-        List<Long> userList = wishRegionService.findUserIdByRegion(areaCode);
-        for (Long userId : userList) {
-            alertService.createAlert(userId,
-                "관심있던 '" + areaCode.getAreaName() + "'지역에 새로운 상품이 등록되었습니다! 사라지기 전에 확인해보세요!");
-        }
+        alertService.createAlertOfWishRegion(product.getAreaCode());
 
         return ProductResponse.fromEntity(savedProduct);
     }
@@ -174,8 +169,13 @@ public class ProductService {
     public ProductResponse updateProduct(ProductRequest productRequest, Long productId) {
         Product product = getProduct(productId);
         product.update(productRequest.goldenPrice(), productRequest.content());
+        AreaCode pastAreaCode = product.getAreaCode();
         Product updatedProduct = productRepository.save(product);
-
+        AreaCode nowAreaCode = updatedProduct.getAreaCode();
+        //해당 지역 찜한 회원들에게 알림 전송
+        if(!nowAreaCode.equals(pastAreaCode)) {
+            alertService.createAlertOfWishRegion(nowAreaCode);
+        }
         return ProductResponse.fromEntity(updatedProduct);
     }
 

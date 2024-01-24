@@ -13,6 +13,8 @@ import site.goldenticket.domain.alert.dto.AlertResponse;
 import site.goldenticket.domain.alert.dto.AlertUnSeenResponse;
 import site.goldenticket.domain.alert.entity.Alert;
 import site.goldenticket.domain.alert.repository.AlertRepository;
+import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.domain.user.wish.service.WishRegionService;
 
 @Service
 @Transactional
@@ -20,6 +22,7 @@ import site.goldenticket.domain.alert.repository.AlertRepository;
 public class AlertService {
 
     private final AlertRepository alertRepository;
+    private final WishRegionService wishRegionService;
 
     public AlertResponse createAlertForTest(AlertRequest alertRequest) {
         Alert alert = Alert.builder()
@@ -69,5 +72,13 @@ public class AlertService {
         Collections.sort(alertResponses,
             Comparator.comparing(AlertResponse::createdAt).reversed());
         return AlertListResponse.builder().alertResponses(alertResponses).build();
+    }
+
+    public void createAlertOfWishRegion(AreaCode areaCode) {
+        List<Long> userList = wishRegionService.findUserIdByRegion(areaCode);
+        for (Long userId : userList) {
+            createAlert(userId,
+                "관심있던 '" + areaCode.getAreaName() + "'지역에 새로운 상품이 등록되었습니다! 사라지기 전에 확인해보세요!");
+        }
     }
 }
