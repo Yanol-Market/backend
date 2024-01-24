@@ -41,6 +41,7 @@ public enum ErrorCode {
     NEGO_COUNT_OVER(BAD_REQUEST,"네고를 3회이상 제안하실수 없습니다."),
     NO_TRANSFER_PENDING_NEGO(BAD_REQUEST, "양도 대기중인 네고가 없습니다."),
     NO_REGISTERED_ACCOUNT(NOT_FOUND, "등록된 계좌가 없습니다"),
+    TRANSFER_PENDING_NEGO(BAD_REQUEST,"양도 대기 중인 상품이 있어 결제할 수 없습니다."),
 
 
     // Auth

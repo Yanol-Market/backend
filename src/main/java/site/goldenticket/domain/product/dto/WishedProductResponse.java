@@ -24,7 +24,6 @@ public record WishedProductResponse(
         int originPriceRatio,
         int marketPriceRatio,
         ProductStatus productStatus,
-        Long wishId,
         boolean isWished
 ) {
 
@@ -44,7 +43,6 @@ public record WishedProductResponse(
         int marketPriceRatio = DiscountCalculatorUtil.calculateDiscountPercentage(yanoljaPrice, goldenPrice);
 
         boolean isWished = isAuthenticated ? !product.getWishProducts().isEmpty() : false;
-        Long wishId = isWished ? product.getWishProducts().get(0).getId() : null;
 
         return new WishedProductResponse(
                 product.getId(),
@@ -62,7 +60,6 @@ public record WishedProductResponse(
                 originPriceRatio,
                 marketPriceRatio,
                 product.getProductStatus(),
-                wishId,
                 isWished
         );
     }
