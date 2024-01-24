@@ -11,6 +11,7 @@ import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
+import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
@@ -56,9 +57,18 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
-        int price = product.getGoldenPrice();
-
+        //상품상태 = 예약중, 해당 경우에 본인이 네고를 진행하였고 결제 대기중인지 확인
         Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(user.getId(), product.getId());
+        if (product.getProductStatus() == ProductStatus.RESERVED) {
+            if (nego.isEmpty()) {
+                throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+            }
+            if (nego.get().getStatus() != NegotiationStatus.PAYMENT_PENDING) {
+                throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+            }
+        }
+
+        int price = product.getGoldenPrice();
 
         Order order = Order.of(product.getId(), user.getId(), null, price);
 
@@ -91,6 +101,17 @@ public class PaymentService {
             throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
         }
 
+        //상품상태 = 예약중, 해당 경우에 본인이 네고를 진행하였고 결제 대기중인지 확인
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(user.getId(), product.getId());
+        if (product.getProductStatus() == ProductStatus.RESERVED) {
+            if (nego.isEmpty()) {
+                throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+            }
+            if (nego.get().getStatus() != NegotiationStatus.PAYMENT_PENDING) {
+                throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+            }
+        }
+
         order.requestPayment();
 
         iamportRepository.prepare(order.getId(), BigDecimal.valueOf(order.getTotalPrice()));
@@ -115,20 +136,40 @@ public class PaymentService {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_AMOUNT_ERROR);
         }
 
+        //결제가 되지 않은 경우
         if (savedPayment.isNotPaid()) {
             order.paymentFailed();
             return PaymentResponse.failed();
         }
 
-        if (order.getNegoStatus() != null) {
-            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, order.getProductId()).orElseThrow(
-                    () -> new CustomException(ErrorCode.NEGO_NOT_FOUND)
-            );
-            if (nego.getStatus() != order.getNegoStatus()) {
+        //상품상태 = 상품만료, 솔드아웃
+        if (product.isNotOnSale()) {
+            cancelPayment(request.getImpUid());
+            return PaymentResponse.failed();
+        }
+
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, product.getId());
+
+        //네고가 존재할때, 결제 대기중 -> 타임아웃 경우
+        if (nego.isPresent()) {
+            if (nego.get().getStatus() != order.getNegoStatus()) {
                 cancelPayment(request.getImpUid());
                 return PaymentResponse.timeOver();
             }
-            nego.completed();
+            if (product.getProductStatus() == ProductStatus.RESERVED) {
+                if (nego.get().getStatus() != NegotiationStatus.PAYMENT_PENDING) {
+                    cancelPayment(request.getImpUid());
+                    return PaymentResponse.failed();
+                }
+            }
+            nego.get().completed();
+        }
+
+        if (product.getProductStatus() == ProductStatus.RESERVED) {
+            if (nego.isEmpty()) {
+                cancelPayment(request.getImpUid());
+                return PaymentResponse.failed();
+            }
         }
 
         order.waitTransfer();
@@ -141,7 +182,7 @@ public class PaymentService {
                         + "까지 양도 신청을 완료해주세요. 양도 미신청 시, 자동 양도 신청됩니다.");
 
         //채팅방 생성 + 시작 메세지 생성
-        if(!chatService.existsChatRoomByBuyerIdAndProductId(userId, product.getId())) {
+        if (!chatService.existsChatRoomByBuyerIdAndProductId(userId, product.getId())) {
             ChatRoomResponse chatRoomResponse = chatService.createChatRoom(userId, product.getId());
             chatService.createStartMessageOfNewChatRoom(chatRoomResponse.chatRoomId());
         }
