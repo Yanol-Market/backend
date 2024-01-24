@@ -26,7 +26,6 @@ import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.repository.ProductRepository;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.domain.user.wish.service.WishRegionService;
 import site.goldenticket.dummy.reservation.dto.ReservationDetailsResponse;
 import site.goldenticket.dummy.reservation.dto.YanoljaProductResponse;
 
@@ -51,7 +50,6 @@ public class ProductService {
     private final RedisService redisService;
     private final ProductRepository productRepository;
     private final AlertService alertService;
-    private final WishRegionService wishRegionService;
 
     // 1. 키워드 검색 및 지역 검색 메서드
     @Transactional(readOnly = true)

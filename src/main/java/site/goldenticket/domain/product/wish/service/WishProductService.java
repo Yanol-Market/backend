@@ -2,7 +2,6 @@ package site.goldenticket.domain.product.wish.service;
 
 import static site.goldenticket.common.response.ErrorCode.WISH_PRODUCT_NOT_FOUND;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,19 +55,5 @@ public class WishProductService {
             .userId(userId)
             .product(product)
             .build();
-    }
-
-    /***
-     * 특정 상품을 관심 상품으로 등록한 회원 ID 목록 조회
-     * @param productId 관심 상품 ID
-     * @return 회원 ID List
-     */
-    public List<Long> findUserIdListByProductId(Long productId) {
-        List<WishProduct> wishProductList = wishProductRepository.findByProductId(productId);
-        List<Long> userIdList = new ArrayList<>();
-        for (WishProduct wishProduct : wishProductList) {
-            userIdList.add(wishProduct.getUserId());
-        }
-        return userIdList;
     }
 }
