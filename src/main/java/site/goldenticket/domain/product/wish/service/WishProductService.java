@@ -1,5 +1,9 @@
 package site.goldenticket.domain.product.wish.service;
 
+import static site.goldenticket.common.response.ErrorCode.WISH_PRODUCT_NOT_FOUND;
+
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,10 +13,6 @@ import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.product.wish.entity.WishProduct;
 import site.goldenticket.domain.product.wish.repository.WishProductRepository;
-
-import java.util.List;
-
-import static site.goldenticket.common.response.ErrorCode.WISH_PRODUCT_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -48,13 +48,27 @@ public class WishProductService {
 
     private WishProduct findByUserIdAndProductId(Long userId, Long productId) {
         return wishProductRepository.findByUserIdAndProductId(userId, productId)
-                .orElseThrow(() -> new CustomException(WISH_PRODUCT_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(WISH_PRODUCT_NOT_FOUND));
     }
 
     private WishProduct createWishProduct(Long userId, Product product) {
         return WishProduct.builder()
-                .userId(userId)
-                .product(product)
-                .build();
+            .userId(userId)
+            .product(product)
+            .build();
+    }
+
+    /***
+     * 특정 상품을 관심 상품으로 등록한 회원 ID 목록 조회
+     * @param productId 관심 상품 ID
+     * @return 회원 ID List
+     */
+    public List<Long> findUserIdListByProductId(Long productId) {
+        List<WishProduct> wishProductList = wishProductRepository.findByProductId(productId);
+        List<Long> userIdList = new ArrayList<>();
+        for (WishProduct wishProduct : wishProductList) {
+            userIdList.add(wishProduct.getUserId());
+        }
+        return userIdList;
     }
 }

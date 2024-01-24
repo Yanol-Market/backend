@@ -14,6 +14,7 @@ import site.goldenticket.domain.alert.dto.AlertUnSeenResponse;
 import site.goldenticket.domain.alert.entity.Alert;
 import site.goldenticket.domain.alert.repository.AlertRepository;
 import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.domain.product.wish.service.WishProductService;
 import site.goldenticket.domain.user.wish.service.WishRegionService;
 
 @Service
@@ -23,6 +24,7 @@ public class AlertService {
 
     private final AlertRepository alertRepository;
     private final WishRegionService wishRegionService;
+    private final WishProductService wishProductService;
 
     public AlertResponse createAlertForTest(AlertRequest alertRequest) {
         Alert alert = Alert.builder()
@@ -79,6 +81,15 @@ public class AlertService {
         for (Long userId : userList) {
             createAlert(userId,
                 "관심있던 '" + areaCode.getAreaName() + "'지역에 새로운 상품이 등록되었습니다! 사라지기 전에 확인해보세요!");
+        }
+    }
+
+    public void createAlertOfWishProductToSelling(Long productId, String accommodationName,
+        String roomName) {
+        List<Long> userList = wishProductService.findUserIdListByProductId(productId);
+        for (Long userId : userList) {
+            createAlert(userId, "찜한 ‘" + accommodationName + "(" + roomName
+                    + ")' 상품이 판매중으로 변경되어 다시 구매가 가능합니다. 빠르게 거래를 진행해주세요!");
         }
     }
 }

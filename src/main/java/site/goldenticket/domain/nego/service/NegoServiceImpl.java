@@ -276,6 +276,10 @@ public class NegoServiceImpl implements NegoService {
             //판매자에게 양도 취소 알림 전송
             alertService.createAlert(product.getUserId(),
                     "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
+            //해당 상품 찜한 회원들에게 알림 전송
+            if(product.getProductStatus().equals(ProductStatus.SELLING)) {
+                alertService.createAlertOfWishProductToSelling(productId, product.getAccommodationName(), product.getRoomName());
+            }
         }
 
         if (transferPendingNego.isPresent()) {
@@ -298,6 +302,10 @@ public class NegoServiceImpl implements NegoService {
             //판매자에게 양도 취소 알림 전송
             alertService.createAlert(product.getUserId(),
                     "양도가 취소되었습니다. 구매자에게 결제 금액이 100% 환불됩니다.");
+            //해당 상품 찜한 회원들에게 알림 전송
+            if(product.getProductStatus().equals(ProductStatus.SELLING)) {
+                alertService.createAlertOfWishProductToSelling(productId, product.getAccommodationName(), product.getRoomName());
+            }
 
             return NegoResponse.fromEntity(nego);
         }
