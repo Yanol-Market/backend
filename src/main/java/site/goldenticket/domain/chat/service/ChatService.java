@@ -12,6 +12,8 @@ import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -87,7 +89,7 @@ public class ChatService {
     public ChatRoomListResponse getChatRoomListAll() {
         List<ChatRoom> chatRoomList = chatRoomRepository.findAll();
         List<ChatRoomResponse> chatRoomResponseList = new ArrayList<>();
-        for(ChatRoom chatRoom : chatRoomList) {
+        for (ChatRoom chatRoom : chatRoomList) {
             chatRoomResponseList.add(
                 ChatRoomResponse.builder()
                     .chatRoomId(chatRoom.getId())
@@ -190,6 +192,48 @@ public class ChatService {
             .userId(chatRoom.getBuyerId())
             .productId(chatRoom.getProductId())
             .build();
+    }
+
+    /***
+     * 채팅 시작할 때 필요한 메세지 생성
+     * @param chatRoomId 채팅방 ID
+     */
+    public void createStartMessageOfNewChatRoom(Long chatRoomId) {
+        ChatRoom chatRoom = getChatRoom(chatRoomId);
+        Product product = productService.getProduct(chatRoom.getProductId());
+        User buyer = userService.findById(chatRoom.getBuyerId());
+        User seller = userService.findById(product.getUserId());
+        createChat(new ChatRequest(chatRoomId, "SYSTEM", buyer.getId(),
+            createEntranceMessage(buyer.getNickname())));
+        createChat(new ChatRequest(chatRoomId, "SYSTEM", seller.getId(),
+            createEntranceMessage(seller.getNickname())));
+        createChat(new ChatRequest(chatRoomId, "SELLER", seller.getId(),
+            createNegoStartMessage(product)));
+    }
+
+    /***
+     * 입장 메세지 생성
+     * @param nickname 회원 닉네임
+     * @return 메세지
+     */
+    private String createEntranceMessage (String nickname) {
+        return nickname + "님이 입장하셨습니다.";
+    }
+
+    /***
+     * 네고 시작 메세지 생성
+     * @param product 판매 상품
+     * @return 메세지
+     */
+    private String createNegoStartMessage(Product product) {
+        LocalDate checkInDate = product.getCheckInDate();
+        LocalDate checkOutDate = product.getCheckOutDate();
+        Long numberOfNights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+        return product.getAccommodationName() + " " + product.getRoomName() + " "
+            + checkInDate.getMonthValue() + "/" + checkInDate.getDayOfMonth() + "~"
+            + checkOutDate.getMonthValue() + "/" + checkOutDate.getDayOfMonth() + " "
+            + numberOfNights + "박 " + numberOfNights + 1 + "일 " + product.getGoldenPrice()
+            + "원에 팝니다. 가격 협의 가능합니다.";
     }
 
     /***

@@ -4,7 +4,6 @@ import lombok.Getter;
 
 public record PaymentResponse(
     PaymentResult result,
-    Boolean isNewChatRoom,
     Long chatRoomId
 ) {
 
@@ -16,15 +15,15 @@ public record PaymentResponse(
         SUCCESS, TIME_OVER, FAILED
     }
 
-    public static PaymentResponse success(Boolean isNewChatRoom, Long chatRoomId) {
-        return new PaymentResponse(PaymentResult.SUCCESS, isNewChatRoom, chatRoomId);
+    public static PaymentResponse success(Long chatRoomId) {
+        return new PaymentResponse(PaymentResult.SUCCESS, chatRoomId);
     }
 
     public static PaymentResponse timeOver() {
-        return new PaymentResponse(PaymentResult.TIME_OVER, false, -1L);
+        return new PaymentResponse(PaymentResult.TIME_OVER, -1L);
     }
 
     public static PaymentResponse failed() {
-        return new PaymentResponse(PaymentResult.FAILED, false, -1L);
+        return new PaymentResponse(PaymentResult.FAILED, -1L);
     }
 }
