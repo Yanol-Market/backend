@@ -7,9 +7,10 @@ import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
+import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
-import site.goldenticket.domain.nego.service.NegoService;
+import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
@@ -41,8 +42,8 @@ public class PaymentService {
     private final IamportRepository iamportRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentCancelDetailRepository paymentCancelDetailRepository;
+    private final NegoRepository negoRepository;
     private final UserService userService;
-    private final NegoService negoService;
     private final ProductService productService;
     private final AlertService alertService;
     private final ChatService chatService;
@@ -57,7 +58,7 @@ public class PaymentService {
 
         int price = product.getGoldenPrice();
 
-        Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(user.getId(), product.getId());
 
         Order order = Order.of(product.getId(), user.getId(), null, price);
 
@@ -120,12 +121,11 @@ public class PaymentService {
         }
 
         if (order.getNegoStatus() != null) {
-            Nego nego = negoService.getNego(userId, order.getProductId()).orElseThrow(
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, order.getProductId()).orElseThrow(
                     () -> new CustomException(ErrorCode.NEGO_NOT_FOUND)
             );
             if (nego.getStatus() != order.getNegoStatus()) {
-                List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(request.getImpUid());
-                paymentCancelDetailRepository.saveAll(paymentCancelDetails);
+                cancelPayment(request.getImpUid());
                 return PaymentResponse.timeOver();
             }
             nego.completed();
@@ -133,19 +133,21 @@ public class PaymentService {
 
         order.waitTransfer();
         product.setProductStatus(ProductStatus.RESERVED);
+
+        //판매자에게 양도 알림 전송
         alertService.createAlert(product.getUserId(),
                 product.getAccommodationName() + "(" + product.getRoomName() + ") "
                         + "상품이 결제완료되었습니다." + order.getUpdatedAt().plusHours(3)
                         + "까지 양도 신청을 완료해주세요. 양도 미신청 시, 자동 양도 신청됩니다.");
-        //채팅방 생성
-        Boolean isNewChatRoom = false;
+
+        //채팅방 생성 + 시작 메세지 생성
         if(!chatService.existsChatRoomByBuyerIdAndProductId(userId, product.getId())) {
-            chatService.createChatRoom(userId, product.getId());
-            isNewChatRoom = true;
+            ChatRoomResponse chatRoomResponse = chatService.createChatRoom(userId, product.getId());
+            chatService.createStartMessageOfNewChatRoom(chatRoomResponse.chatRoomId());
         }
         Long chatRoomId = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId()).getId();
 
-        return PaymentResponse.success(isNewChatRoom, chatRoomId);
+        return PaymentResponse.success(chatRoomId);
     }
 
     public List<Order> findByStatusAndProductId(OrderStatus orderStatus, Long productId) {
@@ -154,5 +156,22 @@ public class PaymentService {
 
     public Order findByProductId(Long productId) {
         return orderRepository.findByProductId(productId);
+    }
+
+    public void cancelPayment(String impUid) {
+        List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(impUid);
+        paymentCancelDetailRepository.saveAll(paymentCancelDetails);
+
+        String pgTid = paymentCancelDetails.get(0).getPgTid();
+        Payment payment = paymentRepository.findByPgTid(pgTid).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
+        payment.cancelledPayment();
+    }
+
+    public Payment findByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
     }
 }

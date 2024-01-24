@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public record PurchaseCompletedResponse(
         Long productId,
-        Long OrderId,
+        Long orderId,
         String accommodationImage,
         String accommodationName,
         String roomName,
