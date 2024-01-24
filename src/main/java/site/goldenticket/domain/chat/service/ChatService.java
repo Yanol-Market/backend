@@ -29,8 +29,8 @@ import site.goldenticket.domain.chat.dto.response.ChatResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomDetailResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomInfoResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomListResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomShortListResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
+import site.goldenticket.domain.chat.dto.response.ChatRoomShortListResponse;
 import site.goldenticket.domain.chat.dto.response.ChatRoomShortResponse;
 import site.goldenticket.domain.chat.entity.Chat;
 import site.goldenticket.domain.chat.entity.ChatRoom;
@@ -216,7 +216,7 @@ public class ChatService {
      * @param nickname 회원 닉네임
      * @return 메세지
      */
-    private String createEntranceMessage (String nickname) {
+    private String createEntranceMessage(String nickname) {
         return nickname + "님이 입장하셨습니다.";
     }
 
@@ -389,7 +389,13 @@ public class ChatService {
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
             if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
                 chatStatus = "PAYMENT_PENDING";
-            } else if (nego.getStatus().equals(NegotiationStatus.TRANSFER_PENDING)) {
+            }
+        } else if (product.getProductStatus().equals(ProductStatus.RESERVED)) {
+            Order order = orderRepository.findByProductIdAndStatus(product.getId(),
+                    OrderStatus.WAITING_TRANSFER)
+                .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+            if (order.getUserId().equals(buyerId) && order.getStatus()
+                .equals(OrderStatus.WAITING_TRANSFER)) {
                 chatStatus = "TRANSFER_PENDING";
             }
         } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
