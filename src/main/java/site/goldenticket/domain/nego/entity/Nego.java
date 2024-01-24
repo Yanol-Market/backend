@@ -120,7 +120,7 @@ public class Nego {
         this.updatedAt = updatedAt;
     }
 
-    public void completed() {
-        status = NegotiationStatus.NEGOTIATION_COMPLETED;
+    public void transferPending() {
+        status = NegotiationStatus.TRANSFER_PENDING;
     }
 }
