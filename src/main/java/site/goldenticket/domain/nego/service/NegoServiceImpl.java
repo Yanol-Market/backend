@@ -1,6 +1,5 @@
 package site.goldenticket.domain.nego.service;
 
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
@@ -23,6 +22,7 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -198,6 +198,12 @@ public class NegoServiceImpl implements NegoService {
 
         Product product = productService.getProduct(nego.getProductId());
 
+        List<Nego> transferPendingNegos = negoRepository.findAllByProductAndStatus(product, NegotiationStatus.TRANSFER_PENDING);
+
+        if (!transferPendingNegos.isEmpty()) {
+            throw new CustomException("양도 대기 중인 상품이 있어 결제할 수 없습니다.", ErrorCode.TRANSFER_PENDING_NEGO);
+        }
+
         if (nego.getStatus() == NegotiationStatus.NEGOTIATION_COMPLETED
                 || nego.getStatus() == NegotiationStatus.TRANSFER_PENDING) {
             throw new CustomException("다른 유저가 네고를 성공해 제안할수 없습니다.", ErrorCode.NEGO_COMPLETED);
@@ -214,7 +220,7 @@ public class NegoServiceImpl implements NegoService {
         } else {
             throw new CustomException("네고 승인이 필요합니다.", ErrorCode.NEGO_APPROVAL_REQUIRED);
         }
-    }
+    } //양도 대기중인 상품 있으면 결제 되면 안됨
 
     @Override
     public HandoverResponse handOverProduct(Long productId, PrincipalDetails principalDetails) {
@@ -235,7 +241,7 @@ public class NegoServiceImpl implements NegoService {
 
         if (transferPendingNego.isEmpty()) {
             Order order = orderRepository.findByProductId(productId);
-            checkAccountAndThrowException(user);
+            //checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
             handleNegos(allNegosForProduct);
@@ -243,7 +249,7 @@ public class NegoServiceImpl implements NegoService {
         }
 
         if (transferPendingNego.isPresent()) {
-            checkAccountAndThrowException(user);
+            //checkAccountAndThrowException(user);
             Nego nego = transferPendingNego.get();
             completeTransfer(product, nego);
             handleNegos(allNegosForProduct);
@@ -349,7 +355,7 @@ public class NegoServiceImpl implements NegoService {
                         + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
 
         // 판매자에게 계좌 등록 알림 전송
-        if (user.getAccountNumber() == null) {
+        if (user!=null && user.getAccountNumber() == null) {
             alertService.createAlert(product.getUserId(),
                     "'" + product.getAccommodationName() + "(" + product.getRoomName()
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
@@ -357,25 +363,29 @@ public class NegoServiceImpl implements NegoService {
     }
 
     private void sendTransferCompleteAlertsForNotNego(Order order, Product product, User user) {
-        // 구매자에게 양도 완료 알림 전송
-        alertService.createAlert(order.getUserId(),
-                "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                        + ")'상품 양도가 완료되었습니다. "
-                        + "양도 완료에 따른 체크인 정보는 '마이페이지 > 구매내역 > 구매 완료'에서 확인하실 수 있습니다.");
+        // order 객체가 null이 아닌 경우에만 실행
+        if (order != null && user!=null) {
+            // 구매자에게 양도 완료 알림 전송
+            alertService.createAlert(order.getUserId(),
+                    "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                            + ")'상품 양도가 완료되었습니다. "
+                            + "양도 완료에 따른 체크인 정보는 '마이페이지 > 구매내역 > 구매 완료'에서 확인하실 수 있습니다.");
 
-        // 판매자에게 정산 요청 알림 전송
-        alertService.createAlert(product.getUserId(),
-                "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                        + ")'상품 양도가 완료되었습니다. 영업일 1일 이내 등록한 계좌 정보로 정산 금액이 입금됩니다."
-                        + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
-
-        // 판매자에게 계좌 등록 알림 전송
-        if (user.getAccountNumber() == null) {
+            // 판매자에게 정산 요청 알림 전송
             alertService.createAlert(product.getUserId(),
                     "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                            + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
+                            + ")'상품 양도가 완료되었습니다. 영업일 1일 이내 등록한 계좌 정보로 정산 금액이 입금됩니다."
+                            + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
+
+            // 판매자에게 계좌 등록 알림 전송
+            if (user.getAccountNumber() == null) {
+                alertService.createAlert(product.getUserId(),
+                        "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                                + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
+            }
         }
     }
+
 
     @Override
     public Optional<Nego> getNego(Long userId, Long productId) {
@@ -448,11 +458,11 @@ public class NegoServiceImpl implements NegoService {
     public NegoTestListResponse getNegoListForTest() {
         List<Nego> negoList = negoRepository.findAll();
         List<NegoTestResponse> negoTestResponseList = new ArrayList<>();
-        for(Nego nego: negoList) {
+        for (Nego nego : negoList) {
             negoTestResponseList.add(NegoTestResponse.fromEntity(nego));
         }
         return NegoTestListResponse.builder()
-            .negoTestResponseList(negoTestResponseList).build();
+                .negoTestResponseList(negoTestResponseList).build();
     }
 
     public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList,
