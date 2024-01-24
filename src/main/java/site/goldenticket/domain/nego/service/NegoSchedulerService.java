@@ -76,7 +76,7 @@ public class NegoSchedulerService {
                 //판매자에게 계좌 등록 알림 전송
                 User user = userRepository.findById(product.getUserId())
                     .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
-                if (user.getAccountNumber().equals(null)) {
+                if (user!=null && user.getAccountNumber() == null) {
                     alertService.createAlert(product.getUserId(),
                         "'" + product.getAccommodationName() + "(" + product.getRoomName()
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
