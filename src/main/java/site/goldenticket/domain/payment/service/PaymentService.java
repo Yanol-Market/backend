@@ -168,4 +168,10 @@ public class PaymentService {
         );
         payment.cancelledPayment();
     }
+
+    public Payment findByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
+    }
 }
