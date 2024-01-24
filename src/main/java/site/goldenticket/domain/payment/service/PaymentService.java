@@ -10,7 +10,7 @@ import site.goldenticket.domain.alert.service.AlertService;
 import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
-import site.goldenticket.domain.nego.service.NegoService;
+import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
@@ -42,8 +42,8 @@ public class PaymentService {
     private final IamportRepository iamportRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentCancelDetailRepository paymentCancelDetailRepository;
+    private final NegoRepository negoRepository;
     private final UserService userService;
-    private final NegoService negoService;
     private final ProductService productService;
     private final AlertService alertService;
     private final ChatService chatService;
@@ -58,7 +58,7 @@ public class PaymentService {
 
         int price = product.getGoldenPrice();
 
-        Optional<Nego> nego = negoService.getNego(user.getId(), product.getId());
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(user.getId(), product.getId());
 
         Order order = Order.of(product.getId(), user.getId(), null, price);
 
@@ -121,7 +121,7 @@ public class PaymentService {
         }
 
         if (order.getNegoStatus() != null) {
-            Nego nego = negoService.getNego(userId, order.getProductId()).orElseThrow(
+            Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, order.getProductId()).orElseThrow(
                     () -> new CustomException(ErrorCode.NEGO_NOT_FOUND)
             );
             if (nego.getStatus() != order.getNegoStatus()) {
