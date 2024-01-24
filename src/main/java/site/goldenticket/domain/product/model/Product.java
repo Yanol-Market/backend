@@ -120,13 +120,10 @@ public class Product {
         this.productStatus = productStatus;
     }
 
-    public boolean isOnSale() {
-        return this.productStatus == ProductStatus.SELLING;
+    public boolean isNotOnSale() {
+        return this.productStatus == ProductStatus.EXPIRED || this.productStatus == ProductStatus.SOLD_OUT;
     }
 
-    public boolean isNotOnSale() {
-        return !isOnSale();
-    }
 
     public void setGoldenPrice(int goldenPrice) {
         this.goldenPrice = goldenPrice;
