@@ -120,6 +120,11 @@ public class NegoServiceImpl implements NegoService {
                 .orElseThrow(() -> new NoSuchElementException("Nego not found with id: " + userId));
 
         Product product = productService.getProduct(productId);
+        Long productUserId = product.getUserId();
+
+        if(userId.equals(productUserId)){
+            throw new CustomException("자신의 상품에는 네고를 할 수 없습니다.", ErrorCode.CANNOT_NEGOTIATE_SELF_PRODUCT);
+        }
 
         List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
         for (Nego nego : allNegosForProduct) {
