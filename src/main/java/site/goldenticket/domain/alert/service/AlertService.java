@@ -13,6 +13,10 @@ import site.goldenticket.domain.alert.dto.AlertResponse;
 import site.goldenticket.domain.alert.dto.AlertUnSeenResponse;
 import site.goldenticket.domain.alert.entity.Alert;
 import site.goldenticket.domain.alert.repository.AlertRepository;
+import site.goldenticket.domain.product.constants.AreaCode;
+import site.goldenticket.domain.product.wish.entity.WishProduct;
+import site.goldenticket.domain.product.wish.repository.WishProductRepository;
+import site.goldenticket.domain.user.wish.service.WishRegionService;
 
 @Service
 @Transactional
@@ -20,6 +24,8 @@ import site.goldenticket.domain.alert.repository.AlertRepository;
 public class AlertService {
 
     private final AlertRepository alertRepository;
+    private final WishRegionService wishRegionService;
+    private final WishProductRepository wishProductRepository;
 
     public AlertResponse createAlertForTest(AlertRequest alertRequest) {
         Alert alert = Alert.builder()
@@ -69,5 +75,36 @@ public class AlertService {
         Collections.sort(alertResponses,
             Comparator.comparing(AlertResponse::createdAt).reversed());
         return AlertListResponse.builder().alertResponses(alertResponses).build();
+    }
+
+    public void createAlertOfWishRegion(AreaCode areaCode) {
+        List<Long> userList = wishRegionService.findUserIdByRegion(areaCode);
+        for (Long userId : userList) {
+            createAlert(userId,
+                "관심있던 '" + areaCode.getAreaName() + "'지역에 새로운 상품이 등록되었습니다! 사라지기 전에 확인해보세요!");
+        }
+    }
+
+    public void createAlertOfWishProductToSelling(Long productId, String accommodationName,
+        String roomName) {
+        List<Long> userList = findUserIdListByProductId(productId);
+        for (Long userId : userList) {
+            createAlert(userId, "찜한 ‘" + accommodationName + "(" + roomName
+                    + ")' 상품이 판매중으로 변경되어 다시 구매가 가능합니다. 빠르게 거래를 진행해주세요!");
+        }
+    }
+
+    /***
+     * 특정 상품을 관심 상품으로 등록한 회원 ID 목록 조회
+     * @param productId 관심 상품 ID
+     * @return 회원 ID List
+     */
+    public List<Long> findUserIdListByProductId(Long productId) {
+        List<WishProduct> wishProductList = wishProductRepository.findByProductId(productId);
+        List<Long> userIdList = new ArrayList<>();
+        for (WishProduct wishProduct : wishProductList) {
+            userIdList.add(wishProduct.getUserId());
+        }
+        return userIdList;
     }
 }

@@ -19,4 +19,5 @@ public interface WishProductRepository extends JpaRepository<WishProduct, Long> 
     List<WishProduct> findByUserIdWithProduct(@Param("userId") Long userId);
 
     Optional<WishProduct> findByUserIdAndProductId(Long userId, Long product_id);
+    List<WishProduct> findByProductId(Long productId); 
 }
