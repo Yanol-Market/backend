@@ -2,6 +2,7 @@ package site.goldenticket.domain.nego.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
@@ -14,6 +15,7 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.repository.OrderRepository;
+import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
@@ -36,6 +38,7 @@ public class NegoServiceImpl implements NegoService {
     private final UserRepository userRepository;
     private final ChatService chatService;
     private final AlertService alertService;
+    private final PaymentService paymentService;
     private final OrderRepository orderRepository;
 
     @Override
@@ -240,8 +243,11 @@ public class NegoServiceImpl implements NegoService {
                 .findFirst();
 
         if (transferPendingNego.isEmpty()) {
-            Order order = orderRepository.findByProductId(productId);
+            Order order = orderRepository.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER).orElseThrow(
+                    () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+            );
             checkAccountAndThrowException(user);
+            //checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
             handleNegos(allNegosForProduct);
@@ -266,6 +272,13 @@ public class NegoServiceImpl implements NegoService {
         // 해당 Product ID로 Product 정보 가져오기
         Product product = productService.getProduct(productId);
 
+        //구매자 환불
+        Order order = orderRepository.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+        paymentService.cancelPayment(paymentService.findByOrderId(order.getId()).getImpUid());
+
+
         // Product에 대한 모든 네고 가져오기
         List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
 
@@ -275,8 +288,8 @@ public class NegoServiceImpl implements NegoService {
                 .findFirst();
 
         if (transferPendingNego.isEmpty()) {
-            Order order = orderRepository.findByProductId(productId);
             updateProductForDenyHandOver(product);
+
             //구매자에게 양도 취소 알림 전송
             alertService.createAlert(order.getUserId(),
                     "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
@@ -355,7 +368,7 @@ public class NegoServiceImpl implements NegoService {
                         + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
 
         // 판매자에게 계좌 등록 알림 전송
-        if (user!=null && user.getAccountNumber() == null) {
+        if (user != null && user.getAccountNumber() == null) {
             alertService.createAlert(product.getUserId(),
                     "'" + product.getAccommodationName() + "(" + product.getRoomName()
                             + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
@@ -364,7 +377,7 @@ public class NegoServiceImpl implements NegoService {
 
     private void sendTransferCompleteAlertsForNotNego(Order order, Product product, User user) {
         // order 객체가 null이 아닌 경우에만 실행
-        if (order != null && user!=null) {
+        if (order != null && user != null) {
             // 구매자에게 양도 완료 알림 전송
             alertService.createAlert(order.getUserId(),
                     "'" + product.getAccommodationName() + "(" + product.getRoomName()
@@ -384,13 +397,6 @@ public class NegoServiceImpl implements NegoService {
                                 + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
             }
         }
-    }
-
-
-    @Override
-    public Optional<Nego> getNego(Long userId, Long productId) {
-        return negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId,
-                productId);
     }
 
     @Override

@@ -86,4 +86,8 @@ public class Payment extends BaseTimeEntity {
     public boolean isDifferentAmount(Integer price) {
         return !isSameAmount(price);
     }
+
+    public void cancelledPayment() {
+        status = PaymentStatus.CANCELLED;
+    }
 }

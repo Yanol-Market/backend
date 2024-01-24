@@ -119,7 +119,9 @@ public class PurchaseHistoryService {
         }
 
         Product product = productService.getProduct(order.getProductId());
-        Payment payment = paymentRepository.findByOrderId(order.getId());
+        Payment payment = paymentRepository.findByOrderId(order.getId()).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
         ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, order.getProductId());
         User seller = userService.findById(chatRoom.getBuyerId());
         LocalDateTime lastUpdatedAt = chatService.getChatList(userId, chatRoom.getId()).get(0).getCreatedAt();

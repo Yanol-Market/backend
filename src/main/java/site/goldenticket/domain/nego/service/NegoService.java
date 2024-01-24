@@ -8,7 +8,6 @@ import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.security.PrincipalDetails;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface NegoService {
 
@@ -23,8 +22,6 @@ public interface NegoService {
     HandoverResponse handOverProduct(Long negoId, PrincipalDetails principalDetails);
 
     NegoResponse denyHandoverProduct(Long negoId, PrincipalDetails principalDetails);
-
-    Optional<Nego> getNego(Long userId, Long productId);
 
     List<Nego> getUserNego(Long userId);
 
