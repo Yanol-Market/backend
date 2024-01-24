@@ -58,4 +58,8 @@ public class Order extends BaseTimeEntity {
     public void changeViewCheck() {
         customerViewCheck = true;
     }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
 }
