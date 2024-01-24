@@ -12,6 +12,7 @@ import java.time.LocalTime;
 
 public record PurchaseCompletedDetailResponse(
         Long productId,
+        Long orderId,
         String accommodationImage,
         String accommodationName,
         String roomName,
@@ -35,6 +36,7 @@ public record PurchaseCompletedDetailResponse(
     public static PurchaseCompletedDetailResponse create(Product product, Order order, Payment payment, User seller,Long chatRoomId, LocalDateTime lastUpdatedAt) {
         return new PurchaseCompletedDetailResponse(
                 product.getId(),
+                order.getId(),
                 product.getAccommodationImage(),
                 product.getAccommodationName(),
                 product.getRoomName(),
