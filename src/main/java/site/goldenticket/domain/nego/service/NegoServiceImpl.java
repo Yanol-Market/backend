@@ -1,8 +1,8 @@
 package site.goldenticket.domain.nego.service;
 
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
@@ -15,6 +15,7 @@ import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.repository.OrderRepository;
+import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
@@ -23,6 +24,7 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -36,6 +38,7 @@ public class NegoServiceImpl implements NegoService {
     private final UserRepository userRepository;
     private final ChatService chatService;
     private final AlertService alertService;
+    private final PaymentService paymentService;
     private final OrderRepository orderRepository;
 
     @Override
@@ -260,6 +263,13 @@ public class NegoServiceImpl implements NegoService {
         // 해당 Product ID로 Product 정보 가져오기
         Product product = productService.getProduct(productId);
 
+        //구매자 환불
+        Order order = orderRepository.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+        paymentService.cancelPayment(paymentService.findByOrderId(order.getId()).getImpUid());
+
+
         // Product에 대한 모든 네고 가져오기
         List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
 
@@ -269,8 +279,8 @@ public class NegoServiceImpl implements NegoService {
                 .findFirst();
 
         if (transferPendingNego.isEmpty()) {
-            Order order = orderRepository.findByProductId(productId);
             updateProductForDenyHandOver(product);
+
             //구매자에게 양도 취소 알림 전송
             alertService.createAlert(order.getUserId(),
                     "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
