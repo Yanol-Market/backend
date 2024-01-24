@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
@@ -63,6 +64,11 @@ public class NegoSchedulerService {
             List<Nego> transferNegos = negoRepository.findAllByProduct(product);
             LocalDateTime updatedAt = transferOrder.getUpdatedAt();
 
+            User user = userRepository.findById(product.getUserId())
+                    .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+            checkAccountAndThrowException(user);
+
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
                 for (Nego transferNego : transferNegos) {
                     // 각 네고의 현재 상태를 확인하고 처리
@@ -90,8 +96,7 @@ public class NegoSchedulerService {
                                     + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
 
                     // 판매자에게 계좌 등록 알림 전송
-                    User user = userRepository.findById(product.getUserId())
-                            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
                     if (user != null && user.getAccountNumber() == null) {
                         alertService.createAlert(product.getUserId(),
                                 "'" + product.getAccommodationName() + "(" + product.getRoomName()
@@ -101,5 +106,10 @@ public class NegoSchedulerService {
                 negoRepository.saveAll(transferNegos);
             }
         } // 20분 뒤 자동양도
+    }
+    private void checkAccountAndThrowException(User user) {
+        if (user.getAccountNumber() == null) {
+            throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+        }
     }
 }
