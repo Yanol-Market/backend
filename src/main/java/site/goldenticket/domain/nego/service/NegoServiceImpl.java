@@ -246,6 +246,7 @@ public class NegoServiceImpl implements NegoService {
             Order order = orderRepository.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER).orElseThrow(
                     () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
             );
+            checkAccountAndThrowException(user);
             //checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
@@ -254,7 +255,7 @@ public class NegoServiceImpl implements NegoService {
         }
 
         if (transferPendingNego.isPresent()) {
-            //checkAccountAndThrowException(user);
+            checkAccountAndThrowException(user);
             Nego nego = transferPendingNego.get();
             completeTransfer(product, nego);
             handleNegos(allNegosForProduct);
