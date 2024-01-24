@@ -150,12 +150,8 @@ public class PaymentService {
         return PaymentResponse.success(chatRoomId);
     }
 
-    public List<Order> findByStatusAndProductId(OrderStatus orderStatus, Long productId) {
-        return orderRepository.findByStatusAndProductId(orderStatus, productId);
-    }
-
-    public Order findByProductId(Long productId) {
-        return orderRepository.findByProductId(productId);
+    public Optional<Order> findByProductIdAndStatus(Long productId, OrderStatus orderStatus) {
+        return orderRepository.findByProductIdAndStatus(productId, orderStatus);
     }
 
     public void cancelPayment(String impUid) {
