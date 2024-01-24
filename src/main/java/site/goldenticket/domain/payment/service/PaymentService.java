@@ -138,11 +138,14 @@ public class PaymentService {
                         + "상품이 결제완료되었습니다." + order.getUpdatedAt().plusHours(3)
                         + "까지 양도 신청을 완료해주세요. 양도 미신청 시, 자동 양도 신청됩니다.");
         //채팅방 생성
+        Boolean isNewChatRoom = false;
         if(!chatService.existsChatRoomByBuyerIdAndProductId(userId, product.getId())) {
             chatService.createChatRoom(userId, product.getId());
+            isNewChatRoom = true;
         }
+        Long chatRoomId = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId()).getId();
 
-        return PaymentResponse.success();
+        return PaymentResponse.success(isNewChatRoom, chatRoomId);
     }
 
     public List<Order> findByStatusAndProductId(OrderStatus orderStatus, Long productId) {
