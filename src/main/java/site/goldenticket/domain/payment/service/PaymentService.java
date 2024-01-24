@@ -150,26 +150,31 @@ public class PaymentService {
 
         Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, product.getId());
 
-        //네고가 존재할때, 결제 대기중 -> 타임아웃 경우
-        if (nego.isPresent()) {
-            if (nego.get().getStatus() != order.getNegoStatus()) {
-                cancelPayment(request.getImpUid());
-                return PaymentResponse.timeOver();
-            }
-            if (product.getProductStatus() == ProductStatus.RESERVED) {
-                if (nego.get().getStatus() != NegotiationStatus.PAYMENT_PENDING) {
-                    cancelPayment(request.getImpUid());
-                    return PaymentResponse.failed();
-                }
-            }
-            nego.get().completed();
-        }
-
+        //상품상태 = 예약중
         if (product.getProductStatus() == ProductStatus.RESERVED) {
             if (nego.isEmpty()) {
                 cancelPayment(request.getImpUid());
                 return PaymentResponse.failed();
             }
+            if (nego.get().getStatus() != order.getNegoStatus()) {
+                cancelPayment(request.getImpUid());
+                return PaymentResponse.failed();
+            }
+            if (nego.get().getStatus() != NegotiationStatus.PAYMENT_PENDING) {
+                cancelPayment(request.getImpUid());
+                return PaymentResponse.failed();
+            }
+        }
+
+        //상품상태 = 판매중
+        //네고 내역 존재할 때
+        if (nego.isPresent()) {
+            //네고 상태: 결제 대기중 -> 타임아웃 => 결제 결과 타임오버
+            if (nego.get().getStatus() != order.getNegoStatus()) {
+                cancelPayment(request.getImpUid());
+                return PaymentResponse.timeOver();
+            }
+            nego.get().transferPending();
         }
 
         order.waitTransfer();
