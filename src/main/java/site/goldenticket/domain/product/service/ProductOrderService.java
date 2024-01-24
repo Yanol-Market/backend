@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
 import static site.goldenticket.common.redis.constants.RedisConstants.AUTOCOMPLETE_KEY;
 
 @Slf4j
@@ -80,9 +81,11 @@ public class ProductOrderService {
             List<ProgressChatResponse> progressChatResponseList = new ArrayList<>();
 
             // 2.1 주문
-            List<Order> orderList = getOrdersForProduct(productId);
+            Optional<Order> optionalOrder = getOrdersForProduct(productId);
 
-            for (Order order : orderList) {
+            if (!optionalOrder.isPresent()) {
+                Order order = optionalOrder.get();
+
                 ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(order.getStatus()));
                 progressProductStatusSet.add(progressProductStatus);
 
@@ -167,7 +170,8 @@ public class ProductOrderService {
     public ProductCompletedSoldOutResponse getSoldOutCaseProductDetails(Long productId) {
         Product product = productService.findByProductStatusAndProductId(ProductStatus.SOLD_OUT, productId);
 
-        Order order = paymentService.findByProductId(productId);
+        Order order = paymentService.findByProductIdAndStatus(productId, COMPLETED_TRANSFER)
+                .orElseThrow(() -> new CustomException(ErrorCode.NO_COMPLETED_TRANSFER_ORDER));
 
         Long userId = order.getUserId();
         User user = userService.findById(userId);
@@ -192,8 +196,8 @@ public class ProductOrderService {
         return productId;
     }
 
-    public List<Order> getOrdersForProduct(Long productId) {
-        return paymentService.findByStatusAndProductId(OrderStatus.WAITING_TRANSFER, productId);
+    public Optional<Order> getOrdersForProduct(Long productId) {
+        return paymentService.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER);
     }
 
     private List<Nego> getNegotiationsForProduct(Product product) {
