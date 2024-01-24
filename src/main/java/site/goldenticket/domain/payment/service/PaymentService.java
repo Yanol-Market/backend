@@ -125,8 +125,7 @@ public class PaymentService {
                     () -> new CustomException(ErrorCode.NEGO_NOT_FOUND)
             );
             if (nego.getStatus() != order.getNegoStatus()) {
-                List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(request.getImpUid());
-                paymentCancelDetailRepository.saveAll(paymentCancelDetails);
+                cancelPayment(request.getImpUid());
                 return PaymentResponse.timeOver();
             }
             nego.completed();
@@ -134,6 +133,8 @@ public class PaymentService {
 
         order.waitTransfer();
         product.setProductStatus(ProductStatus.RESERVED);
+
+        //판매자에게 양도 알림 전송
         alertService.createAlert(product.getUserId(),
                 product.getAccommodationName() + "(" + product.getRoomName() + ") "
                         + "상품이 결제완료되었습니다." + order.getUpdatedAt().plusHours(3)
@@ -155,5 +156,16 @@ public class PaymentService {
 
     public Order findByProductId(Long productId) {
         return orderRepository.findByProductId(productId);
+    }
+
+    public void cancelPayment(String impUid) {
+        List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(impUid);
+        paymentCancelDetailRepository.saveAll(paymentCancelDetails);
+
+        String pgTid = paymentCancelDetails.get(0).getPgTid();
+        Payment payment = paymentRepository.findByPgTid(pgTid).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
+        payment.cancelledPayment();
     }
 }
