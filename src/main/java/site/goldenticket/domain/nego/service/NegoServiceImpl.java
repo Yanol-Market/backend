@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
+import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.dto.request.PriceProposeRequest;
 import site.goldenticket.domain.nego.dto.response.*;
@@ -396,11 +397,10 @@ public class NegoServiceImpl implements NegoService {
      * 네고 가능 여부 조회
      * @param userId 회원 ID
      * @param productId 상품 ID
-     * @return 네고 가능 여부 응답 DTO (네고 가능 여부, 네고 가능 시, 채팅방 ID)
+     * @return 네고 가능 여부 응답 DTO (네고 가능 여부, 채팅방 ID)
      */
     public NegoAvailableResponse isAvailableNego(Long userId, Long productId) {
         Boolean negoAvailable = true;
-        Boolean isNewChatRoom = false;
         Long chatRoomId = -1L;
         Product product = productService.getProduct(productId);
         //본인이 판매하는 상품이면 네고 불가
@@ -413,11 +413,11 @@ public class NegoServiceImpl implements NegoService {
 
         } else {
             if (!negoRepository.existsByUser_IdAndProduct_Id(userId, productId)) {
-                //네고 이력 없는 경우 : 채팅방 생성 + 네고 가능
+                //네고 이력 없는 경우 : 채팅방 생성 + 채팅방 시작 메세지 생성 + 네고 가능
                 if (!chatService.existsChatRoomByBuyerIdAndProductId(userId, productId)) {
-                    chatService.createChatRoom(userId, productId);
+                    ChatRoomResponse chatRoomResponse = chatService.createChatRoom(userId, productId);
+                    chatService.createStartMessageOfNewChatRoom(chatRoomResponse.chatRoomId());
                     negoAvailable = true;
-                    isNewChatRoom = true;
                 }
             } else {
                 //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
@@ -437,7 +437,6 @@ public class NegoServiceImpl implements NegoService {
         }
         return NegoAvailableResponse.builder()
                 .negoAvailable(negoAvailable)
-                .isNewChatRoom(isNewChatRoom)
                 .chatRoomId(chatRoomId)
                 .build();
     }
