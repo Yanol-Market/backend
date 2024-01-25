@@ -2,6 +2,7 @@ package site.goldenticket.domain.payment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
@@ -200,6 +201,7 @@ public class PaymentService {
         return orderRepository.findByProductIdAndStatus(productId, orderStatus);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancelPayment(String impUid) {
         List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(impUid);
         paymentCancelDetailRepository.saveAll(paymentCancelDetails);
