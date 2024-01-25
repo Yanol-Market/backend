@@ -67,7 +67,7 @@ public class PurchaseHistoryService {
 
         if (!userNego.isEmpty()) {
             for (Nego nego : userNego) {
-                if (nego.getStatus() == NegotiationStatus.NEGOTIATING) {
+                if (nego.getStatus() == NegotiationStatus.NEGOTIATING || nego.getStatus() == NegotiationStatus.NEGOTIATION_TIMEOUT) {
                     Product product = productService.getProduct(nego.getProductId());
                     User user = userService.findById(product.getUserId());
                     ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId());
