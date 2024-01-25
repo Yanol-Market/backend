@@ -57,7 +57,7 @@ public class ProductOrderService {
         String userKey = isAuthenticated ? principalDetails.getUsername() : productService.generateOrRetrieveAnonymousKey(request, response);
 
         boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
-        boolean isTrading = !getOrdersForProduct(userId).isEmpty() || !getNegotiationsForProduct(product).isEmpty();
+        boolean isTrading = getOrdersForProduct(userId).isPresent() || !getNegotiationsForProduct(product).isEmpty();
 
         productService.updateProductViewCount(userKey, productId.toString());
         productService.updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
