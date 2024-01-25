@@ -1,5 +1,6 @@
 package site.goldenticket.domain.product.dto;
 
+import site.goldenticket.domain.product.constants.NegoProductStatus;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.dummy.reservation.constants.ReservationType;
 import site.goldenticket.common.utils.DateUtil;
@@ -31,12 +32,12 @@ public record ProductDetailResponse(
         String content,
         ProductStatus productStatus,
         boolean isSeller,
-        boolean isTrading,
+        NegoProductStatus negoProductStatus,
         Long wishId,
         boolean isWished
 ) {
 
-    public static ProductDetailResponse fromEntity(Product product, boolean isSeller, boolean isTrading, boolean isAuthenticated) {
+    public static ProductDetailResponse fromEntity(Product product, boolean isSeller, NegoProductStatus negoProductStatus, boolean isAuthenticated) {
         LocalDate checkInDate = product.getCheckInDate();
         LocalDate checkOutDate = product.getCheckOutDate();
 
@@ -75,7 +76,7 @@ public record ProductDetailResponse(
                 product.getContent(),
                 product.getProductStatus(),
                 isSeller,
-                isTrading,
+                negoProductStatus,
                 wishId,
                 isWished
         );

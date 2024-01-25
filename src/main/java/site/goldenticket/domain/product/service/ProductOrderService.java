@@ -18,6 +18,7 @@ import site.goldenticket.domain.nego.service.NegoService;
 import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.service.PaymentService;
+import site.goldenticket.domain.product.constants.NegoProductStatus;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.constants.ProgressProductStatus;
 import site.goldenticket.domain.product.dto.*;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
 import static site.goldenticket.common.redis.constants.RedisConstants.AUTOCOMPLETE_KEY;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATING;
 
 @Slf4j
 @Service
@@ -57,12 +59,30 @@ public class ProductOrderService {
         String userKey = isAuthenticated ? principalDetails.getUsername() : productService.generateOrRetrieveAnonymousKey(request, response);
 
         boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
-        boolean isTrading = getOrdersForProduct(productId).isPresent() || !getNegotiationsForProduct(product).isEmpty();
+
+        NegoProductStatus negoProductStatus = null;
+        if(isSeller) {
+            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NegotiationStatus.NEGOTIATION_CANCELLED);
+            List<Nego> negoList =  negoService.findByStatusInAndProduct(negotiationStatusList, product);
+            if(!negoList.isEmpty()) {
+                negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
+            }
+        } else {
+            if(isAuthenticated) {
+                Optional<Nego> optionalNego = negoService.findByUserIdAndProduct(userId, product);
+                if(optionalNego.isPresent()) {
+                    Nego nego = optionalNego.get();
+                    if (List.of(NEGOTIATING, COMPLETED_TRANSFER).contains(nego.getStatus())) {
+                        negoProductStatus = NegoProductStatus.valueOf(String.valueOf(nego.getStatus()));
+                    }
+                }
+            }
+        }
 
         productService.updateProductViewCount(userKey, productId.toString());
         productService.updateAutocompleteCount(AUTOCOMPLETE_KEY, product.getAccommodationName());
 
-        return ProductDetailResponse.fromEntity(product, isSeller, isTrading, isAuthenticated);
+        return ProductDetailResponse.fromEntity(product, isSeller, negoProductStatus, isAuthenticated);
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +101,7 @@ public class ProductOrderService {
             List<ProgressChatResponse> progressChatResponseList = new ArrayList<>();
 
             // 2.1 주문
-            Optional<Order> optionalOrder = getOrdersForProduct(productId);
+            Optional<Order> optionalOrder = paymentService.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER);
 
             if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
@@ -106,7 +126,8 @@ public class ProductOrderService {
             }
 
             // 2.2 네고
-            List<Nego> negoList = getNegotiationsForProduct(product);
+            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED, NegotiationStatus.NEGOTIATION_TIMEOUT);
+            List<Nego> negoList =  negoService.findByStatusInAndProduct(negotiationStatusList, product);
 
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();
@@ -123,7 +144,7 @@ public class ProductOrderService {
                 User user = nego.getUser();
 
                 ChatRoomStatus chatRoomStatus;
-                if (negotiationStatus == NegotiationStatus.NEGOTIATING || negotiationStatus == NegotiationStatus.NEGOTIATION_TIMEOUT) {
+                if (negotiationStatus == NEGOTIATING || negotiationStatus == NegotiationStatus.NEGOTIATION_TIMEOUT) {
                     chatRoomStatus = ChatRoomStatus.ACTIVE;
                 } else if (negotiationStatus == NegotiationStatus.PAYMENT_PENDING) {
                     chatRoomStatus = ChatRoomStatus.YELLOW_DOT;
@@ -198,14 +219,5 @@ public class ProductOrderService {
         Product product = productService.getProduct(productId);
         product.setIsSellerViewCheck(true);
         return productId;
-    }
-
-    public Optional<Order> getOrdersForProduct(Long productId) {
-        return paymentService.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER);
-    }
-
-    private List<Nego> getNegotiationsForProduct(Product product) {
-        List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED, NegotiationStatus.NEGOTIATION_TIMEOUT);
-        return negoService.findByStatusInAndProduct(negotiationStatusList, product);
     }
 }

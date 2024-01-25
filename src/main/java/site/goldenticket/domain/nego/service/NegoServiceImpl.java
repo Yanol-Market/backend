@@ -509,4 +509,8 @@ public class NegoServiceImpl implements NegoService {
         Product product) {
         return negoRepository.findByStatusInAndProduct(negotiationStatusList, product);
     }
+
+    public Optional<Nego> findByUserIdAndProduct(Long userId, Product product) {
+        return negoRepository.findByUserIdAndProduct(userId, product);
+    }
 }
