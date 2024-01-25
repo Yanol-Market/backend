@@ -386,6 +386,10 @@ public class ChatService {
         String chatStatus = "";
 
         Boolean existsNego = negoRepository.existsByUser_IdAndProduct_Id(buyerId, product.getId());
+        Boolean existsOrderOfWaitingTransfer = orderRepository.existsByProductIdAndStatus(productId,
+            OrderStatus.WAITING_TRANSFER);
+        Boolean existsOrderOfCompletedTransfer = orderRepository.existsByProductIdAndStatus(
+            productId, OrderStatus.COMPLETED_TRANSFER);
         if (product.getProductStatus().equals(ProductStatus.SELLING) && existsNego) {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
@@ -405,7 +409,7 @@ public class ChatService {
                 chatStatus = "PAYMENT_PENDING";
             }
         }
-        if (product.getProductStatus().equals(ProductStatus.RESERVED)) {
+        if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsOrderOfWaitingTransfer) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.WAITING_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
@@ -414,7 +418,7 @@ public class ChatService {
                 chatStatus = "TRANSFER_PENDING";
             }
         }
-        if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
+        if (product.getProductStatus().equals(ProductStatus.SOLD_OUT) && existsOrderOfCompletedTransfer) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
