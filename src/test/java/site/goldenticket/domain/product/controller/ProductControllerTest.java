@@ -71,7 +71,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/" + product.getId();
 
         // when
-        final ExtractableResponse<Response> response = performAuthorizedDeleteRequest(url);
+        final ExtractableResponse<Response> response = performDeleteRequest(url);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -131,7 +131,7 @@ public class ProductControllerTest extends ApiTest {
         String parameterValues = product.getProductStatus().toString();
 
         // when
-        final ExtractableResponse<Response> response = performAuthorizedGetRequestWithQueryParam(url, parameterName, parameterValues, true);
+        final ExtractableResponse<Response> response = performGetRequestWithQueryParam(url, parameterName, parameterValues, true);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -147,7 +147,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/history/completed/" + product.getId();
 
         // when
-        final ExtractableResponse<Response> response = performAuthorizedDeleteRequest(url);
+        final ExtractableResponse<Response> response = performDeleteRequest(url);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -213,7 +213,7 @@ public class ProductControllerTest extends ApiTest {
                 .extract();
     }
 
-    private ExtractableResponse<Response> performAuthorizedGetRequestWithQueryParam(String url, String parameterName, String parameterValues, boolean needsAuthentication) {
+    private ExtractableResponse<Response> performGetRequestWithQueryParam(String url, String parameterName, String parameterValues, boolean needsAuthentication) {
         RequestSpecification requestSpecification = setupRequestSpecification(needsAuthentication);
 
         return requestSpecification
@@ -223,7 +223,7 @@ public class ProductControllerTest extends ApiTest {
                 .extract();
     }
 
-    private ExtractableResponse<Response> performAuthorizedDeleteRequest(String url) {
+    private ExtractableResponse<Response> performDeleteRequest(String url) {
         RequestSpecification requestSpecification = setupRequestSpecification(true);
 
         return requestSpecification
