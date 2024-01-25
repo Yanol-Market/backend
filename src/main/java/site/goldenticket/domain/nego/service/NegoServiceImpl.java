@@ -289,7 +289,7 @@ public class NegoServiceImpl implements NegoService {
                 () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
         paymentService.cancelPayment(paymentService.findByOrderId(order.getId()).getImpUid());
-        order.orderCancel();
+
 
         // Product에 대한 모든 네고 가져오기
         List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
@@ -301,7 +301,8 @@ public class NegoServiceImpl implements NegoService {
 
         if (transferPendingNego.isEmpty()) {
             updateProductForDenyHandOver(product);
-
+            order.orderCancel();
+            orderRepository.save(order);
             //구매자에게 양도 취소 알림 전송
             alertService.createAlert(order.getUserId(),
                     "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
@@ -316,7 +317,8 @@ public class NegoServiceImpl implements NegoService {
 
         if (transferPendingNego.isPresent()) {
             Nego nego = transferPendingNego.get();
-
+            order.orderCancel();
+            orderRepository.save(order);
             // 양도 대기 중인 네고를 찾았을 경우 거절 처리
             if (nego.getCount() < 2) {
                 nego.setStatus(NegotiationStatus.NEGOTIATING);
