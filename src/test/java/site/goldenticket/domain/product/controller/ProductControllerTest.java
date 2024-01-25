@@ -121,7 +121,7 @@ public class ProductControllerTest extends ApiTest {
     @Test
     void getCompletedProductDetails() {
         // given
-        Product product = saveSoldOutProduct();
+        Product product = saveExpiredProduct();
         ChatRoom chatRoom = saveChatRoom(product);
         saveChat(chatRoom);
         saveOrder(product);
