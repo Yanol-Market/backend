@@ -398,13 +398,15 @@ public class ChatService {
                     chatStatus = "NEGO_PROPOSE";
                 }
             }
-        } else if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
+        }
+        if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
             if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
                 chatStatus = "PAYMENT_PENDING";
             }
-        } else if (product.getProductStatus().equals(ProductStatus.RESERVED)) {
+        }
+        if (product.getProductStatus().equals(ProductStatus.RESERVED)) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.WAITING_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
@@ -412,7 +414,8 @@ public class ChatService {
                 .equals(OrderStatus.WAITING_TRANSFER)) {
                 chatStatus = "TRANSFER_PENDING";
             }
-        } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
+        }
+        if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
