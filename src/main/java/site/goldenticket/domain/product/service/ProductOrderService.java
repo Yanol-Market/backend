@@ -83,7 +83,7 @@ public class ProductOrderService {
             // 2.1 주문
             Optional<Order> optionalOrder = getOrdersForProduct(productId);
 
-            if (!optionalOrder.isPresent()) {
+            if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
 
                 ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(order.getStatus()));
