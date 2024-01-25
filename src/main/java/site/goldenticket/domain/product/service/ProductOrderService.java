@@ -111,7 +111,7 @@ public class ProductOrderService {
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();
 
-                if(negotiationStatus != NegotiationStatus.NEGOTIATION_CANCELLED) {
+                if(negotiationStatus != NegotiationStatus.NEGOTIATION_CANCELLED && negotiationStatus != NegotiationStatus.NEGOTIATION_TIMEOUT) {
                     ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(nego.getStatus()));
                     progressProductStatusSet.add(progressProductStatus);
                 }
