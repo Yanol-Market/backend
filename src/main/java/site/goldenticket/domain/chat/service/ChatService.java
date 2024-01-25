@@ -276,7 +276,7 @@ public class ChatService {
             .receiverId(receiverId)
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
-            // * .price(getPriceOfChatRoom(buyerId, product.getId()))
+            .price(getPriceOfChatRoom(buyerId, product.getId()))
             .price(product.getGoldenPrice())
             .productStatus(product.getProductStatus())
             .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
