@@ -116,6 +116,10 @@ public class ProductOrderService {
                     progressProductStatusSet.add(progressProductStatus);
                 }
 
+                if(negotiationStatus == NegotiationStatus.NEGOTIATION_TIMEOUT) {
+                    progressProductStatusSet.add(ProgressProductStatus.NEGOTIATING);
+                }
+
                 User user = nego.getUser();
 
                 ChatRoomStatus chatRoomStatus;
@@ -201,7 +205,7 @@ public class ProductOrderService {
     }
 
     private List<Nego> getNegotiationsForProduct(Product product) {
-        List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED);
+        List<NegotiationStatus> negotiationStatusList = Arrays.asList(NegotiationStatus.NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED, NegotiationStatus.NEGOTIATION_TIMEOUT);
         return negoService.findByStatusInAndProduct(negotiationStatusList, product);
     }
 }
