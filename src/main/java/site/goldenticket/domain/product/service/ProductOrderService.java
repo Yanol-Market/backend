@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
 import static site.goldenticket.common.redis.constants.RedisConstants.AUTOCOMPLETE_KEY;
 import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATING;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATION_CANCELLED;
 
 @Slf4j
 @Service
@@ -62,7 +63,7 @@ public class ProductOrderService {
 
         NegoProductStatus negoProductStatus = null;
         if(isSeller) {
-            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NegotiationStatus.NEGOTIATION_CANCELLED);
+            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NEGOTIATION_CANCELLED);
             List<Nego> negoList =  negoService.findByStatusInAndProduct(negotiationStatusList, product);
             if(!negoList.isEmpty()) {
                 negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
@@ -72,7 +73,7 @@ public class ProductOrderService {
                 Optional<Nego> optionalNego = negoService.findByUserIdAndProduct(userId, product);
                 if(optionalNego.isPresent()) {
                     Nego nego = optionalNego.get();
-                    if (List.of(NEGOTIATING, COMPLETED_TRANSFER).contains(nego.getStatus())) {
+                    if (List.of(NEGOTIATING, NEGOTIATION_CANCELLED).contains(nego.getStatus())) {
                         negoProductStatus = NegoProductStatus.valueOf(String.valueOf(nego.getStatus()));
                     }
                 }
@@ -126,13 +127,13 @@ public class ProductOrderService {
             }
 
             // 2.2 네고
-            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NegotiationStatus.NEGOTIATION_CANCELLED, NegotiationStatus.NEGOTIATION_TIMEOUT);
+            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NEGOTIATION_CANCELLED, NegotiationStatus.NEGOTIATION_TIMEOUT);
             List<Nego> negoList =  negoService.findByStatusInAndProduct(negotiationStatusList, product);
 
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();
 
-                if(negotiationStatus != NegotiationStatus.NEGOTIATION_CANCELLED && negotiationStatus != NegotiationStatus.NEGOTIATION_TIMEOUT) {
+                if(negotiationStatus != NEGOTIATION_CANCELLED && negotiationStatus != NegotiationStatus.NEGOTIATION_TIMEOUT) {
                     ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(nego.getStatus()));
                     progressProductStatusSet.add(progressProductStatus);
                 }
@@ -148,7 +149,7 @@ public class ProductOrderService {
                     chatRoomStatus = ChatRoomStatus.ACTIVE;
                 } else if (negotiationStatus == NegotiationStatus.PAYMENT_PENDING) {
                     chatRoomStatus = ChatRoomStatus.YELLOW_DOT;
-                } else if (negotiationStatus == NegotiationStatus.NEGOTIATION_CANCELLED) {
+                } else if (negotiationStatus == NEGOTIATION_CANCELLED) {
                     chatRoomStatus = ChatRoomStatus.INACTIVE;
                 } else {
                     throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
