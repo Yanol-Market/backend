@@ -33,15 +33,7 @@ class UserControllerTest extends ApiTest {
     @DisplayName("회원가입 검증")
     void join() {
         // given
-        JoinRequest request = new JoinRequest(
-                NAME,
-                "NICKNAME",
-                "join@gmail.com",
-                PASSWORD,
-                PHONE_NUMBER,
-                null,
-                new AgreementRequest(true)
-        );
+        JoinRequest request = createJoinRequest();
 
         String url = "/users";
 
@@ -93,7 +85,7 @@ class UserControllerTest extends ApiTest {
     @DisplayName("사용자 삭제 검증")
     void removeUser() {
         // given
-        RemoveUserRequest request = new RemoveUserRequest("delete reason");
+        RemoveUserRequest request = createRemoveUserRequest();
 
         String url = "/users";
 
@@ -118,7 +110,7 @@ class UserControllerTest extends ApiTest {
     void changeProfile() {
         // given
         String changeNickname = "changeNickname";
-        ChangeProfileRequest request = new ChangeProfileRequest(changeNickname);
+        ChangeProfileRequest request = createChangeProfileRequest(changeNickname);
 
         String url = "/users/me";
 
@@ -153,7 +145,7 @@ class UserControllerTest extends ApiTest {
     @DisplayName("비밀번호 변경 검증")
     void changePassword() {
         // given
-        ChangePasswordRequest request = new ChangePasswordRequest(PASSWORD, CHANGE_PASSWORD);
+        ChangePasswordRequest request = createChangePasswordRequest();
 
         String url = "/users/password";
 
@@ -179,10 +171,7 @@ class UserControllerTest extends ApiTest {
     @DisplayName("계좌 등록 검증")
     void registerAccount() {
         // given
-        RegisterAccountRequest request = new RegisterAccountRequest(
-                BANK_NAME,
-                ACCOUNT_NUMBER
-        );
+        RegisterAccountRequest request = createRegisterAccountRequest();
 
         String url = "/users/account";
 
