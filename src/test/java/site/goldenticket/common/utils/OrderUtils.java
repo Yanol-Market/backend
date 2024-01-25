@@ -6,11 +6,11 @@ import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.user.entity.User;
 
-import static site.goldenticket.common.constants.OrderStatus.WAITING_TRANSFER;
+import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
 import static site.goldenticket.domain.nego.status.NegotiationStatus.TRANSFER_PENDING;
 
 public class OrderUtils {
-    private static final OrderStatus status = WAITING_TRANSFER;
+    private static final OrderStatus status = COMPLETED_TRANSFER;
     private static final NegotiationStatus negoStatus = TRANSFER_PENDING;
     private static final Integer price = 50000;
 

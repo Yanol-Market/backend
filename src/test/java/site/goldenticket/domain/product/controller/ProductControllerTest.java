@@ -121,14 +121,14 @@ public class ProductControllerTest extends ApiTest {
     @Test
     void getCompletedProductDetails() {
         // given
-        Product product = saveExpiredProduct();
+        Product product = saveSoldOutProduct();
         ChatRoom chatRoom = saveChatRoom(product);
         saveChat(chatRoom);
         saveOrder(product);
 
         String url = "/products/history/completed/" + product.getId();
         String parameterName = "productStatus";
-        String parameterValues = EXPIRED.toString();
+        String parameterValues = product.getProductStatus().toString();
 
         // when
         final ExtractableResponse<Response> response = performGetRequestWithQueryParam(url, parameterName, parameterValues, true);
