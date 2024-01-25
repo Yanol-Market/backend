@@ -123,7 +123,7 @@ public class ProductOrderService {
                 User user = nego.getUser();
 
                 ChatRoomStatus chatRoomStatus;
-                if (negotiationStatus == NegotiationStatus.NEGOTIATING) {
+                if (negotiationStatus == NegotiationStatus.NEGOTIATING || negotiationStatus == NegotiationStatus.NEGOTIATION_TIMEOUT) {
                     chatRoomStatus = ChatRoomStatus.ACTIVE;
                 } else if (negotiationStatus == NegotiationStatus.PAYMENT_PENDING) {
                     chatRoomStatus = ChatRoomStatus.YELLOW_DOT;
