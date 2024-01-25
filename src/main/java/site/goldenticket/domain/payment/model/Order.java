@@ -55,6 +55,10 @@ public class Order extends BaseTimeEntity {
         status = OrderStatus.PAYMENT_FAILED;
     }
 
+    public void orderCancel() {
+        status = OrderStatus.CANCEL;
+    }
+
     public void changeViewCheck() {
         customerViewCheck = true;
     }

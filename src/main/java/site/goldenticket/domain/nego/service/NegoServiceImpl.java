@@ -2,6 +2,7 @@ package site.goldenticket.domain.nego.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
@@ -271,6 +272,7 @@ public class NegoServiceImpl implements NegoService {
     }
 
     @Override
+    @Transactional
     public NegoResponse denyHandoverProduct(Long productId, PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
 
@@ -282,7 +284,7 @@ public class NegoServiceImpl implements NegoService {
                 () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
         paymentService.cancelPayment(paymentService.findByOrderId(order.getId()).getImpUid());
-
+        order.orderCancel();
 
         // Product에 대한 모든 네고 가져오기
         List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
