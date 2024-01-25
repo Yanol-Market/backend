@@ -34,7 +34,7 @@ public class NegoSchedulerService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 1000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
@@ -43,7 +43,7 @@ public class NegoSchedulerService {
         for (Nego nego : pendingNegos) {
             Product product = productService.getProduct(nego.getProductId());
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
                 product.setProductStatus(ProductStatus.SELLING);
                 productService.updateProductForNego(product);
                 nego.setStatus(NEGOTIATION_TIMEOUT);
@@ -75,7 +75,7 @@ public class NegoSchedulerService {
 
             checkAccountAndThrowException(user);
 
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
                 for (Nego transferNego : transferNegos) {
                     // 각 네고의 현재 상태를 확인하고 처리
                     if (transferNego.getStatus() == NEGOTIATION_COMPLETED) {
