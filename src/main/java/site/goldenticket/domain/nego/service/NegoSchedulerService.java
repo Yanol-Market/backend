@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
+import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.payment.model.Order;
@@ -31,6 +32,7 @@ public class NegoSchedulerService {
     private final NegoRepository negoRepository;
     private final ProductService productService;
     private final AlertService alertService;
+    private final ChatService chatService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
@@ -62,6 +64,9 @@ public class NegoSchedulerService {
                     alertService.createAlertOfWishProductToSelling(product.getId(),
                         product.getAccommodationName(), product.getRoomName());
                 }
+                //재결제 관련 시스템 메세지 전송
+                chatService.createSystemMessageOfTimeOut(product.getId(), product.getUserId(),
+                    nego.getUser().getId());
             }
         } //상품 상태 판매중
 

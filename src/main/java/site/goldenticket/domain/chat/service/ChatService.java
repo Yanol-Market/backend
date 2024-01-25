@@ -237,6 +237,20 @@ public class ChatService {
     }
 
     /***
+     * 시간초과 관련 시스템 메세지 생성
+     * @param productId 상품 ID
+     * @param sellerId 판매자 ID
+     * @param buyerId 구매자 ID
+     */
+    public void createSystemMessageOfTimeOut(Long productId, Long sellerId, Long buyerId) {
+        ChatRoom chatRoom = getChatRoomByBuyerIdAndProductId(buyerId, productId);
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", sellerId,
+            "구매자가 20분 이내에 결제를 완료하지 않아 거래가 이루어지지 않았습니다."));
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", buyerId,
+            "20분이 초과되었습니다. 아직 구매를 원하신다면 재결제 버튼을 눌러 결제해주세요."));
+    }
+
+    /***
      * 채팅방 ID를 통한 채팅방 조회
      * @param chatRoomId 채팅방 ID
      * @return 채팅방 Entity
