@@ -107,12 +107,15 @@ public class NegoSchedulerService {
                             + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
 
                     // 판매자에게 계좌 등록 알림 전송
-
                     if (user != null && user.getAccountNumber() == null) {
                         alertService.createAlert(product.getUserId(),
                             "'" + product.getAccommodationName() + "(" + product.getRoomName()
                                 + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
                     }
+
+                    //자동 양도완료 관련 시스템 메세지 전송
+                    chatService.createSystemMessageOfCompletedTransferByScheduler(product.getId(),
+                        product.getUserId(), transferNego.getUser().getId());
                 }
                 negoRepository.saveAll(transferNegos);
             }

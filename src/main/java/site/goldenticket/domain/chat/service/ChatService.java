@@ -251,6 +251,18 @@ public class ChatService {
     }
 
     /***
+     * 자동 양도 완료 관련 시스템 메세지 생성
+     * @param productId 상품 ID
+     * @param sellerId 판매자 ID
+     * @param buyerId 구매자 ID
+     */
+    public void createSystemMessageOfCompletedTransferByScheduler(Long productId, Long sellerId, Long buyerId) {
+        ChatRoom chatRoom = getChatRoomByBuyerIdAndProductId(buyerId, productId);
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", sellerId, "양도가 완료되었습니다!"));
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", buyerId, "양도가 완료되었습니다!"));
+    }
+
+    /***
      * 채팅방 ID를 통한 채팅방 조회
      * @param chatRoomId 채팅방 ID
      * @return 채팅방 Entity
