@@ -128,7 +128,7 @@ public class ProductControllerTest extends ApiTest {
 
         String url = "/products/history/completed/" + product.getId();
         String parameterName = "productStatus";
-        String parameterValues = product.getProductStatus().toString();
+        String parameterValues = EXPIRED.toString();
 
         // when
         final ExtractableResponse<Response> response = performGetRequestWithQueryParam(url, parameterName, parameterValues, true);
