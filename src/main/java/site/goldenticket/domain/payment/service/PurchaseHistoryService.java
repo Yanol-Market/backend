@@ -99,6 +99,9 @@ public class PurchaseHistoryService {
         List<PurchaseCompletedResponse> purchaseCompletedResponses = new ArrayList<>();
 
         for (Order order : orders) {
+            if (order.isCustomerViewCheck()) {
+                continue;
+            }
             Product product = productService.getProduct(order.getProductId());
             PurchaseCompletedResponse response = PurchaseCompletedResponse.create(product, order);
             purchaseCompletedResponses.add(response);
