@@ -1,6 +1,7 @@
 package site.goldenticket.domain.nego.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
@@ -32,6 +33,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NegoServiceImpl implements NegoService {
 
     private final NegoRepository negoRepository;
@@ -286,16 +288,19 @@ public class NegoServiceImpl implements NegoService {
 
         // 해당 Product ID로 Product 정보 가져오기
         Product product = productService.getProduct(productId);
-
+        log.info("김수빈 check1");
         //구매자 환불
         Order order = orderRepository.findByProductIdAndStatus(productId,
             OrderStatus.WAITING_TRANSFER).orElseThrow(
             () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
+        log.info("김수빈 check2");
         paymentService.cancelPayment(paymentService.findByOrderId(order.getId()).getImpUid());
+        log.info("김수빈 check3");
 
         // Product에 대한 모든 네고 가져오기
         List<Nego> allNegosForProduct = negoRepository.findAllByProduct(product);
+        log.info("김수빈 check4");
 
         // 양도 대기 중인 네고 찾기
         Optional<Nego> transferPendingNego = allNegosForProduct.stream()
@@ -306,6 +311,7 @@ public class NegoServiceImpl implements NegoService {
             updateProductForDenyHandOver(product);
             order.orderCancel();
             orderRepository.save(order);
+            log.info("김수빈 check5");
             //구매자에게 양도 취소 알림 전송
             alertService.createAlert(order.getUserId(),
                 "판매자 사정으로 양도가 취소되었습니다. 결제 금액이 100% 환불됩니다.");
@@ -323,6 +329,7 @@ public class NegoServiceImpl implements NegoService {
             Nego nego = transferPendingNego.get();
             order.orderCancel();
             orderRepository.save(order);
+            log.info("김수빈 check6");
             // 양도 대기 중인 네고를 찾았을 경우 거절 처리
             if (nego.getCount() < 2) {
                 nego.setStatus(NegotiationStatus.NEGOTIATING);
@@ -333,6 +340,7 @@ public class NegoServiceImpl implements NegoService {
             nego.setExpirationTime(LocalDateTime.now());
             updateProductForDenyHandOver(product);
             negoRepository.save(nego);
+            log.info("김수빈 check7");
 
             //구매자에게 양도 취소 알림 전송
             alertService.createAlert(nego.getUser().getId(),
