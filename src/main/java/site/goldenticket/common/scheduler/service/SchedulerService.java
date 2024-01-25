@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import site.goldenticket.domain.product.service.ProductSchedulerService;
-import site.goldenticket.domain.product.service.ProductService;
 
 @Slf4j
 @Component
@@ -14,7 +13,7 @@ public class SchedulerService {
 
     private final ProductSchedulerService productSchedulerService;
 
-    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "* */30 * * * *")
     public void updateViewCountsScheduler() {
         log.info("매 10분마다 실행 되는 Product ViewCount Update Scheduler.");
         productSchedulerService.updateViewCounts();
