@@ -64,7 +64,7 @@ public class NegoSchedulerService {
                     alertService.createAlertOfWishProductToSelling(product.getId(),
                         product.getAccommodationName(), product.getRoomName());
                 }
-                //재결제 관련 시스템 메세지 전송
+                //타임오버 관련 시스템 메세지 전송
                 chatService.createSystemMessageOfTimeOut(product.getId(), product.getUserId(),
                     nego.getUser().getId());
             }
