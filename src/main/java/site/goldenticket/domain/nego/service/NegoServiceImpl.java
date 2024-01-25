@@ -235,6 +235,7 @@ public class NegoServiceImpl implements NegoService {
     } //양도 대기중인 상품 있으면 결제 되면 안됨
 
     @Override
+    @Transactional
     public HandoverResponse handOverProduct(Long productId, PrincipalDetails principalDetails) {
         Long userId = principalDetails.getUserId();
         User user = userRepository.findById(userId)
@@ -262,7 +263,6 @@ public class NegoServiceImpl implements NegoService {
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
             order.setStatus(OrderStatus.COMPLETED_TRANSFER);
-            orderRepository.save(order);
             handleNegos(allNegosForProduct);
             sendTransferCompleteAlertsForNotNego(order, product, user);
         }
@@ -273,7 +273,6 @@ public class NegoServiceImpl implements NegoService {
             completeTransfer(product, nego);
             handleNegos(allNegosForProduct);
             order.setStatus(OrderStatus.COMPLETED_TRANSFER);
-            orderRepository.save(order);
             sendTransferCompleteAlerts(nego, product, user);
             return HandoverResponse.fromEntity(product, nego);
         }
