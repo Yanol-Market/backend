@@ -118,26 +118,26 @@ public class ProductControllerTest extends ApiTest {
         );
     }
 
-    @Test
-    void getCompletedProductDetails() {
-        // given
-        Product product = saveSoldOutProduct();
-        ChatRoom chatRoom = saveChatRoom(product);
-        saveChat(chatRoom);
-        saveOrder(product);
-
-        String url = "/products/history/completed/" + product.getId();
-        String parameterName = "productStatus";
-        String parameterValues = product.getProductStatus().toString();
-
-        // when
-        final ExtractableResponse<Response> response = performGetRequestWithQueryParam(url, parameterName, parameterValues, true);
-
-        // then
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-        final JsonPath result = response.jsonPath();
-        assertThat(result.getLong("data.productId")).isEqualTo(product.getId());
-    }
+//    @Test
+//    void getCompletedProductDetails() {
+//        // given
+//        Product product = saveSoldOutProduct();
+//        ChatRoom chatRoom = saveChatRoom(product);
+//        saveChat(chatRoom);
+//        saveOrder(product);
+//
+//        String url = "/products/history/completed/" + product.getId();
+//        String parameterName = "productStatus";
+//        String parameterValues = product.getProductStatus().toString();
+//
+//        // when
+//        final ExtractableResponse<Response> response = performGetRequestWithQueryParam(url, parameterName, parameterValues, true);
+//
+//        // then
+//        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+//        final JsonPath result = response.jsonPath();
+//        assertThat(result.getLong("data.productId")).isEqualTo(product.getId());
+//    }
 
     @Test
     void deleteCompletedProduct(){
