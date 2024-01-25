@@ -248,14 +248,17 @@ public class NegoServiceImpl implements NegoService {
                 .filter(nego -> nego.getStatus() == NegotiationStatus.TRANSFER_PENDING)
                 .findFirst();
 
+        Order order = orderRepository.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
+
         if (transferPendingNego.isEmpty()) {
-            Order order = orderRepository.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER).orElseThrow(
-                    () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
-            );
             checkAccountAndThrowException(user);
             //checkAccountAndThrowException(user);
             product.setProductStatus(ProductStatus.SOLD_OUT);
             productService.updateProductForNego(product);
+            order.setStatus(OrderStatus.COMPLETED_TRANSFER);
+            orderRepository.save(order);
             handleNegos(allNegosForProduct);
             sendTransferCompleteAlertsForNotNego(order, product, user);
         }
@@ -265,6 +268,8 @@ public class NegoServiceImpl implements NegoService {
             Nego nego = transferPendingNego.get();
             completeTransfer(product, nego);
             handleNegos(allNegosForProduct);
+            order.setStatus(OrderStatus.COMPLETED_TRANSFER);
+            orderRepository.save(order);
             sendTransferCompleteAlerts(nego, product, user);
             return HandoverResponse.fromEntity(product, nego);
         }
