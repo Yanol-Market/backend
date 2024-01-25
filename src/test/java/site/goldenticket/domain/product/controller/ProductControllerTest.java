@@ -131,7 +131,7 @@ public class ProductControllerTest extends ApiTest {
         String parameterValues = product.getProductStatus().toString();
 
         // when
-        final ExtractableResponse<Response> response = performAuthorizedGetRequestWithQueryParam(url, parameterName, parameterValues);
+        final ExtractableResponse<Response> response = performAuthorizedGetRequestWithQueryParam(url, parameterName, parameterValues, true);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -194,12 +194,18 @@ public class ProductControllerTest extends ApiTest {
         orderRepository.save(order);
     }
 
-    private ExtractableResponse<Response> performGetRequest(String url, boolean needsAuthentication) {
+    private RequestSpecification setupRequestSpecification(boolean needsAuthentication) {
         RequestSpecification requestSpecification = RestAssured.given().log().all();
 
         if (needsAuthentication) {
             requestSpecification.header("Authorization", "Bearer " + accessToken);
         }
+
+        return requestSpecification;
+    }
+
+    private ExtractableResponse<Response> performGetRequest(String url, boolean needsAuthentication) {
+        RequestSpecification requestSpecification = setupRequestSpecification(needsAuthentication);
 
         return requestSpecification
                 .when().get(url)
@@ -207,9 +213,10 @@ public class ProductControllerTest extends ApiTest {
                 .extract();
     }
 
-    private ExtractableResponse<Response> performAuthorizedGetRequestWithQueryParam(String url, String parameterName, String parameterValues) {
-        return RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
+    private ExtractableResponse<Response> performAuthorizedGetRequestWithQueryParam(String url, String parameterName, String parameterValues, boolean needsAuthentication) {
+        RequestSpecification requestSpecification = setupRequestSpecification(needsAuthentication);
+
+        return requestSpecification
                 .queryParam(parameterName, parameterValues)
                 .when().get(url)
                 .then().log().all()
@@ -217,8 +224,9 @@ public class ProductControllerTest extends ApiTest {
     }
 
     private ExtractableResponse<Response> performAuthorizedDeleteRequest(String url) {
-        return RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
+        RequestSpecification requestSpecification = setupRequestSpecification(true);
+
+        return requestSpecification
                 .when().delete(url)
                 .then().log().all()
                 .extract();
