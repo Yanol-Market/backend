@@ -256,7 +256,8 @@ public class ChatService {
      * @param sellerId 판매자 ID
      * @param buyerId 구매자 ID
      */
-    public void createSystemMessageOfCompletedTransferByScheduler(Long productId, Long sellerId, Long buyerId) {
+    public void createSystemMessageOfCompletedTransferByScheduler(Long productId, Long sellerId,
+        Long buyerId) {
         ChatRoom chatRoom = getChatRoomByBuyerIdAndProductId(buyerId, productId);
         createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", sellerId, "양도가 완료되었습니다!"));
         createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", buyerId, "양도가 완료되었습니다!"));
@@ -306,6 +307,7 @@ public class ChatService {
             .productStatus(product.getProductStatus())
             .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
             .negoId(getNegoIdOfChatRoom(buyerId, product.getId()))
+            .negoAvailable(isNegoAvailable(buyerId, product.getId()))
             .build();
 
         List<Chat> chatList = getChatListAll(chatRoomId, userId);
@@ -332,6 +334,39 @@ public class ChatService {
         return ChatRoomDetailResponse.builder()
             .chatRoomInfoResponse(chatRoomInfoResponse)
             .chatResponseList(chatResponseList).build();
+    }
+
+    /***
+     * 채팅방 네고가능여부 조회 : 네고 제시 버튼 활성화 여부 구분 목적
+     * @param buyerId
+     * @param productId
+     * @return
+     */
+    private Boolean isNegoAvailable(Long buyerId, Long productId) {
+        Boolean negoAvailable = true;
+        Product product = productService.getProduct(productId);
+        //본인이 판매하는 상품이면 네고 불가
+        if (product.getUserId().equals(buyerId)) {
+            negoAvailable = false;
+        }
+        //판매중인 상품인지 확인: 판매중이 아니면 네고 불가
+        if (!product.getProductStatus().equals(ProductStatus.SELLING)) {
+            negoAvailable = false;
+        } else { //판매중이면
+            if (negoRepository.existsByUser_IdAndProduct_Id(buyerId, productId)) {
+                //네고 이력 있는 경우 : 2차 네고(거절 혹은 승인) OR 재결제 -> 네고 불가
+                List<Nego> negoList = negoRepository.findAllByUser_IdAndProduct_Id(buyerId,
+                    productId);
+                for (Nego nego : negoList) {
+                    if (nego.getCount().equals(2) || nego.getStatus()
+                        .equals(NegotiationStatus.NEGOTIATION_TIMEOUT)) {
+                        negoAvailable = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return negoAvailable;
     }
 
     /***
@@ -421,7 +456,8 @@ public class ChatService {
                 chatStatus = "PAYMENT_PENDING";
             }
         }
-        if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsOrderOfWaitingTransfer) {
+        if (product.getProductStatus().equals(ProductStatus.RESERVED)
+            && existsOrderOfWaitingTransfer) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.WAITING_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
@@ -430,7 +466,8 @@ public class ChatService {
                 chatStatus = "TRANSFER_PENDING";
             }
         }
-        if (product.getProductStatus().equals(ProductStatus.SOLD_OUT) && existsOrderOfCompletedTransfer) {
+        if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)
+            && existsOrderOfCompletedTransfer) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));

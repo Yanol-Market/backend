@@ -449,7 +449,7 @@ public class NegoServiceImpl implements NegoService {
         if (!product.getProductStatus().equals(ProductStatus.SELLING)) {
             negoAvailable = false;
 
-        } else {
+        } else { //판매중이면
             if (!negoRepository.existsByUser_IdAndProduct_Id(userId, productId)) {
                 //네고 이력 없는 경우 : 채팅방 생성 + 채팅방 시작 메세지 생성 + 네고 가능
                 if (!chatService.existsChatRoomByBuyerIdAndProductId(userId, productId)) {

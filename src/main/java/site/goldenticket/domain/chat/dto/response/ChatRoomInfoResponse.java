@@ -24,7 +24,8 @@ public record ChatRoomInfoResponse(
     ProductStatus productStatus,
     Integer price,
     String chatStatus,
-    Long negoId
+    Long negoId,
+    Boolean negoAvailable
 ) {
 
 }
