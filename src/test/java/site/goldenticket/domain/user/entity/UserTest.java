@@ -75,4 +75,26 @@ class UserTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ALREADY_REGISTER_ACCOUNT.getMessage());
     }
+
+    @ParameterizedTest
+    @MethodSource("registerAccount_invalidParam")
+    @DisplayName("계좌 등록 실패 - 유효하지 않은 파라미터에 대한 예외 발생")
+    void registerAccount_failureInvalidParam(String bankName, String accountNumber) {
+        // when
+        // then
+        assertThatThrownBy(() -> user.registerAccount(bankName, accountNumber))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_REGISTER_ACCOUNT_PARAM.getMessage());
+    }
+
+    private static Stream<Arguments> registerAccount_invalidParam() {
+        return Stream.of(
+                Arguments.of(null, ACCOUNT_NUMBER),
+                Arguments.of("", ACCOUNT_NUMBER),
+                Arguments.of(BANK_NAME, null),
+                Arguments.of(BANK_NAME, ""),
+                Arguments.of(null, null),
+                Arguments.of("", "")
+        );
+    }
 }
