@@ -1,5 +1,8 @@
 package site.goldenticket.domain.payment.service;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +52,8 @@ public class PaymentService {
     private final AlertService alertService;
     private final ChatService chatService;
 
-    public PaymentDetailResponse getPaymentDetail(Long productId, PrincipalDetails principalDetails) {
+    public PaymentDetailResponse getPaymentDetail(Long productId,
+        PrincipalDetails principalDetails) {
         User user = userService.findById(principalDetails.getUserId());
 
         Product product = productService.getProduct(productId);
@@ -58,7 +62,8 @@ public class PaymentService {
         }
 
         //상품상태 = 예약중, 해당 경우에 본인이 네고를 진행하였고 결제 대기중인지 확인
-        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(user.getId(), product.getId());
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(
+            user.getId(), product.getId());
         if (product.getProductStatus() == ProductStatus.RESERVED) {
             if (nego.isEmpty()) {
                 throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
@@ -85,7 +90,8 @@ public class PaymentService {
 
         Order savedOrder = orderRepository.save(order);
 
-        return PaymentDetailResponse.of(savedOrder.getId(), user, product, price, product.getYanoljaPrice());
+        return PaymentDetailResponse.of(savedOrder.getId(), user, product, price,
+            product.getYanoljaPrice());
     }
 
     public PaymentReadyResponse preparePayment(Long orderId, PrincipalDetails principalDetails) {
@@ -93,7 +99,7 @@ public class PaymentService {
         User user = userService.findById(principalDetails.getUserId());
 
         Order order = orderRepository.findById(orderId).orElseThrow(
-                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+            () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
 
         Product product = productService.getProduct(order.getProductId());
@@ -102,7 +108,8 @@ public class PaymentService {
         }
 
         //상품상태 = 예약중, 해당 경우에 본인이 네고를 진행하였고 결제 대기중인지 확인
-        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(user.getId(), product.getId());
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(
+            user.getId(), product.getId());
         if (product.getProductStatus() == ProductStatus.RESERVED) {
             if (nego.isEmpty()) {
                 throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
@@ -123,10 +130,10 @@ public class PaymentService {
         Long userId = principalDetails.getUserId();
 
         Payment payment = iamportRepository.findPaymentByImpUid(request.getImpUid())
-                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         Product product = productService.getProduct(order.getProductId());
 
@@ -148,7 +155,8 @@ public class PaymentService {
             return PaymentResponse.failed();
         }
 
-        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(userId, product.getId());
+        Optional<Nego> nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(
+            userId, product.getId());
 
         //상품상태 = 예약중
         if (product.getProductStatus() == ProductStatus.RESERVED) {
@@ -180,18 +188,29 @@ public class PaymentService {
         order.waitTransfer();
         product.setProductStatus(ProductStatus.RESERVED);
 
-        //판매자에게 양도 알림 전송
+        //판매자에게 20분 내 양도 알림 전송
+        ZoneId koreaZoneId = ZoneId.of("Asia/Seoul");
+        ZonedDateTime koreaZonedDateTimeOfExpirationTime = order.getUpdatedAt().plusMinutes(20)
+            .atZone(koreaZoneId);
+        Integer hour = koreaZonedDateTimeOfExpirationTime.getHour();
+        Integer minute = koreaZonedDateTimeOfExpirationTime.getMinute();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+        String formattedDateTimeOfExpirationTime = koreaZonedDateTimeOfExpirationTime.format(
+            formatter);
+        String formattedDateTimeWithoutSeconds =formattedDateTimeOfExpirationTime
+            .substring(0, formattedDateTimeOfExpirationTime.length() - 3);
         alertService.createAlert(product.getUserId(),
-                product.getAccommodationName() + "(" + product.getRoomName() + ") "
-                        + "상품이 결제완료되었습니다." + order.getUpdatedAt().plusHours(3)
-                        + "까지 양도 신청을 완료해주세요. 양도 미신청 시, 자동 양도 신청됩니다.");
+            product.getAccommodationName() + "(" + product.getRoomName() + ") "
+                + "상품이 결제완료되었습니다." + formattedDateTimeWithoutSeconds
+                + "'까지 양도 여부를 선택해주세요. 미 입력 시 "+hour+":"+minute+" 이후 자동으로 양도가 진행됩니다.");
 
         //채팅방 생성 + 시작 메세지 생성
         if (!chatService.existsChatRoomByBuyerIdAndProductId(userId, product.getId())) {
             ChatRoomResponse chatRoomResponse = chatService.createChatRoom(userId, product.getId());
             chatService.createStartMessageOfNewChatRoom(chatRoomResponse.chatRoomId());
         }
-        Long chatRoomId = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId()).getId();
+        Long chatRoomId = chatService.getChatRoomByBuyerIdAndProductId(userId, product.getId())
+            .getId();
 
         return PaymentResponse.success(chatRoomId);
     }
@@ -201,19 +220,20 @@ public class PaymentService {
     }
 
     public void cancelPayment(String impUid) {
-        List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(impUid);
+        List<PaymentCancelDetail> paymentCancelDetails = iamportRepository.cancelPaymentByImpUid(
+            impUid);
         paymentCancelDetailRepository.saveAll(paymentCancelDetails);
 
         String pgTid = paymentCancelDetails.get(0).getPgTid();
         Payment payment = paymentRepository.findByPgTid(pgTid).orElseThrow(
-                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+            () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
         );
         payment.cancelledPayment();
     }
 
     public Payment findByOrderId(Long orderId) {
         return paymentRepository.findByOrderId(orderId).orElseThrow(
-                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+            () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
         );
     }
 }
