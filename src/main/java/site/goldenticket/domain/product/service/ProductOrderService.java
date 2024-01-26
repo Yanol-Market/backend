@@ -66,7 +66,7 @@ public class ProductOrderService {
             List<Nego> negoList = negoService.findAllByProductAndStatus(product, NegotiationStatus.NEGOTIATING);
 
             if (!negoList.isEmpty()) {
-                negoProductStatus = NegoProductStatus.NEGOTIATING;
+                negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
             }
         }
         else {
