@@ -337,7 +337,7 @@ public class NegoServiceImpl implements NegoService {
             if (nego.getCount() < 2) {
                 nego.setStatus(NegotiationStatus.NEGOTIATING);
             } else {
-                nego.setStatus(NegotiationStatus.NEGOTIATION_COMPLETED);
+                nego.setStatus(NegotiationStatus.NEGOTIATION_CANCELLED);
             }
             nego.setConsent(Boolean.FALSE);
             nego.setExpirationTime(LocalDateTime.now());
