@@ -15,6 +15,8 @@ public final class UserUtils {
     public static final Long YANOLJA_ID = 1L;
     public static final String BANK_NAME = "bankName";
     public static final String ACCOUNT_NUMBER = "000000000000";
+    public static final String JOIN_NICKNAME = "joinNickname";
+    public static final String JOIN_EMAIL = "join@gmail.com";
     public static final String CHANGE_PASSWORD = "changePassword";
 
     public static User createUser(String encodePassword) {
@@ -41,8 +43,8 @@ public final class UserUtils {
     public static JoinRequest createJoinRequest() {
         return new JoinRequest(
                 NAME,
-                "NICKNAME",
-                "join@gmail.com",
+                JOIN_NICKNAME,
+                JOIN_EMAIL,
                 PASSWORD,
                 PHONE_NUMBER,
                 null,
