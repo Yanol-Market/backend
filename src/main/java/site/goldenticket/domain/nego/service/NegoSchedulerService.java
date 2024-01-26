@@ -80,10 +80,10 @@ public class NegoSchedulerService {
             User user = userRepository.findById(product.getUserId())
                     .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-            //판매자 계좌 있는지 확인
-            if (user.getAccountNumber() == null) {
-                throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
-            }
+//            //판매자 계좌 있는지 확인
+//            if (user.getAccountNumber() == null) {
+//                throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+//            }
 
             //양도 시간 지났는지 확인, 지났으면 양도 처리
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
