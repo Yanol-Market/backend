@@ -7,14 +7,14 @@ import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 public final class UserUtils {
 
-    public static String EMAIL = "email@gamil.com";
-    public static String PASSWORD = "password";
-    public static String NAME = "name";
-    public static String NICKNAME = "nickname";
-    public static String PHONE_NUMBER = "01000000000";
-    public static Long YANOLJA_ID = 1L;
-    public static String BANK_NAME = "bankName";
-    public static String ACCOUNT_NUMBER = "000000000000";
+    public static final String EMAIL = "email@gamil.com";
+    public static final String PASSWORD = "password";
+    public static final String NAME = "name";
+    public static final String NICKNAME = "nickname";
+    public static final String PHONE_NUMBER = "01000000000";
+    public static final Long YANOLJA_ID = 1L;
+    public static final String BANK_NAME = "bankName";
+    public static final String ACCOUNT_NUMBER = "000000000000";
     public static final String CHANGE_PASSWORD = "changePassword";
 
     public static User createUser(String encodePassword) {
