@@ -32,6 +32,6 @@ public interface NegoService {
 
     NegoTestListResponse getNegoListForTest(); // 테스트용 모든 네고 기록 조회
     List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList, Product product);
-
+    List<Nego> findAllByProductAndStatus(Product product, NegotiationStatus negotiationStatus);
     Optional<Nego> findByUserIdAndProduct(Long userId, Product product);
 }

@@ -26,6 +26,9 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -67,11 +70,17 @@ public class NegoServiceImpl implements NegoService {
             productService.updateProductForNego(product);
             negoRepository.save(nego);
 
-            //구매자에게 네고 승인 및 결제 안내 알림 전송
+            //구매자에게 네고 승인 및 20분 내 결제 안내 알림 전송
+            ZoneId koreaZoneId = ZoneId.of("Asia/Seoul");
+            ZonedDateTime koreaZonedDateTimeOfExpirationTime = nego.getExpirationTime().atZone(koreaZoneId);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+            String formattedDateTimeOfExpirationTime = koreaZonedDateTimeOfExpirationTime.format(formatter);
+            String formattedDateTimeWithoutSeconds =formattedDateTimeOfExpirationTime
+                .substring(0, formattedDateTimeOfExpirationTime.length() - 3);
             alertService.createAlert(nego.getUser().getId(),
                 "'" + nego.getProduct().getAccommodationName() +
                     "(" + nego.getProduct().getRoomName() + ")'상품에 대한 네고 요청이 승인되었습니다. 해당상품을 "
-                    + nego.getExpirationTime() + "까지 결제를 완료해주세요.");
+                    + formattedDateTimeWithoutSeconds+ "까지 결제를 완료해주세요.");
         } else {
             // 다른 상태의 네고는 가격 승낙을 처리할 수 없음
             throw new CustomException("네고를 승인할수 없습니다.", ErrorCode.CANNOT_CONFIRM_NEGO);
@@ -191,7 +200,7 @@ public class NegoServiceImpl implements NegoService {
 
         //판매자에게 네고 제안 알림 전송
         alertService.createAlert(product.getUserId(),
-            "'" + product.getAccommodationName() + "(" + product.getRoomName()
+            "판매중인 상품 '" + product.getAccommodationName() + "(" + product.getRoomName()
                 + ")'상품에 대한 네고 요청이 들어왔습니다.");
 
         return PriceProposeResponse.fromEntity(userNego);
@@ -392,15 +401,8 @@ public class NegoServiceImpl implements NegoService {
         // 판매자에게 정산 요청 알림 전송
         alertService.createAlert(product.getUserId(),
             "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                + ")'상품 양도가 완료되었습니다. 영업일 1일 이내 등록한 계좌 정보로 정산 금액이 입금됩니다."
+                + ")'상품 양도가 완료되었습니다. 최대 9영업일 이내에 등록한 계좌 정보로 정산 금액이 입금됩니다."
                 + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
-
-        // 판매자에게 계좌 등록 알림 전송
-        if (user != null && user.getAccountNumber() == null) {
-            alertService.createAlert(product.getUserId(),
-                "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                    + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
-        }
     }
 
     private void sendTransferCompleteAlertsForNotNego(Order order, Product product, User user) {
@@ -415,15 +417,8 @@ public class NegoServiceImpl implements NegoService {
             // 판매자에게 정산 요청 알림 전송
             alertService.createAlert(product.getUserId(),
                 "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                    + ")'상품 양도가 완료되었습니다. 영업일 1일 이내 등록한 계좌 정보로 정산 금액이 입금됩니다."
+                    + ")'상품 양도가 완료되었습니다. 최대 9영업일 등록한 계좌 정보로 정산 금액이 입금됩니다."
                     + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
-
-            // 판매자에게 계좌 등록 알림 전송
-            if (user.getAccountNumber() == null) {
-                alertService.createAlert(product.getUserId(),
-                    "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                        + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
-            }
         }
     }
 
@@ -501,6 +496,11 @@ public class NegoServiceImpl implements NegoService {
     public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList,
         Product product) {
         return negoRepository.findByStatusInAndProduct(negotiationStatusList, product);
+    }
+
+    @Override
+    public List<Nego> findAllByProductAndStatus(Product product, NegotiationStatus negotiationStatus) {
+        return negoRepository.findAllByProductAndStatus(product, negotiationStatus);
     }
 
     public Optional<Nego> findByUserIdAndProduct(Long userId, Product product) {

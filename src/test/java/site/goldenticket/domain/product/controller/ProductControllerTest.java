@@ -1,10 +1,8 @@
 package site.goldenticket.domain.product.controller;
 
-import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +27,7 @@ import static site.goldenticket.common.utils.ChatUtils.createChat;
 import static site.goldenticket.common.utils.NegoUtils.createNego;
 import static site.goldenticket.common.utils.OrderUtils.createOrder;
 import static site.goldenticket.common.utils.ProductUtils.createProduct;
+import static site.goldenticket.common.utils.RestAssuredUtils.*;
 import static site.goldenticket.domain.product.constants.ProductStatus.EXPIRED;
 import static site.goldenticket.domain.product.constants.ProductStatus.SOLD_OUT;
 
@@ -57,7 +56,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/" + product.getId();
 
         // when
-        final ExtractableResponse<Response> response = performGetRequest(url, false);
+        final ExtractableResponse<Response> response = restAssuredGet(url);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -71,7 +70,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/" + product.getId();
 
         // when
-        final ExtractableResponse<Response> response = performDeleteRequest(url);
+        final ExtractableResponse<Response> response = restAssuredDeleteWithToken(url, accessToken);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -88,7 +87,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/history/progress";
 
         // when
-        final ExtractableResponse<Response> response = performGetRequest(url, true);
+        final ExtractableResponse<Response> response = restAssuredGetWithToken(url, accessToken);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -107,7 +106,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/history/completed";
 
         // when
-        final ExtractableResponse<Response> response = performGetRequest(url, true);
+        final ExtractableResponse<Response> response = restAssuredGetWithToken(url, accessToken);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -131,7 +130,7 @@ public class ProductControllerTest extends ApiTest {
         String parameterValues = product.getProductStatus().toString();
 
         // when
-        final ExtractableResponse<Response> response = performGetRequestWithQueryParam(url, parameterName, parameterValues, true);
+        final ExtractableResponse<Response> response = restAssuredGetWithTokenAndQueryParam(url, parameterName, parameterValues, accessToken);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -147,7 +146,7 @@ public class ProductControllerTest extends ApiTest {
         String url = "/products/history/completed/" + product.getId();
 
         // when
-        final ExtractableResponse<Response> response = performDeleteRequest(url);
+        final ExtractableResponse<Response> response = restAssuredDeleteWithToken(url, accessToken);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
@@ -192,43 +191,5 @@ public class ProductControllerTest extends ApiTest {
     private void saveOrder(Product product) {
         Order order = createOrder(product, user);
         orderRepository.save(order);
-    }
-
-    private RequestSpecification setupRequestSpecification(boolean needsAuthentication) {
-        RequestSpecification requestSpecification = RestAssured.given().log().all();
-
-        if (needsAuthentication) {
-            requestSpecification.header("Authorization", "Bearer " + accessToken);
-        }
-
-        return requestSpecification;
-    }
-
-    private ExtractableResponse<Response> performGetRequest(String url, boolean needsAuthentication) {
-        RequestSpecification requestSpecification = setupRequestSpecification(needsAuthentication);
-
-        return requestSpecification
-                .when().get(url)
-                .then().log().all()
-                .extract();
-    }
-
-    private ExtractableResponse<Response> performGetRequestWithQueryParam(String url, String parameterName, String parameterValues, boolean needsAuthentication) {
-        RequestSpecification requestSpecification = setupRequestSpecification(needsAuthentication);
-
-        return requestSpecification
-                .queryParam(parameterName, parameterValues)
-                .when().get(url)
-                .then().log().all()
-                .extract();
-    }
-
-    private ExtractableResponse<Response> performDeleteRequest(String url) {
-        RequestSpecification requestSpecification = setupRequestSpecification(true);
-
-        return requestSpecification
-                .when().delete(url)
-                .then().log().all()
-                .extract();
     }
 }

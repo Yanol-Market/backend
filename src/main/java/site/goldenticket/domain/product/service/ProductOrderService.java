@@ -62,13 +62,14 @@ public class ProductOrderService {
         boolean isSeller = isAuthenticated && principalDetails.getUserId().equals(product.getUserId());
 
         NegoProductStatus negoProductStatus = null;
-        if(isSeller) {
-            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NEGOTIATION_CANCELLED);
-            List<Nego> negoList =  negoService.findByStatusInAndProduct(negotiationStatusList, product);
-            if(!negoList.isEmpty()) {
+        if (isSeller) {
+            List<Nego> negoList = negoService.findAllByProductAndStatus(product, NegotiationStatus.NEGOTIATING);
+
+            if (!negoList.isEmpty()) {
                 negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
             }
-        } else {
+        }
+        else {
             if(isAuthenticated) {
                 Optional<Nego> optionalNego = negoService.findByUserIdAndProduct(userId, product);
                 if(optionalNego.isPresent()) {
