@@ -87,17 +87,17 @@ public class NegoSchedulerService {
 
             //양도 시간 지났는지 확인, 지났으면 양도 처리
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
-                // 해당 상품에 대한 네고들 돌기
-                for (Nego transferNego : transferNegos) {
-                    // 각 네고의 현재 상태를 확인하고 처리
-                    transferNego.setStatus(NEGOTIATION_COMPLETED);
-                }
-
                 // 주문 상태 업데이트
                 transferOrder.setStatus(COMPLETED_TRANSFER);
                 // 상품의 상태를 변경하고 업데이트
                 product.setProductStatus(ProductStatus.SOLD_OUT);
                 productService.updateProductForNego(product);
+
+                // 해당 상품에 대한 네고들 돌기
+                for (Nego transferNego : transferNegos) {
+                    // 각 네고의 현재 상태를 확인하고 처리
+                    transferNego.setStatus(NEGOTIATION_COMPLETED);
+                }
 
                 // 구매자에게 양도 완료 알림 전송
                 alertService.createAlert(transferOrder.getUserId(),
