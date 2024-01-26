@@ -93,6 +93,8 @@ public class NegoSchedulerService {
                 product.setProductStatus(ProductStatus.SOLD_OUT);
                 productService.updateProductForNego(product);
 
+                orderRepository.save(transferOrder);
+
                 // 해당 상품에 대한 네고들 돌기
                 for (Nego transferNego : transferNegos) {
                     // 각 네고의 현재 상태를 확인하고 처리
