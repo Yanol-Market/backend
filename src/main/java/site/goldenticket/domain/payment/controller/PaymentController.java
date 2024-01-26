@@ -6,9 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import site.goldenticket.common.response.CommonResponse;
+import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentDetailResponse;
 import site.goldenticket.domain.payment.dto.response.PaymentReadyResponse;
-import site.goldenticket.domain.payment.dto.request.PaymentRequest;
 import site.goldenticket.domain.payment.dto.response.PaymentResponse;
 import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.security.PrincipalDetails;
@@ -44,4 +44,18 @@ public class PaymentController {
         PaymentResponse paymentResponse = paymentService.savePayment(request, principalDetails);
         return ResponseEntity.ok(CommonResponse.ok("Payment result", paymentResponse));
     }
+
+    @PostMapping("/mobile/result")
+    public ResponseEntity<CommonResponse<PaymentResponse>> saveMobliePayment(
+            @RequestParam(name = "imp_uid") String impUid,
+            @RequestParam(name = "merchant_uid") Long orderId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        PaymentRequest request = PaymentRequest.builder()
+                .impUid(impUid)
+                .orderId(orderId)
+                .build();
+        PaymentResponse paymentResponse = paymentService.savePayment(request, principalDetails);
+        return ResponseEntity.ok(CommonResponse.ok("Payment result", paymentResponse));
+    };
 }
