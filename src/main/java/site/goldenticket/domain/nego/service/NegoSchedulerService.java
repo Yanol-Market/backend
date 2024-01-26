@@ -55,69 +55,67 @@ public class NegoSchedulerService {
 
                 //판매자에게 타임오버 알림 전송
                 alertService.createAlert(product.getUserId(),
-                    "구매자가 20분 이내에 결제를 완료하지 않아 거래가 종료되었습니다.");
+                        "구매자가 20분 이내에 결제를 완료하지 않아 거래가 종료되었습니다.");
                 //구매자에게 타임오버 알림 전송
                 alertService.createAlert(nego.getUser().getId(),
-                    "상품 결제 시간 20분이 초과되었습니다. 아직 구매를 원하신다면, 재결제 버튼을 눌러 결제를 완료해주세요.");
+                        "상품 결제 시간 20분이 초과되었습니다. 아직 구매를 원하신다면, 재결제 버튼을 눌러 결제를 완료해주세요.");
                 //해당 상품 찜한 회원들에게 알림 전송
                 if (product.getProductStatus().equals(ProductStatus.SELLING)) {
                     alertService.createAlertOfWishProductToSelling(product.getId(),
-                        product.getAccommodationName(), product.getRoomName());
+                            product.getAccommodationName(), product.getRoomName());
                 }
                 //타임오버 관련 시스템 메세지 전송
                 chatService.createSystemMessageOfTimeOut(product.getId(), product.getUserId(),
-                    nego.getUser().getId());
+                        nego.getUser().getId());
             }
         } //상품 상태 판매중
 
+        // 양도 대기중인 모든 주문 돌기
         for (Order transferOrder : transferOrders) {
             Product product = productService.getProduct(transferOrder.getProductId());
             List<Nego> transferNegos = negoRepository.findAllByProduct(product);
             LocalDateTime updatedAt = transferOrder.getUpdatedAt();
 
+            //판매자
             User user = userRepository.findById(product.getUserId())
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-            checkAccountAndThrowException(user);
+            //판매자 계좌 있는지 확인
+            if (user.getAccountNumber() == null) {
+                throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+            }
 
+            //양도 시간 지났는지 확인, 지났으면 양도 처리
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
+                // 해당 상품에 대한 네고들 돌기
                 for (Nego transferNego : transferNegos) {
                     // 각 네고의 현재 상태를 확인하고 처리
-                    if (transferNego.getStatus() == NEGOTIATION_COMPLETED) {
-                        continue;
-                    }
-                    transferOrder.setStatus(COMPLETED_TRANSFER);
                     transferNego.setStatus(NEGOTIATION_COMPLETED);
-                    transferNego.setUpdatedAt(currentTime);
-
-                    // 상품의 상태를 변경하고 업데이트
-                    product.setProductStatus(ProductStatus.SOLD_OUT);
-                    productService.updateProductForNego(product);
-
-                    // 구매자에게 양도 완료 알림 전송
-                    alertService.createAlert(transferNego.getUser().getId(),
-                        "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                            + ")'상품 양도가 완료되었습니다. "
-                            + "양도 완료에 따른 체크인 정보는 '마이페이지 > 구매내역 > 구매 완료'에서 확인하실 수 있습니다.");
-
-                    // 판매자에게 정산 요청 알림 전송
-                    alertService.createAlert(product.getUserId(),
-                        "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                            + ")'상품 양도가 완료되었습니다. 최대 9영업일 이내에 등록한 계좌 정보로 정산 금액이 입금됩니다."
-                            + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
-
-                    //자동 양도완료 관련 시스템 메세지 전송
-                    chatService.createSystemMessageOfCompletedTransferByScheduler(product.getId(),
-                        product.getUserId(), transferNego.getUser().getId());
                 }
-                negoRepository.saveAll(transferNegos);
-            }
-        } // 20분 뒤 자동양도
-    }
 
-    private void checkAccountAndThrowException(User user) {
-        if (user.getAccountNumber() == null) {
-            throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+                // 주문 상태 업데이트
+                transferOrder.setStatus(COMPLETED_TRANSFER);
+                // 상품의 상태를 변경하고 업데이트
+                product.setProductStatus(ProductStatus.SOLD_OUT);
+                productService.updateProductForNego(product);
+
+                // 구매자에게 양도 완료 알림 전송
+                alertService.createAlert(transferOrder.getUserId(),
+                        "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                                + ")'상품 양도가 완료되었습니다. "
+                                + "양도 완료에 따른 체크인 정보는 '마이페이지 > 구매내역 > 구매 완료'에서 확인하실 수 있습니다.");
+
+                // 판매자에게 정산 요청 알림 전송
+                alertService.createAlert(product.getUserId(),
+                        "'" + product.getAccommodationName() + "(" + product.getRoomName()
+                                + ")'상품 양도가 완료되었습니다. 최대 9영업일 이내에 등록한 계좌 정보로 정산 금액이 입금됩니다."
+                                + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
+
+                //자동 양도완료 관련 시스템 메세지 전송
+                chatService.createSystemMessageOfCompletedTransferByScheduler(product.getId(),
+                        product.getUserId(), transferOrder.getUserId());
+            }
+            negoRepository.saveAll(transferNegos);
         }
     }
 }
