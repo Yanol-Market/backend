@@ -1,6 +1,5 @@
 package site.goldenticket.domain.user.controller;
 
-import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -17,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static site.goldenticket.common.utils.RestAssuredUtils.*;
 import static site.goldenticket.common.utils.UserUtils.*;
 
 @DisplayName("UserController 검증")
@@ -33,27 +32,11 @@ class UserControllerTest extends ApiTest {
     @DisplayName("회원가입 검증")
     void join() {
         // given
-        JoinRequest request = new JoinRequest(
-                NAME,
-                "NICKNAME",
-                "join@gmail.com",
-                PASSWORD,
-                PHONE_NUMBER,
-                null,
-                new AgreementRequest(true)
-        );
-
+        JoinRequest request = createJoinRequest();
         String url = "/users";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .contentType(APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .post(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredPost(url, request);
 
         // then
         assertThat(result.statusCode()).isEqualTo(CREATED.value());
@@ -66,13 +49,7 @@ class UserControllerTest extends ApiTest {
         String url = "/users/me";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when()
-                .get(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredGetWithToken(url, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -93,20 +70,11 @@ class UserControllerTest extends ApiTest {
     @DisplayName("사용자 삭제 검증")
     void removeUser() {
         // given
-        RemoveUserRequest request = new RemoveUserRequest("delete reason");
-
+        RemoveUserRequest request = createRemoveUserRequest();
         String url = "/users";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .delete(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredDeleteWithToken(url, request, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -118,26 +86,16 @@ class UserControllerTest extends ApiTest {
     void changeProfile() {
         // given
         String changeNickname = "changeNickname";
-        ChangeProfileRequest request = new ChangeProfileRequest(changeNickname);
-
+        ChangeProfileRequest request = createChangeProfileRequest(changeNickname);
         String url = "/users/me";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .put(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredPutWithToken(url, request, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
 
         User findUser = userRepository.findById(user.getId()).orElseThrow();
-
         assertAll(
                 () -> assertThat(findUser.getId()).isEqualTo(user.getId()),
                 () -> assertThat(findUser.getEmail()).isEqualTo(EMAIL),
@@ -153,20 +111,11 @@ class UserControllerTest extends ApiTest {
     @DisplayName("비밀번호 변경 검증")
     void changePassword() {
         // given
-        ChangePasswordRequest request = new ChangePasswordRequest(PASSWORD, CHANGE_PASSWORD);
-
+        ChangePasswordRequest request = createChangePasswordRequest();
         String url = "/users/password";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .patch(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredPatchWithToken(url, request, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -179,23 +128,11 @@ class UserControllerTest extends ApiTest {
     @DisplayName("계좌 등록 검증")
     void registerAccount() {
         // given
-        RegisterAccountRequest request = new RegisterAccountRequest(
-                BANK_NAME,
-                ACCOUNT_NUMBER
-        );
-
+        RegisterAccountRequest request = createRegisterAccountRequest();
         String url = "/users/account";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .patch(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredPatchWithToken(url, request, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -207,17 +144,10 @@ class UserControllerTest extends ApiTest {
         // given
         user.registerAccount(BANK_NAME, ACCOUNT_NUMBER);
         userRepository.save(user);
-
         String url = "/users/account";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when()
-                .get(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredGetWithToken(url, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -236,17 +166,10 @@ class UserControllerTest extends ApiTest {
         // given
         user.registerAccount(BANK_NAME, ACCOUNT_NUMBER);
         userRepository.save(user);
-
         String url = "/users/account";
 
         // when
-        ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when()
-                .delete(url)
-                .then().log().all()
-                .extract();
+        ExtractableResponse<Response> result = restAssuredDeleteWithToken(url, accessToken);
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());

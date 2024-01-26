@@ -14,6 +14,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static site.goldenticket.common.response.ErrorCode.COMMON_INVALID_PARAMETER;
+import static site.goldenticket.common.response.ErrorCode.LOGIN_FAIL;
 import static site.goldenticket.common.response.Status.FAIL;
 import static site.goldenticket.common.utils.UserUtils.EMAIL;
 import static site.goldenticket.common.utils.UserUtils.PASSWORD;
@@ -69,7 +71,7 @@ public class SecurityTest extends ApiTest {
         JsonPath jsonPath = result.jsonPath();
         assertAll(
                 () -> assertThat(jsonPath.getString("status")).isEqualTo(FAIL.name()),
-                () -> assertThat(jsonPath.getString("message")).isEqualTo("이메일, 비밀번호를 확인해주세요.")
+                () -> assertThat(jsonPath.getString("message")).isEqualTo(LOGIN_FAIL.getMessage())
         );
     }
 
@@ -98,7 +100,7 @@ public class SecurityTest extends ApiTest {
         JsonPath jsonPath = result.jsonPath();
         assertAll(
                 () -> assertThat(jsonPath.getString("status")).isEqualTo(FAIL.name()),
-                () -> assertThat(jsonPath.getString("message")).isEqualTo("이메일, 비밀번호를 확인해주세요.")
+                () -> assertThat(jsonPath.getString("message")).isEqualTo(LOGIN_FAIL.getMessage())
         );
     }
 
@@ -120,7 +122,7 @@ public class SecurityTest extends ApiTest {
         JsonPath jsonPath = result.jsonPath();
         assertAll(
                 () -> assertThat(jsonPath.getString("status")).isEqualTo(FAIL.name()),
-                () -> assertThat(jsonPath.getString("message")).isEqualTo("요청한 값이 올바르지 않습니다.")
+                () -> assertThat(jsonPath.getString("message")).isEqualTo(COMMON_INVALID_PARAMETER.getMessage())
         );
     }
 }

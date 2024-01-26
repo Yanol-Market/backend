@@ -237,6 +237,32 @@ public class ChatService {
     }
 
     /***
+     * 시간초과 관련 시스템 메세지 생성
+     * @param productId 상품 ID
+     * @param sellerId 판매자 ID
+     * @param buyerId 구매자 ID
+     */
+    public void createSystemMessageOfTimeOut(Long productId, Long sellerId, Long buyerId) {
+        ChatRoom chatRoom = getChatRoomByBuyerIdAndProductId(buyerId, productId);
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", sellerId,
+            "구매자가 20분 이내에 결제를 완료하지 않아 거래가 이루어지지 않았습니다."));
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", buyerId,
+            "20분이 초과되었습니다. 아직 구매를 원하신다면 재결제 버튼을 눌러 결제해주세요."));
+    }
+
+    /***
+     * 자동 양도 완료 관련 시스템 메세지 생성
+     * @param productId 상품 ID
+     * @param sellerId 판매자 ID
+     * @param buyerId 구매자 ID
+     */
+    public void createSystemMessageOfCompletedTransferByScheduler(Long productId, Long sellerId, Long buyerId) {
+        ChatRoom chatRoom = getChatRoomByBuyerIdAndProductId(buyerId, productId);
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", sellerId, "양도가 완료되었습니다!"));
+        createChat(new ChatRequest(chatRoom.getId(), "SYSTEM", buyerId, "양도가 완료되었습니다!"));
+    }
+
+    /***
      * 채팅방 ID를 통한 채팅방 조회
      * @param chatRoomId 채팅방 ID
      * @return 채팅방 Entity
@@ -276,8 +302,7 @@ public class ChatService {
             .receiverId(receiverId)
             .receiverProfileImage(receiver.getImageUrl())
             .receiverNickname(receiver.getNickname())
-            // * .price(getPriceOfChatRoom(buyerId, product.getId()))
-            .price(product.getGoldenPrice())
+            .price(getPriceOfChatRoom(buyerId, product.getId()))
             .productStatus(product.getProductStatus())
             .chatStatus(getStatusOfChatRoom(buyerId, product.getId()))
             .negoId(getNegoIdOfChatRoom(buyerId, product.getId()))
@@ -373,6 +398,10 @@ public class ChatService {
         String chatStatus = "";
 
         Boolean existsNego = negoRepository.existsByUser_IdAndProduct_Id(buyerId, product.getId());
+        Boolean existsOrderOfWaitingTransfer = orderRepository.existsByProductIdAndStatus(productId,
+            OrderStatus.WAITING_TRANSFER);
+        Boolean existsOrderOfCompletedTransfer = orderRepository.existsByProductIdAndStatus(
+            productId, OrderStatus.COMPLETED_TRANSFER);
         if (product.getProductStatus().equals(ProductStatus.SELLING) && existsNego) {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
@@ -384,13 +413,15 @@ public class ChatService {
                     chatStatus = "NEGO_PROPOSE";
                 }
             }
-        } else if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
+        }
+        if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsNego) {
             Nego nego = negoRepository.findFirstByUser_IdAndProduct_IdOrderByCreatedAtDesc(buyerId,
                 product.getId()).orElseThrow(() -> new CustomException(NEGO_NOT_FOUND));
             if (nego.getStatus().equals(NegotiationStatus.PAYMENT_PENDING)) {
                 chatStatus = "PAYMENT_PENDING";
             }
-        } else if (product.getProductStatus().equals(ProductStatus.RESERVED)) {
+        }
+        if (product.getProductStatus().equals(ProductStatus.RESERVED) && existsOrderOfWaitingTransfer) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.WAITING_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
@@ -398,7 +429,8 @@ public class ChatService {
                 .equals(OrderStatus.WAITING_TRANSFER)) {
                 chatStatus = "TRANSFER_PENDING";
             }
-        } else if (product.getProductStatus().equals(ProductStatus.SOLD_OUT)) {
+        }
+        if (product.getProductStatus().equals(ProductStatus.SOLD_OUT) && existsOrderOfCompletedTransfer) {
             Order order = orderRepository.findByProductIdAndStatus(product.getId(),
                     OrderStatus.COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));

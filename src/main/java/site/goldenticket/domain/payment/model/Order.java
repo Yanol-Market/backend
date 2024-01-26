@@ -2,6 +2,7 @@ package site.goldenticket.domain.payment.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.common.constants.OrderStatus;
@@ -27,6 +28,7 @@ public class Order extends BaseTimeEntity {
     private Integer price;
     private boolean customerViewCheck;
 
+    @Builder
     private Order(Long productId, Long userId, OrderStatus status, NegotiationStatus negoStatus, Integer price) {
         this.productId = productId;
         this.userId = userId;
@@ -53,6 +55,10 @@ public class Order extends BaseTimeEntity {
 
     public void paymentFailed() {
         status = OrderStatus.PAYMENT_FAILED;
+    }
+
+    public void orderCancel() {
+        status = OrderStatus.CANCEL;
     }
 
     public void changeViewCheck() {

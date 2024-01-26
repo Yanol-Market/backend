@@ -8,6 +8,7 @@ import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.security.PrincipalDetails;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NegoService {
 
@@ -31,4 +32,6 @@ public interface NegoService {
 
     NegoTestListResponse getNegoListForTest(); // 테스트용 모든 네고 기록 조회
     List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList, Product product);
+
+    Optional<Nego> findByUserIdAndProduct(Long userId, Product product);
 }

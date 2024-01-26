@@ -16,6 +16,7 @@ public class PaymentCancelMapper {
                                 .pgTid(paymentCancelDetail.getPgTid())
                                 .cancelledAt(convertUnixToLocalDateTime(paymentCancelDetail.getCancelledAt()))
                                 .amount(paymentCancelDetail.getAmount().intValue())
+                                .reason(paymentCancelDetail.getReason())
                                 .build())
                 .toList();
     }

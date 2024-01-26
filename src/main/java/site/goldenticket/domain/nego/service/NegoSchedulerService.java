@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.alert.service.AlertService;
+import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
 import site.goldenticket.domain.nego.repository.NegoRepository;
 import site.goldenticket.domain.payment.model.Order;
@@ -31,10 +32,11 @@ public class NegoSchedulerService {
     private final NegoRepository negoRepository;
     private final ProductService productService;
     private final AlertService alertService;
+    private final ChatService chatService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 1000)
     public void changeStatus() {
         LocalDateTime currentTime = LocalDateTime.now();
         List<Nego> pendingNegos = negoRepository.findByStatus(PAYMENT_PENDING);
@@ -43,7 +45,7 @@ public class NegoSchedulerService {
         for (Nego nego : pendingNegos) {
             Product product = productService.getProduct(nego.getProductId());
             LocalDateTime updatedAt = nego.getUpdatedAt();
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
                 product.setProductStatus(ProductStatus.SELLING);
                 productService.updateProductForNego(product);
                 nego.setStatus(NEGOTIATION_TIMEOUT);
@@ -62,6 +64,9 @@ public class NegoSchedulerService {
                     alertService.createAlertOfWishProductToSelling(product.getId(),
                         product.getAccommodationName(), product.getRoomName());
                 }
+                //타임오버 관련 시스템 메세지 전송
+                chatService.createSystemMessageOfTimeOut(product.getId(), product.getUserId(),
+                    nego.getUser().getId());
             }
         } //상품 상태 판매중
 
@@ -75,7 +80,7 @@ public class NegoSchedulerService {
 
             checkAccountAndThrowException(user);
 
-            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(20))) {
+            if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
                 for (Nego transferNego : transferNegos) {
                     // 각 네고의 현재 상태를 확인하고 처리
                     if (transferNego.getStatus() == NEGOTIATION_COMPLETED) {
@@ -102,12 +107,15 @@ public class NegoSchedulerService {
                             + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
 
                     // 판매자에게 계좌 등록 알림 전송
-
                     if (user != null && user.getAccountNumber() == null) {
                         alertService.createAlert(product.getUserId(),
                             "'" + product.getAccommodationName() + "(" + product.getRoomName()
                                 + ")'상품에 대한 원활한 정산을 위해 '마이페이지 > 내 계좌'에서 입금받으실 계좌를 등록해주세요.");
                     }
+
+                    //자동 양도완료 관련 시스템 메세지 전송
+                    chatService.createSystemMessageOfCompletedTransferByScheduler(product.getId(),
+                        product.getUserId(), transferNego.getUser().getId());
                 }
                 negoRepository.saveAll(transferNegos);
             }
