@@ -55,10 +55,10 @@ public class NegoSchedulerService {
 
                 //판매자에게 타임오버 알림 전송
                 alertService.createAlert(product.getUserId(),
-                    "구매자가 20분 이내에 결제를 완료하지 않아 거래가 종료되었습니다.");
+                        "구매자가 20분 이내에 결제를 완료하지 않아 거래가 종료되었습니다.");
                 //구매자에게 타임오버 알림 전송
                 alertService.createAlert(nego.getUser().getId(),
-                    "상품 결제 시간 20분이 초과되었습니다. 아직 구매를 원하신다면, 재결제 버튼을 눌러 결제를 완료해주세요.");
+                        "상품 결제 시간 20분이 초과되었습니다. 아직 구매를 원하신다면, 재결제 버튼을 눌러 결제를 완료해주세요.");
                 //해당 상품 찜한 회원들에게 알림 전송
                 if (product.getProductStatus().equals(ProductStatus.SELLING)) {
                     alertService.createAlertOfWishProductToSelling(product.getId(),
@@ -81,7 +81,9 @@ public class NegoSchedulerService {
                     .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
             //판매자 계좌 있는지 확인
-            checkAccountAndThrowException(user);
+            if (user.getAccountNumber() == null) {
+                throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+            }
 
             //양도 시간 지났는지 확인, 지났으면 양도 처리
             if (updatedAt != null && currentTime.isAfter(updatedAt.plusMinutes(5))) {
@@ -106,21 +108,14 @@ public class NegoSchedulerService {
                 // 판매자에게 정산 요청 알림 전송
                 alertService.createAlert(product.getUserId(),
                         "'" + product.getAccommodationName() + "(" + product.getRoomName()
-                            + ")'상품 양도가 완료되었습니다. 최대 9영업일 이내에 등록한 계좌 정보로 정산 금액이 입금됩니다."
-                            + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
+                                + ")'상품 양도가 완료되었습니다. 최대 9영업일 이내에 등록한 계좌 정보로 정산 금액이 입금됩니다."
+                                + "원활한 정산 진행을 위해 '마이페이지 - 나의 계좌'정보를 다시 한번 확인해주세요.");
 
-                    //자동 양도완료 관련 시스템 메세지 전송
-                    chatService.createSystemMessageOfCompletedTransferByScheduler(product.getId(),
-                        product.getUserId(), transferNego.getUser().getId());
-                }
-                negoRepository.saveAll(transferNegos);
+                //자동 양도완료 관련 시스템 메세지 전송
+                chatService.createSystemMessageOfCompletedTransferByScheduler(product.getId(),
+                        product.getUserId(), transferOrder.getUserId());
             }
-        }
-    }
-
-    private void checkAccountAndThrowException(User user) {
-        if (user.getAccountNumber() == null) {
-            throw new CustomException("등록된 계좌가 없습니다.", ErrorCode.NO_REGISTERED_ACCOUNT);
+            negoRepository.saveAll(transferNegos);
         }
     }
 }
