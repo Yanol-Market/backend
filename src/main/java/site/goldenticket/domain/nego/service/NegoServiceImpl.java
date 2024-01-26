@@ -1,8 +1,5 @@
 package site.goldenticket.domain.nego.service;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +26,9 @@ import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -503,6 +503,11 @@ public class NegoServiceImpl implements NegoService {
     public List<Nego> findByStatusInAndProduct(List<NegotiationStatus> negotiationStatusList,
         Product product) {
         return negoRepository.findByStatusInAndProduct(negotiationStatusList, product);
+    }
+
+    @Override
+    public List<Nego> findAllByProductAndStatus(Product product, NegotiationStatus negotiationStatus) {
+        return negoRepository.findAllByProductAndStatus(product, negotiationStatus);
     }
 
     public Optional<Nego> findByUserIdAndProduct(Long userId, Product product) {
