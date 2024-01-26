@@ -15,7 +15,7 @@ public final class RestAssuredUtils {
         return RestAssured
                 .given().log().all()
                 .when()
-                .post(url)
+                .get(url)
                 .then().log().all()
                 .extract();
     }
@@ -27,6 +27,22 @@ public final class RestAssuredUtils {
         return RestAssured
                 .given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
+    }
+
+    public static ExtractableResponse<Response> restAssuredGetWithTokenAndQueryParam(
+            String url,
+            String parameterName,
+            String parameterValues,
+            String accessToken
+    ) {
+        return RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .queryParam(parameterName, parameterValues)
                 .when()
                 .get(url)
                 .then().log().all()
@@ -58,7 +74,7 @@ public final class RestAssuredUtils {
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
-                .get(url)
+                .post(url)
                 .then().log().all()
                 .extract();
     }
