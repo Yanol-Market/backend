@@ -17,7 +17,7 @@ public final class UserUtils {
     public static String ACCOUNT_NUMBER = "000000000000";
     public static final String CHANGE_PASSWORD = "changePassword";
 
-    public static User createUser(String encodePassword) {
+    public static User createUserWithYanolja(String encodePassword) {
         return User.builder()
                 .email(EMAIL)
                 .password(encodePassword)

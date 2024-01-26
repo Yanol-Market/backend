@@ -43,7 +43,7 @@ public abstract class ApiTest {
 
     private User saveUser() {
         String encodePassword = passwordEncoder.encode(PASSWORD);
-        User user = createUser(encodePassword);
+        User user = createUserWithYanolja(encodePassword);
         userRepository.save(user);
         return user;
     }
