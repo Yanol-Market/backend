@@ -19,6 +19,7 @@ public final class UserUtils {
     public static final String JOIN_EMAIL = "join@gmail.com";
     public static final String CHANGE_NICKNAME = "changeNickname";
     public static final String CHANGE_PASSWORD = "changePassword";
+    public static final String ENCODED_PASSWORD = "encodedPassword";
 
     public static User createUser(String encodePassword) {
         return User.builder()

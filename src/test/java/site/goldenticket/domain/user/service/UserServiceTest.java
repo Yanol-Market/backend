@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.domain.user.dto.ChangePasswordRequest;
 import site.goldenticket.domain.user.dto.ChangeProfileRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RemoveUserRequest;
@@ -143,5 +144,40 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updateProfile(USER_ID, changeProfileRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ALREADY_EXIST_NICKNAME.getMessage());
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 검증")
+    void updatePassword() {
+        // given
+        User user = createUser(PASSWORD);
+
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(PASSWORD, user.getPassword())).thenReturn(true);
+        when(passwordEncoder.encode(CHANGE_PASSWORD)).thenReturn(ENCODED_PASSWORD);
+        ChangePasswordRequest changePasswordRequest = createChangePasswordRequest();
+
+        // when
+        userService.updatePassword(USER_ID, changePasswordRequest);
+
+        // then
+        assertThat(user.getPassword()).isEqualTo(ENCODED_PASSWORD);
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 실패 - 기존 비밀번호가 틀린 경우 예외 발생")
+    void updatePassword_failureInvalidPassword() {
+        // given
+        User user = createUser(PASSWORD);
+
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(PASSWORD, user.getPassword())).thenReturn(false);
+        ChangePasswordRequest changePasswordRequest = createChangePasswordRequest();
+
+        // when
+        // then
+        assertThatThrownBy(() -> userService.updatePassword(USER_ID, changePasswordRequest))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_PASSWORD.getMessage());
     }
 }
