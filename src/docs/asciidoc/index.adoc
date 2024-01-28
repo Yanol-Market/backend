@@ -67,3 +67,7 @@ Golden-Ticket API adheres as closely as possible to standard HTTP and REST conve
 | 500 Internal Server Error
 | An unexpected internal server error occurred
 |===
+
+= 사용자 기능
+
+include::user.adoc[]

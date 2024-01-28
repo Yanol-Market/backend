@@ -1,0 +1,15 @@
+== 회원가입
+
+=== HTTP request fields
+include::{snippets}/user/join/success/request-fields.adoc[]
+
+=== HTTP request
+include::{snippets}/user/join/success/http-request.adoc[]
+
+=== HTTP response fields
+
+include::{snippets}/user/join/success/response-fields.adoc[]
+
+=== HTTP request
+
+include::{snippets}/user/join/success/http-response.adoc[]

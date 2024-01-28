@@ -68,7 +68,7 @@ dependencies {
     implementation 'org.testcontainers:testcontainers:1.19.3'
 
     // Rest Assured
-    testImplementation 'io.rest-assured:rest-assured:5.3.2'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

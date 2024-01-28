@@ -1,5 +1,6 @@
 package site.goldenticket.domain.user.controller;
 
+import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -7,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import site.goldenticket.common.config.ApiTest;
+import site.goldenticket.common.config.ApiDocumentation;
 import site.goldenticket.domain.user.dto.*;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
@@ -16,11 +17,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.restdocs.payload.JsonFieldType.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 import static site.goldenticket.common.utils.RestAssuredUtils.*;
 import static site.goldenticket.common.utils.UserUtils.*;
 
 @DisplayName("UserController 검증")
-class UserControllerTest extends ApiTest {
+class UserControllerTest extends ApiDocumentation {
 
     @Autowired
     private UserRepository userRepository;
@@ -36,7 +41,41 @@ class UserControllerTest extends ApiTest {
         String url = "/users";
 
         // when
-        ExtractableResponse<Response> result = restAssuredPost(url, request);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document(
+                        "user/join/success",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        requestFields(
+                                fieldWithPath("name").type(STRING)
+                                        .description("이름"),
+                                fieldWithPath("nickname").type(STRING)
+                                        .description("닉네임"),
+                                fieldWithPath("email").type(STRING)
+                                        .description("이메일"),
+                                fieldWithPath("password").type(STRING)
+                                        .description("비밀번호"),
+                                fieldWithPath("phoneNumber").type(STRING)
+                                        .description("휴대폰번호"),
+                                fieldWithPath("yanoljaId").type(NUMBER)
+                                        .description("야놀자 회원 식별값").optional(),
+                                fieldWithPath("agreement.isMarketing").type(BOOLEAN)
+                                        .description("마케팅 동의 여부")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").ignored(),
+                                fieldWithPath("message").ignored(),
+                                fieldWithPath("data").type(NUMBER)
+                                        .description("사용자 식별값")
+                        )
+                ))
+                .when()
+                .post(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(CREATED.value());
