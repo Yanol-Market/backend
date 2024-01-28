@@ -17,6 +17,7 @@ public final class UserUtils {
     public static final String ACCOUNT_NUMBER = "000000000000";
     public static final String JOIN_NICKNAME = "joinNickname";
     public static final String JOIN_EMAIL = "join@gmail.com";
+    public static final String CHANGE_NICKNAME = "changeNickname";
     public static final String CHANGE_PASSWORD = "changePassword";
 
     public static User createUser(String encodePassword) {
@@ -52,8 +53,8 @@ public final class UserUtils {
         );
     }
 
-    public static ChangeProfileRequest createChangeProfileRequest(String changeNickname) {
-        return new ChangeProfileRequest(changeNickname);
+    public static ChangeProfileRequest createChangeProfileRequest() {
+        return new ChangeProfileRequest(CHANGE_NICKNAME);
     }
 
     public static ChangePasswordRequest createChangePasswordRequest() {
