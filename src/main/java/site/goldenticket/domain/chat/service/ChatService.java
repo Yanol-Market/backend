@@ -13,10 +13,6 @@ import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
 import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -326,15 +322,12 @@ public class ChatService {
                 chat.setViewedByBuyer(true);
             }
             chatRepository.save(chat); // *확인 필요
-            ZoneId koreaZoneId = ZoneId.of("Asia/Seoul");
-            ZonedDateTime koreaZonedDateTime = chat.getCreatedAt().atZone(koreaZoneId);
-            LocalDateTime koreaLocalDateTime = koreaZonedDateTime.toLocalDateTime();
             ChatResponse chatResponse = ChatResponse.builder()
                 .chatId(chat.getId())
                 .senderType(chat.getSenderType())
                 .userId(chat.getUserId())
                 .content(chat.getContent())
-                .createdAt(koreaLocalDateTime)
+                .createdAt(chat.getCreatedAt().plusHours(9))
                 .viewed(true)
                 .build();
             chatResponseList.add(chatResponse);
