@@ -31,6 +31,18 @@ public final class UserUtils {
                 .build();
     }
 
+    public static User createUserWithAccount(String encodePassword) {
+        User user = User.builder()
+                .email(EMAIL)
+                .password(encodePassword)
+                .name(NAME)
+                .nickname(NICKNAME)
+                .phoneNumber(PHONE_NUMBER)
+                .build();
+        user.registerAccount(BANK_NAME, ACCOUNT_NUMBER);
+        return user;
+    }
+
     public static User createUserWithYanolja(String encodePassword) {
         return User.builder()
                 .email(EMAIL)

@@ -9,10 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import site.goldenticket.common.exception.CustomException;
-import site.goldenticket.domain.user.dto.ChangePasswordRequest;
-import site.goldenticket.domain.user.dto.ChangeProfileRequest;
-import site.goldenticket.domain.user.dto.JoinRequest;
-import site.goldenticket.domain.user.dto.RemoveUserRequest;
+import site.goldenticket.domain.user.dto.*;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.repository.UserRepository;
 
@@ -20,6 +17,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 import static site.goldenticket.common.response.ErrorCode.*;
 import static site.goldenticket.common.utils.UserUtils.*;
@@ -179,5 +177,53 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.updatePassword(USER_ID, changePasswordRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(INVALID_PASSWORD.getMessage());
+    }
+
+    @Test
+    @DisplayName("계좌 등록 검증")
+    void registerAccount() {
+        // given
+        User user = createUser(PASSWORD);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        RegisterAccountRequest registerAccountRequest = createRegisterAccountRequest();
+
+        // when
+        userService.registerAccount(USER_ID, registerAccountRequest);
+
+        // then
+        assertAll(
+                () -> assertThat(user.getBankName()).isEqualTo(BANK_NAME),
+                () -> assertThat(user.getAccountNumber()).isEqualTo(ACCOUNT_NUMBER)
+        );
+    }
+
+    @Test
+    @DisplayName("계좌 등록 실패 - 이미 계좌가 등록된 경우 예외 발생")
+    void registerAccount_failureAlreadyRegisterAccount() {
+        // given
+        User user = createUserWithAccount(PASSWORD);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        RegisterAccountRequest registerAccountRequest = createRegisterAccountRequest();
+
+        // when
+        // then
+        assertThatThrownBy(() -> userService.registerAccount(USER_ID, registerAccountRequest))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ALREADY_REGISTER_ACCOUNT.getMessage());
+    }
+
+    @Test
+    @DisplayName("계좌 등록 실패 - 등록 계좌정보가 없는 경우 예외 발생")
+    void registerAccount_failureDuplicateNickname() {
+        // given
+        User user = createUser(PASSWORD);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        RegisterAccountRequest registerAccountRequest = new RegisterAccountRequest("", "");
+
+        // when
+        // then
+        assertThatThrownBy(() -> userService.registerAccount(USER_ID, registerAccountRequest))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_REGISTER_ACCOUNT_PARAM.getMessage());
     }
 }
