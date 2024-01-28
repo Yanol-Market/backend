@@ -226,4 +226,21 @@ class UserServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(INVALID_REGISTER_ACCOUNT_PARAM.getMessage());
     }
+
+    @Test
+    @DisplayName("계좌 삭제 검증")
+    void removeAccount() {
+        // given
+        User user = createUser(PASSWORD);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        // when
+        userService.removeAccount(USER_ID);
+
+        // then
+        assertAll(
+                () -> assertThat(user.getBankName()).isNull(),
+                () -> assertThat(user.getAccountNumber()).isNull()
+        );
+    }
 }
