@@ -34,7 +34,7 @@ public record ProductCompletedSoldOutResponse(
         LocalDateTime lastUpdatedAt
 
 ) {
-    public static ProductCompletedSoldOutResponse fromEntity(Product product, Order order, User user, ChatRoom chatRoom, LocalDateTime lastUpdatedAt) {
+    public static ProductCompletedSoldOutResponse fromEntity(Product product, Order order, User buyer, ChatRoom chatRoom, LocalDateTime lastUpdatedAt) {
 
         int goldenPrice = product.getGoldenPrice();
         int fee = DiscountCalculatorUtil.calculateFee(goldenPrice);
@@ -58,8 +58,8 @@ public record ProductCompletedSoldOutResponse(
                 fee,
                 calculatedPrice,
                 chatRoom.getId(),
-                user.getNickname(),
-                user.getImageUrl(),
+                buyer.getNickname(),
+                buyer.getImageUrl(),
                 lastUpdatedAt
         );
     }

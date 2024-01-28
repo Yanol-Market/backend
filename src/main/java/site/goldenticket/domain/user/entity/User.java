@@ -142,4 +142,8 @@ public class User extends BaseTimeEntity {
         this.wishRegions.add(wishRegion);
         wishRegion.registerUser(this);
     }
+
+    public void setId(Long id){
+        this.id = id;
+    }
 }

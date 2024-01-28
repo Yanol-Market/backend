@@ -1,37 +1,12 @@
 package site.goldenticket.domain.chat.service;
 
-import static site.goldenticket.common.response.ErrorCode.ALREADY_EXISTS_CHAT_ROOM;
-import static site.goldenticket.common.response.ErrorCode.CHAT_ROOM_NOT_FOUND;
-import static site.goldenticket.common.response.ErrorCode.INVALID_BUYER_ID;
-import static site.goldenticket.common.response.ErrorCode.INVALID_SENDER_TYPE;
-import static site.goldenticket.common.response.ErrorCode.INVALID_USER_ID_IN_CHAT_ROOM;
-import static site.goldenticket.common.response.ErrorCode.INVALID_USER_TYPE;
-import static site.goldenticket.common.response.ErrorCode.MISMATCHED_USER_ID_WITH_SENDER_TYPE;
-import static site.goldenticket.common.response.ErrorCode.NEGO_NOT_FOUND;
-import static site.goldenticket.common.response.ErrorCode.ORDER_NOT_FOUND;
-import static site.goldenticket.common.response.ErrorCode.PRODUCT_NOT_FOUND;
-import static site.goldenticket.common.response.ErrorCode.USER_NOT_FOUND;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.chat.dto.request.ChatRequest;
-import site.goldenticket.domain.chat.dto.response.ChatListResponse;
-import site.goldenticket.domain.chat.dto.response.ChatResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomDetailResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomInfoResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomListResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomShortListResponse;
-import site.goldenticket.domain.chat.dto.response.ChatRoomShortResponse;
+import site.goldenticket.domain.chat.dto.response.*;
 import site.goldenticket.domain.chat.entity.Chat;
 import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.entity.SenderType;
@@ -47,6 +22,16 @@ import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static site.goldenticket.common.response.ErrorCode.*;
 
 @Service
 @Transactional
@@ -615,5 +600,14 @@ public class ChatService {
      */
     public Boolean existsChatRoomByBuyerIdAndProductId(Long buyerId, Long productId) {
         return chatRoomRepository.existsByBuyerIdAndProductId(buyerId, productId);
+    }
+
+    public LocalDateTime getFirstChatUpdatedAt(Long chatRoomId, Long userId) {
+        List<Chat> chatList = getChatList(chatRoomId, userId);
+        if (!chatList.isEmpty()) {
+            return chatList.get(0).getUpdatedAt();
+        } else {
+            return null;
+        }
     }
 }

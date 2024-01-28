@@ -1,7 +1,5 @@
 package site.goldenticket.domain.chat.entity;
 
-import static jakarta.persistence.GenerationType.IDENTITY;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -10,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.goldenticket.common.entiy.BaseTimeEntity;
+
+import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
@@ -29,5 +29,9 @@ public class ChatRoom extends BaseTimeEntity {
         this.id = id;
         this.productId = productId;
         this.buyerId = buyerId;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

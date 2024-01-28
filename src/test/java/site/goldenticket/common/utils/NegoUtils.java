@@ -1,7 +1,6 @@
 package site.goldenticket.common.utils;
 
 import site.goldenticket.domain.nego.entity.Nego;
-import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.domain.user.entity.User;
 
@@ -12,7 +11,6 @@ import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATING
 public class NegoUtils {
     private static final Integer price = 50000;
     private static final Integer count = 1;
-    private static final NegotiationStatus status = NEGOTIATING;
     private static final boolean consent = false;
     private static final LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(20);
     private static final LocalDateTime createdAt = LocalDateTime.now();
@@ -25,7 +23,7 @@ public class NegoUtils {
                 .price(price)
                 .count(count)
                 .status(NEGOTIATING)
-                .consent(false)
+                .consent(consent)
                 .expirationTime(expirationTime)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)

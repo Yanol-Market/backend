@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
 import static site.goldenticket.common.utils.ChatRoomUtils.createChatRoom;
 import static site.goldenticket.common.utils.ChatUtils.createChat;
 import static site.goldenticket.common.utils.NegoUtils.createNego;
@@ -123,7 +124,7 @@ public class ProductControllerTest extends ApiTest {
         Product product = saveSoldOutProduct();
         ChatRoom chatRoom = saveChatRoom(product);
         saveChat(chatRoom);
-        saveOrder(product);
+        saveCompletedTransferOrder(product);
 
         String url = "/products/history/completed/" + product.getId();
         String parameterName = "productStatus";
@@ -188,8 +189,9 @@ public class ProductControllerTest extends ApiTest {
         negoRepository.save(nego);
     }
 
-    private void saveOrder(Product product) {
+    private void saveCompletedTransferOrder(Product product) {
         Order order = createOrder(product, user);
+        order.setStatus(COMPLETED_TRANSFER);
         orderRepository.save(order);
     }
 }

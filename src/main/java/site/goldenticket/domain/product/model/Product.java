@@ -11,6 +11,7 @@ import site.goldenticket.dummy.reservation.constants.ReservationType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -56,7 +57,7 @@ public class Product {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true
     )
-    private List<WishProduct> wishProducts;
+    private List<WishProduct> wishProducts = new ArrayList<>();
 
     @Builder
     private Product(
@@ -124,7 +125,6 @@ public class Product {
         return this.productStatus == ProductStatus.EXPIRED || this.productStatus == ProductStatus.SOLD_OUT;
     }
 
-
     public void setGoldenPrice(int goldenPrice) {
         this.goldenPrice = goldenPrice;
     }
@@ -132,4 +132,6 @@ public class Product {
     public void setIsSellerViewCheck(boolean b) {
         this.sellerViewCheck = b;
     }
+
+    public void setId(Long id) { this.id = id; }
 }

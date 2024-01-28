@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.goldenticket.common.constants.OrderStatus;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.chat.constants.ChatRoomStatus;
@@ -32,9 +31,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
+import static site.goldenticket.common.constants.OrderStatus.WAITING_TRANSFER;
 import static site.goldenticket.common.redis.constants.RedisConstants.AUTOCOMPLETE_KEY;
-import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATING;
-import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATION_CANCELLED;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.*;
 
 @Slf4j
 @Service
@@ -53,6 +52,8 @@ public class ProductOrderService {
     ) {
         Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
 
+        System.out.println(userId);
+
         Product product = (userId != null) ? productService.getProductWithWishProducts(productId, userId) : productService.getProduct(productId);
 
         boolean isAuthenticated = (userId != null);
@@ -63,7 +64,7 @@ public class ProductOrderService {
 
         NegoProductStatus negoProductStatus = null;
         if (isSeller) {
-            List<Nego> negoList = negoService.findAllByProductAndStatus(product, NegotiationStatus.NEGOTIATING);
+            List<Nego> negoList = negoService.findAllByProductAndStatus(product, NEGOTIATING);
 
             if (!negoList.isEmpty()) {
                 negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
@@ -103,7 +104,7 @@ public class ProductOrderService {
             List<ProgressChatResponse> progressChatResponseList = new ArrayList<>();
 
             // 2.1 주문
-            Optional<Order> optionalOrder = paymentService.findByProductIdAndStatus(productId, OrderStatus.WAITING_TRANSFER);
+            Optional<Order> optionalOrder = paymentService.findByProductIdAndStatus(productId, WAITING_TRANSFER);
 
             if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
@@ -111,44 +112,45 @@ public class ProductOrderService {
                 ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(order.getStatus()));
                 progressProductStatusSet.add(progressProductStatus);
 
-                Long orderUserId = order.getUserId();
-                User orderUser = userService.findById(orderUserId);
+                Long buyerId = order.getUserId();
+                User buyer = userService.findById(buyerId);
 
-                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(orderUserId, productId);
+                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(buyerId, productId);
                 progressChatResponseList.add(
                         new ProgressChatResponse(
                                 chatRoom.getId(),
-                                orderUser.getNickname(),
-                                orderUser.getImageUrl(),
+                                buyer.getNickname(),
+                                buyer.getImageUrl(),
                                 order.getPrice(),
                                 ChatRoomStatus.YELLOW_DOT,
-                                chatService.getChatList(chatRoom.getId(), orderUser.getId()).get(0).getUpdatedAt()
+                                chatService.getFirstChatUpdatedAt(chatRoom.getId(), buyer.getId())
                         )
                 );
             }
 
             // 2.2 네고
-            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, NegotiationStatus.PAYMENT_PENDING, NEGOTIATION_CANCELLED, NegotiationStatus.NEGOTIATION_TIMEOUT);
+            List<NegotiationStatus> negotiationStatusList = Arrays.asList(NEGOTIATING, PAYMENT_PENDING, NEGOTIATION_CANCELLED, NEGOTIATION_TIMEOUT);
             List<Nego> negoList =  negoService.findByStatusInAndProduct(negotiationStatusList, product);
 
             for (Nego nego : negoList) {
                 NegotiationStatus negotiationStatus = nego.getStatus();
 
-                if(negotiationStatus != NEGOTIATION_CANCELLED && negotiationStatus != NegotiationStatus.NEGOTIATION_TIMEOUT) {
+                if(negotiationStatus != NEGOTIATION_CANCELLED && negotiationStatus != NEGOTIATION_TIMEOUT) {
                     ProgressProductStatus progressProductStatus = ProgressProductStatus.valueOf(String.valueOf(nego.getStatus()));
                     progressProductStatusSet.add(progressProductStatus);
                 }
 
-                if(negotiationStatus == NegotiationStatus.NEGOTIATION_TIMEOUT) {
+                if(negotiationStatus == NEGOTIATION_TIMEOUT) {
                     progressProductStatusSet.add(ProgressProductStatus.NEGOTIATING);
                 }
 
-                User user = nego.getUser();
+                User buyer = nego.getUser();
+                Long buyerId = buyer.getId();
 
                 ChatRoomStatus chatRoomStatus;
-                if (negotiationStatus == NEGOTIATING || negotiationStatus == NegotiationStatus.NEGOTIATION_TIMEOUT) {
+                if (negotiationStatus == NEGOTIATING || negotiationStatus == NEGOTIATION_TIMEOUT) {
                     chatRoomStatus = ChatRoomStatus.ACTIVE;
-                } else if (negotiationStatus == NegotiationStatus.PAYMENT_PENDING) {
+                } else if (negotiationStatus == PAYMENT_PENDING) {
                     chatRoomStatus = ChatRoomStatus.YELLOW_DOT;
                 } else if (negotiationStatus == NEGOTIATION_CANCELLED) {
                     chatRoomStatus = ChatRoomStatus.INACTIVE;
@@ -156,15 +158,15 @@ public class ProductOrderService {
                     throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
                 }
 
-                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(user.getId(), productId);
+                ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(buyerId, productId);
                 progressChatResponseList.add(
                         new ProgressChatResponse(
                                 chatRoom.getId(),
-                                user.getNickname(),
-                                user.getImageUrl(),
+                                buyer.getNickname(),
+                                buyer.getImageUrl(),
                                 nego.getPrice(),
                                 chatRoomStatus,
-                                chatService.getChatList(chatRoom.getId(), user.getId()).get(0).getUpdatedAt()
+                                chatService.getFirstChatUpdatedAt(chatRoom.getId(), buyerId)
                         )
                 );
             }
@@ -195,18 +197,20 @@ public class ProductOrderService {
 
     @Transactional(readOnly = true)
     public ProductCompletedSoldOutResponse getSoldOutCaseProductDetails(Long productId) {
+        System.out.println();
+
         Product product = productService.findByProductStatusAndProductId(ProductStatus.SOLD_OUT, productId);
 
         Order order = paymentService.findByProductIdAndStatus(productId, COMPLETED_TRANSFER)
                 .orElseThrow(() -> new CustomException(ErrorCode.NO_COMPLETED_TRANSFER_ORDER));
 
-        Long userId = order.getUserId();
-        User user = userService.findById(userId);
+        Long buyerId = order.getUserId();
+        User buyer = userService.findById(buyerId);
 
-        ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(userId, productId);
-        LocalDateTime lastUpdatedAt = chatService.getChatList(chatRoom.getId(), user.getId()).get(0).getUpdatedAt();
+        ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(buyerId, productId);
+        LocalDateTime lastUpdatedAt = chatService.getFirstChatUpdatedAt(chatRoom.getId(), buyerId);
 
-        return ProductCompletedSoldOutResponse.fromEntity(product, order, user, chatRoom, lastUpdatedAt);
+        return ProductCompletedSoldOutResponse.fromEntity(product, order, buyer, chatRoom, lastUpdatedAt);
     }
 
     @Transactional(readOnly = true)
