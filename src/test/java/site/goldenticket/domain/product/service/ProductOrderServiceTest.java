@@ -6,9 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import site.goldenticket.common.constants.OrderStatus;
+import site.goldenticket.domain.chat.dto.response.ProgressChatResponse;
 import site.goldenticket.domain.chat.entity.ChatRoom;
 import site.goldenticket.domain.chat.service.ChatService;
 import site.goldenticket.domain.nego.entity.Nego;
@@ -17,9 +16,9 @@ import site.goldenticket.domain.nego.status.NegotiationStatus;
 import site.goldenticket.domain.payment.model.Order;
 import site.goldenticket.domain.payment.service.PaymentService;
 import site.goldenticket.domain.product.constants.ProductStatus;
-import site.goldenticket.domain.product.dto.*;
+import site.goldenticket.domain.product.dto.ProductCompletedHistoryResponse;
+import site.goldenticket.domain.product.dto.ProductProgressHistoryResponse;
 import site.goldenticket.domain.product.model.Product;
-import site.goldenticket.domain.security.PrincipalDetails;
 import site.goldenticket.domain.user.entity.User;
 import site.goldenticket.domain.user.service.UserService;
 
@@ -27,8 +26,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
 import static site.goldenticket.common.constants.OrderStatus.WAITING_TRANSFER;
 import static site.goldenticket.common.utils.ChatRoomUtils.createChatRoom;
@@ -42,9 +41,6 @@ import static site.goldenticket.domain.product.constants.ProductStatus.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductOrderServiceTest {
-
-    @InjectMocks
-    private ProductOrderService productOrderService;
 
     @Mock
     private ProductService productService;
@@ -61,7 +57,8 @@ public class ProductOrderServiceTest {
     @Mock
     private UserService userService;
 
-    public static final String ANONOYMOUS_KEY = "anonymousKey";
+    @InjectMocks
+    private ProductOrderService productOrderService;
 
     // user
     private Long sellerId;
@@ -95,7 +92,6 @@ public class ProductOrderServiceTest {
         buyer = createUser(PASSWORD);
         buyer.setId(buyerId);
 
-
         // product
         sellingProductId = 1L;
         reservedProductId = 2L;
@@ -123,15 +119,6 @@ public class ProductOrderServiceTest {
     }
 
     @Test
-    void getProduct() {
-        // given
-        setUpProduct(sellerId, sellingProduct);
-
-        // when
-        ProductDetailResponse result = productOrderService.getProduct(sellingProductId, new PrincipalDetails(seller), new MockHttpServletRequest(), new MockHttpServletResponse());
-    }
-
-    @Test
     void getProgressProducts() {
         // given
         setUpBuyer();
@@ -154,7 +141,25 @@ public class ProductOrderServiceTest {
         List<ProductProgressHistoryResponse> result = productOrderService.getProgressProducts(sellerId);
 
         // then
-        assertThat(result).isNotNull();
+        for (ProductProgressHistoryResponse response : result) {
+            assertThat(response.productId()).isNotNull();
+
+            for (ProgressChatResponse chatResponse : response.chats()) {
+                assertThat(chatResponse.chatRoomId()).isNotNull();
+            }
+
+            verify(chatService, atLeastOnce())
+                    .getChatRoomByBuyerIdAndProductId(anyLong(), anyLong());
+            verify(chatService, atLeastOnce())
+                    .getFirstChatUpdatedAt(anyLong(), anyLong());
+        }
+
+        verify(paymentService, atLeastOnce())
+                .findByProductIdAndStatus(anyLong(), any());
+
+        verify(negoService, atLeastOnce())
+                .findByStatusInAndProduct(any(), any());
+
     }
 
     @Test
@@ -168,8 +173,14 @@ public class ProductOrderServiceTest {
         List<ProductCompletedHistoryResponse> result = productOrderService.getAllCompletedProducts(sellerId);
 
         // then
-        assertThat(result).isNotNull();
         assertThat(result).hasSize(2);
+
+        for (ProductCompletedHistoryResponse response : result) {
+            assertThat(response.productId()).isNotNull();
+        }
+        
+        verify(productService, times(1))
+                .findByProductStatusInAndUserId(any(), anyLong());
     }
 
     @Test
@@ -181,10 +192,18 @@ public class ProductOrderServiceTest {
         setUpChatRoom(soldOutProduct);
 
         // when
-        ProductCompletedSoldOutResponse result = productOrderService.getSoldOutCaseProductDetails(soldOutProductId);
+        productOrderService.getSoldOutCaseProductDetails(soldOutProductId);
 
         // then
-        assertThat(result).isNotNull();
+        verify(productService, times(1))
+                .findByProductStatusAndProductId(eq(SOLD_OUT), anyLong());
+        verify(paymentService, times(1))
+                .findByProductIdAndStatus(anyLong(), eq(COMPLETED_TRANSFER));
+
+        verify(chatService, times(1))
+                .getChatRoomByBuyerIdAndProductId(anyLong(), anyLong());
+        verify(chatService, times(1))
+                .getFirstChatUpdatedAt(anyLong(), anyLong());
     }
 
     @Test
@@ -193,22 +212,24 @@ public class ProductOrderServiceTest {
         setUpProduct(EXPIRED, expiredProduct);
 
         // when
-        ProductCompletedExpiredResponse result = productOrderService.getExpiredCaseProductDetails(expiredProductId);
+        productOrderService.getExpiredCaseProductDetails(expiredProductId);
 
         // then
-        assertThat(result).isNotNull();
+        verify(productService, times(1))
+                .findByProductStatusAndProductId(eq(EXPIRED), anyLong());
     }
 
     @Test
     void deleteCompletedProduct() {
         // given
-        setUpProduct(sellerId, soldOutProduct);
+        setUpProduct(soldOutProduct);
 
         // when
-        Long result = productOrderService.deleteCompletedProduct(soldOutProductId);
+        productOrderService.deleteCompletedProduct(soldOutProductId);
 
         // then
-        assertThat(result).isNotNull();
+        verify(productService, times(1))
+                .getProduct(anyLong());
     }
 
     private void setUpBuyer() {
@@ -219,13 +240,11 @@ public class ProductOrderServiceTest {
     }
 
     private void setUpProduct(
-            Long userId,
             Product product
     ) {
         Long productId = product.getId();
-        when(productService.getProductWithWishProducts(
-                productId,
-                userId
+        when(productService.getProduct(
+                productId
         ))
                 .thenReturn(product);
     }
@@ -282,8 +301,8 @@ public class ProductOrderServiceTest {
                 order.setStatus(orderStatus);
 
                 when(paymentService.findByProductIdAndStatus(
-                        eq(productId),
-                        eq(orderStatus)
+                        productId,
+                        orderStatus
                 ))
                         .thenReturn(Optional.of(order));
             }
@@ -305,8 +324,8 @@ public class ProductOrderServiceTest {
             }
 
             when(negoService.findByStatusInAndProduct(
-                    eq(negotiationStatusList),
-                    eq(product)
+                    negotiationStatusList,
+                    product
             ))
                     .thenReturn(negoList);
         }
@@ -338,14 +357,14 @@ public class ProductOrderServiceTest {
             chatRoom.setId(chatRoomId);
 
             when(chatService.getChatRoomByBuyerIdAndProductId(
-                    eq(buyerId),
-                    eq(productId)
+                    buyerId,
+                    productId
             ))
                     .thenReturn(chatRoom);
 
             when(chatService.getFirstChatUpdatedAt(
-                    eq(chatRoomId),
-                    eq(buyerId)
+                    chatRoomId,
+                    buyerId
             ))
                     .thenReturn(LocalDateTime.now());
         }

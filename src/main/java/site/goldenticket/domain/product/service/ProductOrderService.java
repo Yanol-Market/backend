@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.goldenticket.common.exception.CustomException;
-import site.goldenticket.common.response.ErrorCode;
 import site.goldenticket.domain.chat.constants.ChatRoomStatus;
 import site.goldenticket.domain.chat.dto.response.ProgressChatResponse;
 import site.goldenticket.domain.chat.entity.ChatRoom;
@@ -30,10 +29,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static site.goldenticket.common.constants.OrderStatus.COMPLETED_TRANSFER;
-import static site.goldenticket.common.constants.OrderStatus.WAITING_TRANSFER;
-import static site.goldenticket.common.redis.constants.RedisConstants.AUTOCOMPLETE_KEY;
+import static site.goldenticket.common.constants.OrderStatus.*;
+import static site.goldenticket.common.redis.constants.RedisConstants.*;
+import static site.goldenticket.common.response.ErrorCode.*;
+import static site.goldenticket.domain.chat.constants.ChatRoomStatus.*;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATING;
 import static site.goldenticket.domain.nego.status.NegotiationStatus.*;
+import static site.goldenticket.domain.nego.status.NegotiationStatus.NEGOTIATION_CANCELLED;
+import static site.goldenticket.domain.product.constants.NegoProductStatus.*;
+import static site.goldenticket.domain.product.constants.ProductStatus.*;
 
 @Slf4j
 @Service
@@ -52,8 +56,6 @@ public class ProductOrderService {
     ) {
         Long userId = (principalDetails != null) ? principalDetails.getUserId() : null;
 
-        System.out.println(userId);
-
         Product product = (userId != null) ? productService.getProductWithWishProducts(productId, userId) : productService.getProduct(productId);
 
         boolean isAuthenticated = (userId != null);
@@ -67,7 +69,7 @@ public class ProductOrderService {
             List<Nego> negoList = negoService.findAllByProductAndStatus(product, NEGOTIATING);
 
             if (!negoList.isEmpty()) {
-                negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
+                negoProductStatus = NEGOTIATION_HAVE;
             }
         }
         else {
@@ -93,7 +95,7 @@ public class ProductOrderService {
         List<ProductProgressHistoryResponse> productProgressHistoryResponseList = new ArrayList<>();
 
         // 1. 판매중에 해당하는 상품 정보
-        List<ProductStatus> productStatusList = Arrays.asList(ProductStatus.SELLING, ProductStatus.RESERVED);
+        List<ProductStatus> productStatusList = Arrays.asList(SELLING, RESERVED);
         List<Product> productList = productService.findByProductStatusInAndUserId(productStatusList, userId);
 
         // 2. 모든 상품들 조회
@@ -122,7 +124,7 @@ public class ProductOrderService {
                                 buyer.getNickname(),
                                 buyer.getImageUrl(),
                                 order.getPrice(),
-                                ChatRoomStatus.YELLOW_DOT,
+                                YELLOW_DOT,
                                 chatService.getFirstChatUpdatedAt(chatRoom.getId(), buyer.getId())
                         )
                 );
@@ -149,13 +151,13 @@ public class ProductOrderService {
 
                 ChatRoomStatus chatRoomStatus;
                 if (negotiationStatus == NEGOTIATING || negotiationStatus == NEGOTIATION_TIMEOUT) {
-                    chatRoomStatus = ChatRoomStatus.ACTIVE;
+                    chatRoomStatus = ACTIVE;
                 } else if (negotiationStatus == PAYMENT_PENDING) {
-                    chatRoomStatus = ChatRoomStatus.YELLOW_DOT;
+                    chatRoomStatus = YELLOW_DOT;
                 } else if (negotiationStatus == NEGOTIATION_CANCELLED) {
-                    chatRoomStatus = ChatRoomStatus.INACTIVE;
+                    chatRoomStatus = INACTIVE;
                 } else {
-                    throw new CustomException(ErrorCode.COMMON_SYSTEM_ERROR);
+                    throw new CustomException(COMMON_SYSTEM_ERROR);
                 }
 
                 ChatRoom chatRoom = chatService.getChatRoomByBuyerIdAndProductId(buyerId, productId);
@@ -186,7 +188,7 @@ public class ProductOrderService {
 
     @Transactional(readOnly = true)
     public List<ProductCompletedHistoryResponse> getAllCompletedProducts(Long userId) {
-        List<ProductStatus> productStatusList = Arrays.asList(ProductStatus.SOLD_OUT, ProductStatus.EXPIRED);
+        List<ProductStatus> productStatusList = Arrays.asList(SOLD_OUT, EXPIRED);
         List<Product> productList = productService.findByProductStatusInAndUserId(productStatusList, userId);
 
         return productList.stream()
@@ -197,12 +199,10 @@ public class ProductOrderService {
 
     @Transactional(readOnly = true)
     public ProductCompletedSoldOutResponse getSoldOutCaseProductDetails(Long productId) {
-        System.out.println();
-
-        Product product = productService.findByProductStatusAndProductId(ProductStatus.SOLD_OUT, productId);
+        Product product = productService.findByProductStatusAndProductId(SOLD_OUT, productId);
 
         Order order = paymentService.findByProductIdAndStatus(productId, COMPLETED_TRANSFER)
-                .orElseThrow(() -> new CustomException(ErrorCode.NO_COMPLETED_TRANSFER_ORDER));
+                .orElseThrow(() -> new CustomException(NO_COMPLETED_TRANSFER_ORDER));
 
         Long buyerId = order.getUserId();
         User buyer = userService.findById(buyerId);
@@ -215,7 +215,7 @@ public class ProductOrderService {
 
     @Transactional(readOnly = true)
     public ProductCompletedExpiredResponse getExpiredCaseProductDetails(Long productId) {
-        Product product = productService.findByProductStatusAndProductId(ProductStatus.EXPIRED, productId);
+        Product product = productService.findByProductStatusAndProductId(EXPIRED, productId);
 
         return ProductCompletedExpiredResponse.fromEntity(product);
     }
