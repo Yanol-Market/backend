@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import site.goldenticket.common.exception.CustomException;
+import site.goldenticket.domain.user.dto.ChangeProfileRequest;
 import site.goldenticket.domain.user.dto.JoinRequest;
 import site.goldenticket.domain.user.dto.RemoveUserRequest;
 import site.goldenticket.domain.user.entity.User;
@@ -21,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 import static site.goldenticket.common.response.ErrorCode.*;
 import static site.goldenticket.common.utils.UserUtils.*;
+import static site.goldenticket.common.utils.UserUtils.createChangeProfileRequest;
 
 @DisplayName("UserService 검증")
 @ExtendWith(MockitoExtension.class)
@@ -110,5 +112,36 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.deleteUser(USER_ID, removeUserRequest))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(USER_NOT_FOUND.getMessage());
+    }
+    
+    @Test
+    @DisplayName("프로필 수정 검증")
+    void updateProfile() {
+        // given
+        User user = createUser(PASSWORD);
+        ReflectionTestUtils.setField(user, "id", USER_ID);
+        
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        ChangeProfileRequest changeProfileRequest = createChangeProfileRequest();
+
+        // when
+        userService.updateProfile(USER_ID, changeProfileRequest);
+        
+        // then
+        assertThat(user.getNickname()).isEqualTo(CHANGE_NICKNAME);
+    }
+
+    @Test
+    @DisplayName("프로필 수정 실패 - 중복된 닉네임인 경우 예외 발생")
+    void updateProfile_failureDuplicateNickname() {
+        // given
+        when(userRepository.existsByNickname(CHANGE_NICKNAME)).thenReturn(true);
+        ChangeProfileRequest changeProfileRequest = createChangeProfileRequest();
+
+        // when
+        // then
+        assertThatThrownBy(() -> userService.updateProfile(USER_ID, changeProfileRequest))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ALREADY_EXIST_NICKNAME.getMessage());
     }
 }
