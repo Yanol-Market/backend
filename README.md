@@ -1,48 +1,27 @@
 <div align="center">
-    <img src="">
+    <img src="https://github.com/Yanol-Market/frontend/assets/51106050/552ff865-e2b3-4127-b0c8-88e8741eca24">
     <h1>골든티켓</h1>
 </div>
 
 ## 주제
 무료 취소 불가한 숙박 상품 거래 플랫폼
-
 <br>
-
 
 ## 기간
 2023.12.26 ~ 2024.01.29
-
 <br>
-
 
 ## 기술 스택
-### BackEnd
-#### Application
-![Spring](https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-![springboot](https://img.shields.io/badge/springboot-6DB33F.svg?style=for-the-badge&logo=springboot&logoColor=white)
-![springsecurity](https://img.shields.io/badge/spring%20security-6DB33F.svg?style=for-the-badge&logo=springsecurity&logoColor=white)
-
-![java](https://img.shields.io/badge/java-007396?style=for-the-badge&logo=Java&logoColor=white)
-![Gradle](https://img.shields.io/badge/gradle-02303A.svg?style=for-the-badge&logo=gradle&logoColor=white)
-![intellijidea](https://img.shields.io/badge/intellij%20idea-000000.svg?style=for-the-badge&logo=intellijidea&logoColor=white)
-
-#### Database
-![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
-![Redis](https://img.shields.io/badge/redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-
-#### Instructure
-![Docker](https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Github Actions](https://img.shields.io/badge/github%20actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
-![AWS ECS](https://img.shields.io/badge/aws%20ecs-FF9900?style=for-the-badge&logo=amazonecs&logoColor=white)
-![AWS Fargate](https://img.shields.io/badge/aws%20fargate-FF9900?style=for-the-badge&logo=awsfargate&logoColor=white)
-
-#### Collaboration
-![Github](https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white)
-![Notion](https://img.shields.io/badge/notion-000000?style=for-the-badge&logo=notion&logoColor=white)
-![Slack](https://img.shields.io/badge/slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)
-
+![](https://github.com/Yanol-Market/backend/assets/139152515/edbf29e2-458c-4c1e-8e44-e6e1db8566f3)
 <br>
 
+## 아키텍처
+![](https://github.com/Yanol-Market/backend/assets/139152515/f72a7812-56a6-4bff-8291-99e347066fe3)
+<br>
+
+## ERD
+![](https://github.com/Yanol-Market/backend/assets/139152515/926f39df-8fc7-47af-bacc-422bfe47d4fd)
+<br>
 
 ## 팀원 소개
 ### BackEnd
@@ -85,7 +64,7 @@
       <th>네고 실패 케이스, 결제 과정</th>
     </tr>
     <tr>    
-      <td><img src=""height="400"></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/2e810ef3-71b8-47e1-be67-93eb87fb377f"height="400"></td>
     </tr>
   </table>
 </div>
