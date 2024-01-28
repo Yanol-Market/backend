@@ -7,17 +7,43 @@ import site.goldenticket.domain.user.wish.entity.WishRegion;
 
 public final class UserUtils {
 
-    public static String EMAIL = "email@gamil.com";
-    public static String PASSWORD = "password";
-    public static String NAME = "name";
-    public static String NICKNAME = "nickname";
-    public static String PHONE_NUMBER = "01000000000";
-    public static Long YANOLJA_ID = 1L;
-    public static String BANK_NAME = "bankName";
-    public static String ACCOUNT_NUMBER = "000000000000";
+    public static final String EMAIL = "email@gamil.com";
+    public static final String PASSWORD = "password";
+    public static final String NAME = "name";
+    public static final String NICKNAME = "nickname";
+    public static final String PHONE_NUMBER = "01000000000";
+    public static final Long YANOLJA_ID = 1L;
+    public static final String BANK_NAME = "bankName";
+    public static final String ACCOUNT_NUMBER = "000000000000";
+    public static final String JOIN_NICKNAME = "joinNickname";
+    public static final String JOIN_EMAIL = "join@gmail.com";
+    public static final String CHANGE_NICKNAME = "changeNickname";
     public static final String CHANGE_PASSWORD = "changePassword";
+    public static final String ENCODED_PASSWORD = "encodedPassword";
 
     public static User createUser(String encodePassword) {
+        return User.builder()
+                .email(EMAIL)
+                .password(encodePassword)
+                .name(NAME)
+                .nickname(NICKNAME)
+                .phoneNumber(PHONE_NUMBER)
+                .build();
+    }
+
+    public static User createUserWithAccount(String encodePassword) {
+        User user = User.builder()
+                .email(EMAIL)
+                .password(encodePassword)
+                .name(NAME)
+                .nickname(NICKNAME)
+                .phoneNumber(PHONE_NUMBER)
+                .build();
+        user.registerAccount(BANK_NAME, ACCOUNT_NUMBER);
+        return user;
+    }
+
+    public static User createUserWithYanolja(String encodePassword) {
         return User.builder()
                 .email(EMAIL)
                 .password(encodePassword)
@@ -31,8 +57,8 @@ public final class UserUtils {
     public static JoinRequest createJoinRequest() {
         return new JoinRequest(
                 NAME,
-                "NICKNAME",
-                "join@gmail.com",
+                JOIN_NICKNAME,
+                JOIN_EMAIL,
                 PASSWORD,
                 PHONE_NUMBER,
                 null,
@@ -40,8 +66,8 @@ public final class UserUtils {
         );
     }
 
-    public static ChangeProfileRequest createChangeProfileRequest(String changeNickname) {
-        return new ChangeProfileRequest(changeNickname);
+    public static ChangeProfileRequest createChangeProfileRequest() {
+        return new ChangeProfileRequest(CHANGE_NICKNAME);
     }
 
     public static ChangePasswordRequest createChangePasswordRequest() {

@@ -86,7 +86,7 @@ class UserControllerTest extends ApiTest {
     void changeProfile() {
         // given
         String changeNickname = "changeNickname";
-        ChangeProfileRequest request = createChangeProfileRequest(changeNickname);
+        ChangeProfileRequest request = createChangeProfileRequest();
         String url = "/users/me";
 
         // when

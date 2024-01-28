@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.util.StringUtils;
 import site.goldenticket.common.entiy.BaseTimeEntity;
 import site.goldenticket.common.exception.CustomException;
 import site.goldenticket.domain.user.wish.entity.WishRegion;
@@ -108,6 +109,10 @@ public class User extends BaseTimeEntity {
     public void registerAccount(String bankName, String accountNumber) {
         if (!Objects.isNull(this.bankName) || !Objects.isNull(this.accountNumber)) {
             throw new CustomException(ALREADY_REGISTER_ACCOUNT);
+        }
+
+        if (!StringUtils.hasText(bankName) || !StringUtils.hasText(accountNumber)) {
+            throw new CustomException(INVALID_REGISTER_ACCOUNT_PARAM);
         }
 
         this.bankName = bankName;
