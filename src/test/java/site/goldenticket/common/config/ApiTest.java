@@ -29,7 +29,7 @@ public abstract class ApiTest {
     private TokenProvider tokenProvider;
 
     @LocalServerPort
-    private int port;
+    protected int port;
 
     public User user;
     public String accessToken;
