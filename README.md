@@ -15,9 +15,7 @@
 <br>
 
 ## 아키텍처
-<div>
-    <img src="https://github.com/Yanol-Market/backend/assets/139152515/f72a7812-56a6-4bff-8291-99e347066fe3" alt="" style="max-width: 100%;background: white;">
-</div>
+![](https://github.com/Yanol-Market/backend/assets/139435149/e5672995-f22c-4a57-8bbb-5f34a806f76d)
 
 ## ERD
 ![](https://github.com/Yanol-Market/backend/assets/139152515/926f39df-8fc7-47af-bacc-422bfe47d4fd)
