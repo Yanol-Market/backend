@@ -49,6 +49,20 @@
 <div>
   <table>
     <tr>
+      <th>홈, 지역검색, 키워드검색 비회원</th>
+      <th>홈, 지역검색, 검색, 찜 회원</th>
+      <th>관심지역 추가</th>
+    </tr>
+    <tr>    
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/f547b555-989d-4c74-b250-e90b00215bff" height="400" alt=""></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/485a378a-da7e-4d89-bc41-70d162bc57a0" height="400" alt=""></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/c7c2979a-f119-40c2-9054-ba4ba917596b" height="400" alt=""></td>
+    </tr>
+  </table>
+</div>
+<div>
+  <table>
+    <tr>
       <th>비밀번호 찾기</th>
     </tr>
     <tr> 
@@ -81,6 +95,16 @@
     </tr>
     <tr>    
       <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/7b83c4b9-4f2b-4c2c-845e-5402c57c1186" height="400" alt=""></td>
+    </tr>
+  </table>
+</div>
+<div>
+  <table>
+    <tr>
+      <th>양도 및 정산 완료</th>
+    </tr>
+    <tr>    
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/4aebde2b-bfce-4c7c-b87e-ae9c6fc0ceb2" height="400" alt=""></td>
     </tr>
   </table>
 </div>
