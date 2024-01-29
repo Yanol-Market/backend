@@ -51,6 +51,14 @@
 <div align="center">
   <table>
     <tr align="center">
+      <th>비밀번호 찾기</th>
+    </tr>
+    <tr> 
+      <td><img src="https://github.com/Yanol-Market/backend/assets/108813475/bf8f3c1e-235a-4433-8d46-0f560c32dccb"height="400"></td>
+    </tr>
+  </table>
+  <table>
+    <tr align="center">
       <th>네고 정상 과정</th>
     </tr>
     <tr>    
