@@ -82,19 +82,11 @@
   <table>
     <tr>
       <th>채팅 - 거래 과정</th>
-    </tr>
-    <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/d2377714-b52d-4c01-8600-9a753f9c944d" height="400" alt=""></td>
-    </tr>
-  </table>
-</div>
-<div>
-  <table>
-    <tr>
       <th>채팅 - 거래 취소 과정</th>
     </tr>
     <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/32309439-85c6-455d-ab9a-d92252eaf1ff" height="400" alt=""></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/d2377714-b52d-4c01-8600-9a753f9c944d" height="400" alt=""></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/32309439-85c6-455d-ab9a-d92252eaf1ff" height="400" alt=""></td>  
     </tr>
   </table>
 </div>
