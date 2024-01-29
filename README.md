@@ -1,6 +1,5 @@
-<div align="center">
-    <img src="https://github.com/Yanol-Market/frontend/assets/51106050/552ff865-e2b3-4127-b0c8-88e8741eca24">
-    <h1>골든티켓</h1>
+<div>
+    <img src="https://github.com/Yanol-Market/frontend/assets/51106050/552ff865-e2b3-4127-b0c8-88e8741eca24" alt="">
 </div>
 
 ## 주제
@@ -16,8 +15,9 @@
 <br>
 
 ## 아키텍처
-![](https://github.com/Yanol-Market/backend/assets/139152515/f72a7812-56a6-4bff-8291-99e347066fe3)
-<br>
+<div>
+    <img src="https://github.com/Yanol-Market/backend/assets/139152515/f72a7812-56a6-4bff-8291-99e347066fe3" alt="" style="max-width: 100%;background: white;">
+</div>
 
 ## ERD
 ![](https://github.com/Yanol-Market/backend/assets/139152515/926f39df-8fc7-47af-bacc-422bfe47d4fd)
@@ -25,64 +25,64 @@
 
 ## 팀원 소개
 ### BackEnd
-|                                             박찬영 (BE) <br> 팀장                                             |                                                김수빈 (BE) <br> 팀원                                                 |                     서은 (BE) <br> 팀원                     |                              이의인 (BE) <br> 팀원                                             |                                                전유림 (BE) <br> 팀원                                                           
-| :-----------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------: | :-----------------------------------------------------------------------------: | :-----------------------------------------------------------------------------: 
-|  ![cyPark95](https://avatars.githubusercontent.com/cyPark95)  | ![Su-daa](https://avatars.githubusercontent.com/Su-daa) | ![WestSilver99](https://avatars.githubusercontent.com/WestSilver99) |   ![dldmldlsy](https://avatars.githubusercontent.com/dldmldlsy) | ![yurim0628](https://avatars.githubusercontent.com/yurim0628) |    
-|  [cyPark95](https://github.com/cyPark95) | [Su-daa](https://github.com/Su-daa) | [WestSilver99](https://github.com/WestSilver99) | [dldmldlsy](https://github.com/dldmldlsy) | [yurim0628](https://github.com/yurim0628) |       
-| <ul><li>User</li> | <ul><li>Payment</li></ul> | <ul><li>Nego</li></ul> | <ul><li>Chat</li></ul> | <ul><li>Product</li></ul> |  
+|                      박찬영 (BE) <br> 팀장                       |                    김수빈 (BE) <br> 팀원                     |                           서은 (BE) <br> 팀원                           |                       이의인 (BE) <br> 팀원                        |                       전유림 (BE) <br> 팀원                        |
+|:-----------------------------------------------------------:|:-------------------------------------------------------:|:-------------------------------------------------------------------:|:-------------------------------------------------------------:|:-------------------------------------------------------------:|
+| ![cyPark95](https://avatars.githubusercontent.com/cyPark95) | ![Su-daa](https://avatars.githubusercontent.com/Su-daa) | ![WestSilver99](https://avatars.githubusercontent.com/WestSilver99) | ![dldmldlsy](https://avatars.githubusercontent.com/dldmldlsy) | ![yurim0628](https://avatars.githubusercontent.com/yurim0628) |    
+|           [cyPark95](https://github.com/cyPark95)           |           [Su-daa](https://github.com/Su-daa)           |           [WestSilver99](https://github.com/WestSilver99)           |           [dldmldlsy](https://github.com/dldmldlsy)           |           [yurim0628](https://github.com/yurim0628)           |       
+|                      <ul><li>User</li>                      |                <ul><li>Payment</li></ul>                |                       <ul><li>Nego</li></ul>                        |                    <ul><li>Chat</li></ul>                     |                   <ul><li>Product</li></ul>                   |  
 
 <br>
 
 ## 주요 기능
-<div align="center">
+<div>
   <table>
-    <tr align="center">
+    <tr>
       <th>회원 가입 및 로그인</th>
       <th>상품 등록 전 계좌 등록</th>
       <th>상품 등록</th>
     </tr>
     <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/8333a8ec-577b-4ef4-9e1d-1c2d7b6e1b57"height="400"></td>
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/d9472e21-ed6d-4252-9f99-17a45f006ec8"height="400"></td>
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/bfe2d652-73b1-43e4-a22a-2db932e7b95e"height="400"></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/8333a8ec-577b-4ef4-9e1d-1c2d7b6e1b57" height="400" alt=""></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/d9472e21-ed6d-4252-9f99-17a45f006ec8" height="400" alt=""></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/bfe2d652-73b1-43e4-a22a-2db932e7b95e" height="400" alt=""></td>
     </tr>
   </table>
 </div>
-<div align="center">
+<div>
   <table>
-    <tr align="center">
+    <tr>
       <th>비밀번호 찾기</th>
     </tr>
     <tr> 
-      <td><img src="https://github.com/Yanol-Market/backend/assets/108813475/bf8f3c1e-235a-4433-8d46-0f560c32dccb"height="400"></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/108813475/bf8f3c1e-235a-4433-8d46-0f560c32dccb" height="400" alt=""></td>
     </tr>
   </table>
   <table>
-    <tr align="center">
+    <tr>
       <th>네고 정상 과정</th>
     </tr>
     <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/28383b60-d6b2-45c9-9eeb-7afecfb7f596"height="400"></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/28383b60-d6b2-45c9-9eeb-7afecfb7f596" height="400" alt=""></td>
     </tr>
   </table>
 </div>
-<div align="center">
+<div>
   <table>
-    <tr align="center">
+    <tr>
       <th>네고 실패 케이스, 결제 과정</th>
     </tr>
     <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/2e810ef3-71b8-47e1-be67-93eb87fb377f"height="400"></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/2e810ef3-71b8-47e1-be67-93eb87fb377f" height="400" alt=""></td>
     </tr>
   </table>
 </div>
-<div align="center">
+<div>
   <table>
-    <tr align="center">
+    <tr>
       <th>결제 실패 케이스</th>
     </tr>
     <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/7b83c4b9-4f2b-4c2c-845e-5402c57c1186"height="400"></td>
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/7b83c4b9-4f2b-4c2c-845e-5402c57c1186" height="400" alt=""></td>
     </tr>
   </table>
 </div>
