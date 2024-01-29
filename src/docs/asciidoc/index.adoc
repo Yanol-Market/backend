@@ -1,0 +1,73 @@
+= Golden-Ticket API Guide
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toc-levels: 4
+:sect-links:
+:operation-curl-request-title: Example Request
+:operation-http-response-title: Example Response
+
+[[overview_http_verbs]]
+== HTTP Methods
+
+Golden-Ticket API adheres as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| GET
+| Used to retrieve a resource
+
+| POST
+| Used to create a new resource
+
+| PUT
+| Used to replace a representation of the target resource with the request payload
+
+| PATCH
+| Used to update an existing resource, including partial updates
+
+| DELETE
+| Used to delete an existing resource
+|===
+
+[[overview_http_status_codes]]
+== HTTP Status Codes
+
+Golden-Ticket API adheres as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+
+|===
+| Status Code | Usage
+
+| 200 OK
+| The request completed successfully
+
+| 201 Created
+| A new resource has been created successfully. The resource's URI is available from the response's Location header.
+
+| 204 No Content
+| An update to an existing resource has been applied successfully
+
+| 400 Bad Request
+| The request was malformed. The response body will include an error providing further information
+
+| 401 Unauthorized
+| The request has not been applied because it lacks valid authentication credentials for the target resource.
+
+| 403 Forbidden
+| The server understood the request but refuses to authorize it.
+
+| 404 Not Found
+| The requested resource did not exist
+
+| 409 Conflict
+| The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
+
+| 500 Internal Server Error
+| An unexpected internal server error occurred
+|===
+
+= 사용자 기능
+
+include::user.adoc[]
