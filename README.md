@@ -98,3 +98,13 @@
     </tr>
   </table>
 </div>
+<div>
+  <table>
+    <tr>
+      <th>양도 및 정산 완료</th>
+    </tr>
+    <tr>    
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/4aebde2b-bfce-4c7c-b87e-ae9c6fc0ceb2" height="400" alt=""></td>
+    </tr>
+  </table>
+</div>
