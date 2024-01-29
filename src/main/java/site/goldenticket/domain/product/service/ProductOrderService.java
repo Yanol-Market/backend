@@ -66,7 +66,11 @@ public class ProductOrderService {
             List<Nego> negoList = negoService.findAllByProductAndStatus(product, NegotiationStatus.NEGOTIATING);
 
             if (!negoList.isEmpty()) {
-                negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
+                boolean allContentIsOne = negoList.stream().allMatch(nego -> nego.getCount() == 1);
+
+                if (!allContentIsOne) {
+                    negoProductStatus = NegoProductStatus.NEGOTIATION_HAVE;
+                }
             }
         }
         else {
