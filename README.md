@@ -69,14 +69,6 @@
       <td><img src="https://github.com/Yanol-Market/backend/assets/108813475/bf8f3c1e-235a-4433-8d46-0f560c32dccb" height="400" alt=""></td>
     </tr>
   </table>
-  <table>
-    <tr>
-      <th>네고 정상 과정</th>
-    </tr>
-    <tr>    
-      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/28383b60-d6b2-45c9-9eeb-7afecfb7f596" height="400" alt=""></td>
-    </tr>
-  </table>
 </div>
 <div>
   <table>
@@ -87,6 +79,16 @@
     <tr>    
       <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/d2377714-b52d-4c01-8600-9a753f9c944d" height="400" alt=""></td>
       <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/32309439-85c6-455d-ab9a-d92252eaf1ff" height="400" alt=""></td>  
+    </tr>
+  </table>
+</div>
+<div>
+  <table>
+    <tr>
+      <th>네고 정상 과정</th>
+    </tr>
+    <tr>    
+      <td><img src="https://github.com/Yanol-Market/backend/assets/139152515/28383b60-d6b2-45c9-9eeb-7afecfb7f596" height="400" alt=""></td>
     </tr>
   </table>
 </div>
