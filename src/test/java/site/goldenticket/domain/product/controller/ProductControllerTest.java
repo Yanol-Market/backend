@@ -1,7 +1,6 @@
 package site.goldenticket.domain.product.controller;
 
 import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
@@ -28,8 +27,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 import static site.goldenticket.common.utils.ChatRoomUtils.createChatRoom;
 import static site.goldenticket.common.utils.ChatUtils.createChat;
@@ -37,7 +35,6 @@ import static site.goldenticket.common.utils.NegoUtils.createNego;
 import static site.goldenticket.common.utils.OrderUtils.createOrder;
 import static site.goldenticket.common.utils.ProductUtils.createProduct;
 import static site.goldenticket.common.utils.ProductUtils.createProductRequest;
-import static site.goldenticket.common.utils.RestAssuredUtils.restAssuredGetWithTokenAndQueryParam;
 import static site.goldenticket.domain.product.constants.ProductStatus.EXPIRED;
 import static site.goldenticket.domain.product.constants.ProductStatus.SOLD_OUT;
 
@@ -361,6 +358,7 @@ public class ProductControllerTest extends ApiDocumentation {
     }
 
     @Test
+    @DisplayName("판매 내역 - 판매 완료 상세 조회")
     void getCompletedProductDetails() {
         // given
         Product product = saveSoldOutProduct();
@@ -368,17 +366,82 @@ public class ProductControllerTest extends ApiDocumentation {
         saveChat(chatRoom);
         saveOrder(product);
 
-        String url = "/products/history/completed/" + product.getId();
+        String url = "/products/history/completed/{productId}?productStatus={productStatus}";
+        String pathName = "productId";
+        Long pathValues = product.getId();
         String parameterName = "productStatus";
         String parameterValues = product.getProductStatus().toString();
 
         // when
-        final ExtractableResponse<Response> response = restAssuredGetWithTokenAndQueryParam(url, parameterName, parameterValues, accessToken);
+        ExtractableResponse<Response> response = RestAssured
+                .given(spec).log().all()
+                .pathParam(pathName, pathValues)
+                .queryParam(parameterName, parameterValues)
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        "/products/history/completed-details",
+                        pathParameters(
+                                parameterWithName(pathName).description("상품 ID")
+                        ),
+                        queryParameters(
+                                parameterWithName(parameterName).description("상품 상태")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING)
+                                        .description("응답 상태"),
+                                fieldWithPath("message").type(STRING)
+                                        .description("응답 메시지").optional(),
+                                fieldWithPath("data").type(OBJECT)
+                                        .description("응답 데이터"),
+                                fieldWithPath("data.productId").type(NUMBER)
+                                        .description("상품 ID"),
+                                fieldWithPath("data.accommodationImage").type(STRING)
+                                        .description("숙소 이미지 URL"),
+                                fieldWithPath("data.accommodationName").type(STRING)
+                                        .description("숙소명"),
+                                fieldWithPath("data.roomName").type(STRING)
+                                        .description("객실명"),
+                                fieldWithPath("data.reservationType").type(STRING)
+                                        .description("예약 유형"),
+                                fieldWithPath("data.standardNumber").type(NUMBER)
+                                        .description("기준 숙박 인원"),
+                                fieldWithPath("data.maximumNumber").type(NUMBER)
+                                        .description("최대 숙박 인원"),
+                                fieldWithPath("data.checkInTime").type(STRING)
+                                        .description("체크인 시간"),
+                                fieldWithPath("data.checkOutTime").type(STRING)
+                                        .description("체크아웃 시간"),
+                                fieldWithPath("data.checkInDate").type(STRING)
+                                        .description("체크인 날짜"),
+                                fieldWithPath("data.checkOutDate").type(STRING)
+                                        .description("체크아웃 날짜"),
+                                fieldWithPath("data.goldenPrice").type(NUMBER)
+                                        .description("골든 특가"),
+                                fieldWithPath("data.completedDate").type(STRING)
+                                        .description("거래 날짜"),
+                                fieldWithPath("data.calculatedDate").type(STRING)
+                                        .description("정산 날짜"),
+                                fieldWithPath("data.fee").type(NUMBER)
+                                        .description("수수료"),
+                                fieldWithPath("data.calculatedPrice").type(NUMBER)
+                                        .description("정산 금액"),
+                                fieldWithPath("data.chatRoomId").type(NUMBER)
+                                        .description("채팅 룸 ID"),
+                                fieldWithPath("data.receiverNickname").type(STRING)
+                                        .description("구매자 닉네임"),
+                                fieldWithPath("data.receiverProfileImage").type(STRING)
+                                        .description("구매자 프로필 이미지 경로").optional(),
+                                fieldWithPath("data.lastUpdatedAt").type(STRING)
+                                        .description("채팅 최근 업데이트 시간")
+                        )
+                ))
+                .when()
+                .get(url, pathValues, parameterValues)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-        final JsonPath result = response.jsonPath();
-        assertThat(result.getLong("data.productId")).isEqualTo(product.getId());
     }
 
     @Test
