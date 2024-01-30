@@ -165,14 +165,14 @@ public class ProductControllerTest extends ApiDocumentation {
                         "products-update",
                         getDocumentRequest(),
                         getDocumentResponse(),
+                        pathParameters(
+                                parameterWithName("productId").description("상품 ID")
+                        ),
                         requestFields(
                                 fieldWithPath("goldenPrice").type(NUMBER)
                                         .description("골든 특가"),
                                 fieldWithPath("content").type(STRING)
                                         .description("판매자 한마디")
-                        ),
-                        pathParameters(
-                                parameterWithName("productId").description("상품 ID")
                         ),
                         responseFields(
                                 fieldWithPath("status").type(STRING)
