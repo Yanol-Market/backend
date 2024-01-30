@@ -164,7 +164,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse updateProduct(ProductRequest productRequest, Long productId) {
+    public Long updateProduct(ProductRequest productRequest, Long productId) {
         Product product = getProduct(productId);
         product.update(productRequest.goldenPrice(), productRequest.content());
         AreaCode pastAreaCode = product.getAreaCode();
@@ -174,7 +174,7 @@ public class ProductService {
         if(!nowAreaCode.equals(pastAreaCode)) {
             alertService.createAlertOfWishRegion(nowAreaCode);
         }
-        return ProductResponse.fromEntity(updatedProduct);
+        return productId;
     }
 
     @Transactional
