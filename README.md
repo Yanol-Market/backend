@@ -2,6 +2,11 @@
     <img src="https://github.com/Yanol-Market/frontend/assets/51106050/552ff865-e2b3-4127-b0c8-88e8741eca24" alt="">
 </div>
 
+## 배포 URL
+
+- FRONT-END : https://golden-ticket6.netlify.app/
+- BACK-END  : https://golden-ticket.site
+
 ## 주제
 무료 취소 불가한 숙박 상품 거래 플랫폼
 <br>
