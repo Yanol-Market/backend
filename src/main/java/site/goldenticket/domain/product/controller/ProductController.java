@@ -23,13 +23,13 @@ import site.goldenticket.domain.product.search.service.SearchService;
 import site.goldenticket.domain.product.service.ProductOrderService;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.dummy.reservation.dto.YanoljaProductResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static site.goldenticket.common.redis.constants.RedisConstants.*;
+import static site.goldenticket.common.redis.constants.RedisConstants.AREA_RANKING_KEY;
+import static site.goldenticket.common.redis.constants.RedisConstants.KEYWORD_RANKING_KEY;
 
 @RestController
 @RequestMapping("/products")
@@ -125,7 +125,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
+    public ResponseEntity<CommonResponse<Long>> updateProduct(
             @PathVariable Long productId,
             @RequestBody @Validated ProductRequest productRequest
     ) {
