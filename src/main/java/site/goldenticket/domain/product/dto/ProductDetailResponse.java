@@ -33,7 +33,6 @@ public record ProductDetailResponse(
         ProductStatus productStatus,
         boolean isSeller,
         NegoProductStatus negoProductStatus,
-        Long wishId,
         boolean isWished
 ) {
 
@@ -52,7 +51,6 @@ public record ProductDetailResponse(
         int marketPriceRatio = DiscountCalculatorUtil.calculateDiscountPercentage(yanoljaPrice, goldenPrice);
 
         boolean isWished = isAuthenticated ? !product.getWishProducts().isEmpty() : false;
-        Long wishId = isWished ? product.getWishProducts().get(0).getId() : null;
 
         return new ProductDetailResponse(
                 product.getAccommodationImage(),
@@ -77,7 +75,6 @@ public record ProductDetailResponse(
                 product.getProductStatus(),
                 isSeller,
                 negoProductStatus,
-                wishId,
                 isWished
         );
     }
