@@ -31,6 +31,14 @@
 
 <br>
 
+## [API 명세서](https://www.notion.so/d4e01e7858f24219a888176092eceaca?v=fc5d007acc6c4ad7919c7ff4549b7fe0&pvs=4)
+
+![](https://github.com/Yanol-Market/backend/assets/139435149/c455099b-ab1f-4848-94a2-8f82b4ef8a37)
+
+### 상세 페이지
+
+![](https://github.com/Yanol-Market/backend/assets/139435149/0dd443ce-ce85-4f52-b520-34e5a29d0f6f)
+
 ## 주요 기능
 <div>
   <table>
