@@ -1,0 +1,26 @@
+server:
+  port: 8888
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:test;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+jwt:
+  secret: VTNCeWFXNW5JRk5sWTNWeWFYUjVJRWR2YkdSbGJpQlVhV05yWlhR
+  grant-type: Bearer
+  token-validate-in-seconds: 3600
+
+yanolja:
+  url:
+    base: http://localhost:8888
+    reservations: /test/dummy/reservations/{yaUserId}
+    reservation: /test/dummy/reservation/{reservationId}
