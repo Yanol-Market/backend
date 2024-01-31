@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,7 +37,6 @@ import java.util.stream.Collectors;
 
 import static site.goldenticket.common.redis.constants.RedisConstants.*;
 import static site.goldenticket.common.response.ErrorCode.*;
-import static site.goldenticket.domain.product.constants.DummyUrlConstants.*;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.NOT_REGISTERED;
 import static site.goldenticket.dummy.reservation.constants.ReservationStatus.REGISTERED;
 
@@ -45,8 +45,14 @@ import static site.goldenticket.dummy.reservation.constants.ReservationStatus.RE
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final RestTemplateService restTemplateService;
+    @Value("${yanolja.url.base}")
+    private String baseUrl;
+    @Value("${yanolja.url.reservations}")
+    private String reservationsEndpoint;
+    @Value("${yanolja.url.reservation}")
+    private String reservationEndpoint;
 
+    private final RestTemplateService restTemplateService;
     private final RedisService redisService;
     private final ProductRepository productRepository;
     private final AlertService alertService;
@@ -107,7 +113,7 @@ public class ProductService {
     // 2. 야놀자 예약 정보 조회 메서드
     @Transactional
     public List<ReservationResponse> getAllReservations(Long yaUserId) {
-        String getUrl = buildReservationUrl(RESERVATIONS_ENDPOINT, yaUserId);
+        String getUrl = buildReservationUrl(reservationsEndpoint, yaUserId);
 
         List<YanoljaProductResponse> yanoljaProductResponses = restTemplateService.getList(
             getUrl,
@@ -143,7 +149,7 @@ public class ProductService {
             throw new CustomException(PRODUCT_ALREADY_EXISTS);
         }
 
-        String getUrl = buildReservationUrl(RESERVATION_ENDPOINT, reservationId);
+        String getUrl = buildReservationUrl(reservationEndpoint, reservationId);
 
         ReservationDetailsResponse reservationDetailsResponse = restTemplateService.get(
             getUrl,
@@ -202,7 +208,7 @@ public class ProductService {
 
     private String buildReservationUrl(String endpoint, Long pathVariable) {
         return UriComponentsBuilder
-            .fromUriString(DISTRIBUTE_BASE_URL)
+            .fromUriString(baseUrl)
             .path(endpoint)
             .buildAndExpand(pathVariable)
             .encode(StandardCharsets.UTF_8)

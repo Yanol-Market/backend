@@ -7,7 +7,10 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import site.goldenticket.common.config.ApiDocumentation;
 import site.goldenticket.domain.chat.entity.Chat;
 import site.goldenticket.domain.chat.entity.ChatRoom;
@@ -28,8 +31,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 import static site.goldenticket.common.utils.ChatRoomUtils.createChatRoom;
 import static site.goldenticket.common.utils.ChatUtils.createChat;
@@ -41,22 +42,110 @@ import static site.goldenticket.common.utils.RestAssuredUtils.restAssuredGetWith
 import static site.goldenticket.domain.product.constants.ProductStatus.EXPIRED;
 import static site.goldenticket.domain.product.constants.ProductStatus.SOLD_OUT;
 
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 public class ProductControllerTest extends ApiDocumentation {
 
     @Autowired
     private ProductRepository productRepository;
-
     @Autowired
     private ChatRoomRepository chatRoomRepository;
-
     @Autowired
     private ChatRepository chatRepository;
-
     @Autowired
     private NegoRepository negoRepository;
-
     @Autowired
     private OrderRepository orderRepository;
+
+    @Test
+    @DisplayName("예약 목록 조회")
+    void getAllReservations() {
+        // given
+        String url = "/products/reservations/{yaUserId}";
+
+        // when
+        ExtractableResponse<Response> response = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        "reservations-all",
+                        getDocumentResponse(),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data[].reservationId").type(NUMBER).description("예약 ID"),
+                                fieldWithPath("data[].accommodationName").type(STRING).description("숙소명"),
+                                fieldWithPath("data[].reservationType").type(STRING).description("예약 유형"),
+                                fieldWithPath("data[].roomName").type(STRING).description("객실명"),
+                                fieldWithPath("data[].standardNumber").type(NUMBER).description("기준 숙박 인원"),
+                                fieldWithPath("data[].maximumNumber").type(NUMBER).description("최대 숙박 인원"),
+                                fieldWithPath("data[].checkInDate").type(STRING).description("체크인 날짜"),
+                                fieldWithPath("data[].checkOutDate").type(STRING).description("체크아웃 날짜"),
+                                fieldWithPath("data[].checkInTime").type(STRING).description("체크인 시간"),
+                                fieldWithPath("data[].checkOutTime").type(STRING).description("체크아웃 시간"),
+                                fieldWithPath("data[].nights").type(NUMBER).description("숙박 일수"),
+                                fieldWithPath("data[].reservationDate").type(STRING).description("예약일"),
+                                fieldWithPath("data[].originPrice").type(NUMBER).description("구매가"),
+                                fieldWithPath("data[].yanoljaPrice").type(NUMBER).description("야놀자 판매가"),
+                                fieldWithPath("data[].reservationStatus").type(STRING).description("예약 상태")
+                        )
+                ))
+                .when()
+                .get(url, 1L)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+    }
+
+    @Test
+    @DisplayName("상품 등록")
+    void registerProduct() {
+        // given
+        ProductRequest request = createProductRequest();
+        String url = "/products/{reservationId}";
+
+        // when
+        ExtractableResponse<Response> response = RestAssured
+                .given(spec).log().all()
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document(
+                        "product-create",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        requestFields(
+                                fieldWithPath("goldenPrice").type(NUMBER).description("골든 특가"),
+                                fieldWithPath("content").type(STRING).description("판매자 한마디")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data.productId").type(NUMBER).description("상품 ID"),
+                                fieldWithPath("data.accommodationImage").type(STRING).description("숙소 이미지 URL"),
+                                fieldWithPath("data.accommodationName").type(STRING).description("숙소명"),
+                                fieldWithPath("data.reservationType").type(STRING).description("예약 유형"),
+                                fieldWithPath("data.roomName").type(STRING).description("객실명"),
+                                fieldWithPath("data.checkInDate").type(STRING).description("체크인 날짜"),
+                                fieldWithPath("data.checkOutDate").type(STRING).description("체크아웃 날짜"),
+                                fieldWithPath("data.nights").type(NUMBER).description("숙박 일수"),
+                                fieldWithPath("data.days").type(NUMBER).description("판매 가능한 남은 날짜"),
+                                fieldWithPath("data.originPrice").type(NUMBER).description("구매가"),
+                                fieldWithPath("data.yanoljaPrice").type(NUMBER).description("야놀자 판매가"),
+                                fieldWithPath("data.goldenPrice").type(NUMBER).description("골든 특가"),
+                                fieldWithPath("data.productStatus").type(STRING).description("상품 상태")
+                        )
+                ))
+                .when()
+                .post(url, 1L)
+                .then().log().all()
+                .extract();
+
+        // then
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+    }
 
     @Test
     @DisplayName("상품 상세 조회")
@@ -65,76 +154,44 @@ public class ProductControllerTest extends ApiDocumentation {
         Product product = saveProduct();
 
         String url = "/products/{productId}";
-        String pathName = "productId";
-        Long pathValues = product.getId();
 
         // when
         ExtractableResponse<Response> response = RestAssured
                 .given(spec).log().all()
-                .pathParam(pathName, pathValues)
                 .filter(document(
                         "products-details",
                         getDocumentResponse(),
-                        pathParameters(
-                                parameterWithName("productId").description("상품 ID")
-                        ),
                         responseFields(
-                                fieldWithPath("status").type(STRING)
-                                        .description("응답 상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("응답 메시지"),
-                                fieldWithPath("data").type(OBJECT)
-                                        .description("응답 데이터"),
-                                fieldWithPath("data.accommodationImage").type(STRING)
-                                        .description("숙소 이미지 URL"),
-                                fieldWithPath("data.accommodationName").type(STRING)
-                                        .description("숙소명"),
-                                fieldWithPath("data.accommodationAddress").type(STRING)
-                                        .description("숙소 주소"),
-                                fieldWithPath("data.reservationType").type(STRING)
-                                        .description("예약 유형"),
-                                fieldWithPath("data.roomName").type(STRING)
-                                        .description("객실명"),
-                                fieldWithPath("data.standardNumber").type(NUMBER)
-                                        .description("기준 숙박 인원"),
-                                fieldWithPath("data.maximumNumber").type(NUMBER)
-                                        .description("최대 숙박 인원"),
-                                fieldWithPath("data.checkInTime").type(STRING)
-                                        .description("체크인 시간"),
-                                fieldWithPath("data.checkOutTime").type(STRING)
-                                        .description("체크아웃 시간"),
-                                fieldWithPath("data.checkInDate").type(STRING)
-                                        .description("체크인 날짜"),
-                                fieldWithPath("data.checkOutDate").type(STRING)
-                                        .description("체크아웃 날짜"),
-                                fieldWithPath("data.nights").type(NUMBER)
-                                        .description("숙박 일수"),
-                                fieldWithPath("data.days").type(NUMBER)
-                                        .description("판매 가능한 남은 날짜"),
-                                fieldWithPath("data.originPrice").type(NUMBER)
-                                        .description("구매가"),
-                                fieldWithPath("data.yanoljaPrice").type(NUMBER)
-                                        .description("야놀자 판매가"),
-                                fieldWithPath("data.goldenPrice").type(NUMBER)
-                                        .description("골든 특가"),
-                                fieldWithPath("data.originPriceRatio").type(NUMBER)
-                                        .description("구매 가격 할인율"),
-                                fieldWithPath("data.marketPriceRatio").type(NUMBER)
-                                        .description("야놀자 가격 할인율"),
-                                fieldWithPath("data.content").type(STRING)
-                                        .description("판매자 한마디"),
-                                fieldWithPath("data.productStatus").type(STRING)
-                                        .description("상품 상태"),
-                                fieldWithPath("data.isSeller").type(BOOLEAN)
-                                        .description("판매자 여부"),
-                                fieldWithPath("data.negoProductStatus").type(NUMBER)
-                                        .description("상품 네고 상태").optional(),
-                                fieldWithPath("data.isWished").type(BOOLEAN)
-                                        .description("관심 상품 여부")
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(OBJECT).description("응답 데이터"),
+                                fieldWithPath("data.accommodationImage").type(STRING).description("숙소 이미지 URL"),
+                                fieldWithPath("data.accommodationName").type(STRING).description("숙소명"),
+                                fieldWithPath("data.accommodationAddress").type(STRING).description("숙소 주소"),
+                                fieldWithPath("data.reservationType").type(STRING).description("예약 유형"),
+                                fieldWithPath("data.roomName").type(STRING).description("객실명"),
+                                fieldWithPath("data.standardNumber").type(NUMBER).description("기준 숙박 인원"),
+                                fieldWithPath("data.maximumNumber").type(NUMBER).description("최대 숙박 인원"),
+                                fieldWithPath("data.checkInTime").type(STRING).description("체크인 시간"),
+                                fieldWithPath("data.checkOutTime").type(STRING).description("체크아웃 시간"),
+                                fieldWithPath("data.checkInDate").type(STRING).description("체크인 날짜"),
+                                fieldWithPath("data.checkOutDate").type(STRING).description("체크아웃 날짜"),
+                                fieldWithPath("data.nights").type(NUMBER).description("숙박 일수"),
+                                fieldWithPath("data.days").type(NUMBER).description("판매 가능한 남은 날짜"),
+                                fieldWithPath("data.originPrice").type(NUMBER).description("구매가"),
+                                fieldWithPath("data.yanoljaPrice").type(NUMBER).description("야놀자 판매가"),
+                                fieldWithPath("data.goldenPrice").type(NUMBER).description("골든 특가"),
+                                fieldWithPath("data.originPriceRatio").type(NUMBER).description("구매 가격 할인율"),
+                                fieldWithPath("data.marketPriceRatio").type(NUMBER).description("야놀자 가격 할인율"),
+                                fieldWithPath("data.content").type(STRING).description("판매자 한마디"),
+                                fieldWithPath("data.productStatus").type(STRING).description("상품 상태"),
+                                fieldWithPath("data.isSeller").type(BOOLEAN).description("판매자 여부"),
+                                fieldWithPath("data.negoProductStatus").type(NUMBER).description("상품 네고 상태").optional(),
+                                fieldWithPath("data.isWished").type(BOOLEAN).description("관심 상품 여부")
                         )
                 ))
                 .when()
-                .get(url, pathValues)
+                .get(url, product.getId())
                 .then().log().all()
                 .extract();
 
@@ -146,18 +203,14 @@ public class ProductControllerTest extends ApiDocumentation {
     @DisplayName("상품 수정")
     void updateProduct() {
         // given
+        Product product = saveProduct();
         ProductRequest request = createProductRequest();
 
-        Product product = saveProduct();
-
         String url = "/products/{productId}";
-        String pathName = "productId";
-        Long pathValues = product.getId();
 
         // when
         ExtractableResponse<Response> response = RestAssured
                 .given(spec).log().all()
-                .pathParam(pathName, pathValues)
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(request)
                 .header("Authorization", "Bearer " + accessToken)
@@ -165,26 +218,18 @@ public class ProductControllerTest extends ApiDocumentation {
                         "products-update",
                         getDocumentRequest(),
                         getDocumentResponse(),
-                        pathParameters(
-                                parameterWithName("productId").description("상품 ID")
-                        ),
                         requestFields(
-                                fieldWithPath("goldenPrice").type(NUMBER)
-                                        .description("골든 특가"),
-                                fieldWithPath("content").type(STRING)
-                                        .description("판매자 한마디")
+                                fieldWithPath("goldenPrice").type(NUMBER).description("골든 특가"),
+                                fieldWithPath("content").type(STRING).description("판매자 한마디")
                         ),
                         responseFields(
-                                fieldWithPath("status").type(STRING)
-                                        .description("응답 상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("응답 메시지"),
-                                fieldWithPath("data").type(NUMBER)
-                                        .description("상품 ID")
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(NUMBER).description("상품 ID")
                         )
                 ))
                 .when()
-                .put(url, pathValues)
+                .put(url, product.getId())
                 .then().log().all()
                 .extract();
 
@@ -199,31 +244,22 @@ public class ProductControllerTest extends ApiDocumentation {
         Product product = saveProduct();
 
         String url = "/products/{productId}";
-        String pathName = "productId";
-        Long pathValues = product.getId();
 
         // when
         ExtractableResponse<Response> response = RestAssured
                 .given(spec).log().all()
-                .pathParam(pathName, pathValues)
                 .header("Authorization", "Bearer " + accessToken)
                 .filter(document(
                         "products-delete",
                         getDocumentResponse(),
-                        pathParameters(
-                                parameterWithName("productId").description("상품 ID")
-                        ),
                         responseFields(
-                                fieldWithPath("status").type(STRING)
-                                        .description("응답 상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("응답 메시지"),
-                                fieldWithPath("data").type(NUMBER)
-                                        .description("상품 ID")
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(NUMBER).description("상품 ID")
                         )
                 ))
                 .when()
-                .delete(url, pathValues)
+                .delete(url, product.getId())
                 .then().log().all()
                 .extract();
 
@@ -250,56 +286,31 @@ public class ProductControllerTest extends ApiDocumentation {
                         "products/history/progress-all",
                         getDocumentResponse(),
                         responseFields(
-                                fieldWithPath("status").type(STRING)
-                                        .description("응답 상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("응답 메시지"),
-                                fieldWithPath("data").type(ARRAY)
-                                        .description("응답 데이터"),
-                                fieldWithPath("data[].productId").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data[].accommodationImage").type(STRING)
-                                        .description("숙소 이미지 URL"),
-                                fieldWithPath("data[].accommodationName").type(STRING)
-                                        .description("숙소명"),
-                                fieldWithPath("data[].reservationType").type(STRING)
-                                        .description("예약 유형"),
-                                fieldWithPath("data[].roomName").type(STRING)
-                                        .description("객실명"),
-                                fieldWithPath("data[].standardNumber").type(NUMBER)
-                                        .description("기준 숙박 인원"),
-                                fieldWithPath("data[].maximumNumber").type(NUMBER)
-                                        .description("최대 숙박 인원"),
-                                fieldWithPath("data[].checkInTime").type(STRING)
-                                        .description("체크인 시간"),
-                                fieldWithPath("data[].checkOutTime").type(STRING)
-                                        .description("체크아웃 시간"),
-                                fieldWithPath("data[].checkInDate").type(STRING)
-                                        .description("체크인 날짜"),
-                                fieldWithPath("data[].checkOutDate").type(STRING)
-                                        .description("체크아웃 날짜"),
-                                fieldWithPath("data[].originPrice").type(NUMBER)
-                                        .description("구매가"),
-                                fieldWithPath("data[].yanoljaPrice").type(NUMBER)
-                                        .description("야놀자 판매가"),
-                                fieldWithPath("data[].goldenPrice").type(NUMBER)
-                                        .description("골든 특가"),
-                                fieldWithPath("data[].status").type(STRING)
-                                        .description("판매 상태"),
-                                fieldWithPath("data[].chats").type(ARRAY)
-                                        .description("채팅 목록"),
-                                fieldWithPath("data[].chats[].chatRoomId").type(NUMBER)
-                                        .description("채팅 룸 ID"),
-                                fieldWithPath("data[].chats[].receiverNickname").type(STRING)
-                                        .description("구매자 닉네임"),
-                                fieldWithPath("data[].chats[].receiverProfileImage").type(STRING)
-                                        .description("구매자 프로필 이미지 경로").optional(),
-                                fieldWithPath("data[].chats[].price").type(NUMBER)
-                                        .description("거래 가격"),
-                                fieldWithPath("data[].chats[].chatRoomStatus").type(STRING)
-                                        .description("채팅 상태"),
-                                fieldWithPath("data[].chats[].lastUpdatedAt").type(STRING)
-                                        .description("채팅 최근 업데이트 시간")
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(ARRAY).description("응답 데이터"),
+                                fieldWithPath("data[].productId").type(NUMBER).description("상품 ID"),
+                                fieldWithPath("data[].accommodationImage").type(STRING).description("숙소 이미지 URL"),
+                                fieldWithPath("data[].accommodationName").type(STRING).description("숙소명"),
+                                fieldWithPath("data[].reservationType").type(STRING).description("예약 유형"),
+                                fieldWithPath("data[].roomName").type(STRING).description("객실명"),
+                                fieldWithPath("data[].standardNumber").type(NUMBER).description("기준 숙박 인원"),
+                                fieldWithPath("data[].maximumNumber").type(NUMBER).description("최대 숙박 인원"),
+                                fieldWithPath("data[].checkInTime").type(STRING).description("체크인 시간"),
+                                fieldWithPath("data[].checkOutTime").type(STRING).description("체크아웃 시간"),
+                                fieldWithPath("data[].checkInDate").type(STRING).description("체크인 날짜"),
+                                fieldWithPath("data[].checkOutDate").type(STRING).description("체크아웃 날짜"),
+                                fieldWithPath("data[].originPrice").type(NUMBER).description("구매가"),
+                                fieldWithPath("data[].yanoljaPrice").type(NUMBER).description("야놀자 판매가"),
+                                fieldWithPath("data[].goldenPrice").type(NUMBER).description("골든 특가"),
+                                fieldWithPath("data[].status").type(STRING).description("판매 상태"),
+                                fieldWithPath("data[].chats").type(ARRAY).description("채팅 목록"),
+                                fieldWithPath("data[].chats[].chatRoomId").type(NUMBER).description("채팅 룸 ID"),
+                                fieldWithPath("data[].chats[].receiverNickname").type(STRING).description("구매자 닉네임"),
+                                fieldWithPath("data[].chats[].receiverProfileImage").type(STRING).description("구매자 프로필 이미지 경로").optional(),
+                                fieldWithPath("data[].chats[].price").type(NUMBER).description("거래 가격"),
+                                fieldWithPath("data[].chats[].chatRoomStatus").type(STRING).description("채팅 상태"),
+                                fieldWithPath("data[].chats[].lastUpdatedAt").type(STRING).description("채팅 최근 업데이트 시간")
                         )
                 ))
                 .when()
@@ -327,28 +338,17 @@ public class ProductControllerTest extends ApiDocumentation {
                         "products/history/completed-all",
                         getDocumentResponse(),
                         responseFields(
-                                fieldWithPath("status").type(STRING)
-                                        .description("응답 상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("응답 메시지"),
-                                fieldWithPath("data").type(ARRAY)
-                                        .description("응답 데이터"),
-                                fieldWithPath("data[].productId").type(NUMBER)
-                                        .description("상품 ID"),
-                                fieldWithPath("data[].accommodationImage").type(STRING)
-                                        .description("숙소 이미지 URL"),
-                                fieldWithPath("data[].accommodationName").type(STRING)
-                                        .description("숙소명"),
-                                fieldWithPath("data[].roomName").type(STRING)
-                                        .description("객실명"),
-                                fieldWithPath("data[].standardNumber").type(NUMBER)
-                                        .description("기준 숙박 인원"),
-                                fieldWithPath("data[].maximumNumber").type(NUMBER)
-                                        .description("최대 숙박 인원"),
-                                fieldWithPath("data[].goldenPrice").type(NUMBER)
-                                        .description("골든 특가"),
-                                fieldWithPath("data[].productStatus").type(STRING)
-                                        .description("판매 상태")
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(ARRAY).description("응답 데이터"),
+                                fieldWithPath("data[].productId").type(NUMBER).description("상품 ID"),
+                                fieldWithPath("data[].accommodationImage").type(STRING).description("숙소 이미지 URL"),
+                                fieldWithPath("data[].accommodationName").type(STRING).description("숙소명"),
+                                fieldWithPath("data[].roomName").type(STRING).description("객실명"),
+                                fieldWithPath("data[].standardNumber").type(NUMBER).description("기준 숙박 인원"),
+                                fieldWithPath("data[].maximumNumber").type(NUMBER).description("최대 숙박 인원"),
+                                fieldWithPath("data[].goldenPrice").type(NUMBER).description("골든 특가"),
+                                fieldWithPath("data[].productStatus").type(STRING).description("판매 상태")
                         )
                 ))
                 .when()
@@ -361,6 +361,7 @@ public class ProductControllerTest extends ApiDocumentation {
     }
 
     @Test
+    @DisplayName("판매 내역 - 판매 완료 상세 조회")
     void getCompletedProductDetails() {
         // given
         Product product = saveSoldOutProduct();
@@ -388,31 +389,23 @@ public class ProductControllerTest extends ApiDocumentation {
         Product product = saveSoldOutProduct();
 
         String url = "/products/history/completed/{productId}";
-        String pathName = "productId";
-        Long pathValues = product.getId();
 
         // when
         ExtractableResponse<Response> response = RestAssured
                 .given(spec).log().all()
-                .pathParam(pathName, pathValues)
                 .header("Authorization", "Bearer " + accessToken)
                 .filter(document(
                         "products/history/completed-delete",
                         getDocumentResponse(),
-                        pathParameters(
-                                parameterWithName("productId").description("상품 ID")
-                        ),
+
                         responseFields(
-                                fieldWithPath("status").type(STRING)
-                                        .description("응답 상태"),
-                                fieldWithPath("message").type(STRING)
-                                        .description("응답 메시지"),
-                                fieldWithPath("data").type(NUMBER)
-                                        .description("상품 ID")
+                                fieldWithPath("status").type(STRING).description("응답 상태"),
+                                fieldWithPath("message").type(STRING).description("응답 메시지"),
+                                fieldWithPath("data").type(NUMBER).description("상품 ID")
                         )
                 ))
                 .when()
-                .delete(url, pathValues)
+                .delete(url, product.getId())
                 .then().log().all()
                 .extract();
 

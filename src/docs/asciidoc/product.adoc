@@ -1,3 +1,28 @@
+== 예약 목록 조회
+
+=== HTTP request
+include::{snippets}/reservations-all/http-request.adoc[]
+
+=== HTTP response fields
+include::{snippets}/reservations-all/response-fields.adoc[]
+
+=== HTTP response
+include::{snippets}/reservations-all/http-response.adoc[]
+
+== 상품 등록
+
+=== HTTP request fields
+include::{snippets}/product-create/request-fields.adoc[]
+
+=== HTTP request
+include::{snippets}/product-create/http-request.adoc[]
+
+=== HTTP response fields
+include::{snippets}/product-create/response-fields.adoc[]
+
+=== HTTP response
+include::{snippets}/product-create/http-response.adoc[]
+
 == 상품 상세 조회
 
 === HTTP request
