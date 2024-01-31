@@ -70,6 +70,17 @@ include::{snippets}/products/history/progress-all/response-fields.adoc[]
 === HTTP response
 include::{snippets}/products/history/progress-all/http-response.adoc[]
 
+== 판매내역 - 판매중 전체 조회
+
+=== HTTP request
+include::{snippets}/products/history/progress-all/http-request.adoc[]
+
+=== HTTP response fields
+include::{snippets}/products/history/progress-all/response-fields.adoc[]
+
+=== HTTP response
+include::{snippets}/products/history/progress-all/http-response.adoc[]
+
 == 판매내역 - 판매완료 전체 조회
 
 === HTTP request
@@ -80,6 +91,17 @@ include::{snippets}/products/history/completed-all/response-fields.adoc[]
 
 === HTTP response
 include::{snippets}/products/history/completed-all/http-response.adoc[]
+
+== 판매내역 - 판매완료 상세 조회
+
+=== HTTP request
+include::{snippets}/products/history/completed-details/http-request.adoc[]
+
+=== HTTP response fields
+include::{snippets}/products/history/completed-details/response-fields.adoc[]
+
+=== HTTP response
+include::{snippets}/products/history/completed-details/http-response.adoc[]
 
 
 == 판매내역 - 판매완료 삭제
