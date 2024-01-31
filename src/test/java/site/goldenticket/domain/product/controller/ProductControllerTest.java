@@ -7,10 +7,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.TestPropertySource;
 import site.goldenticket.common.config.ApiDocumentation;
 import site.goldenticket.domain.chat.entity.Chat;
 import site.goldenticket.domain.chat.entity.ChatRoom;
@@ -42,8 +39,6 @@ import static site.goldenticket.common.utils.RestAssuredUtils.restAssuredGetWith
 import static site.goldenticket.domain.product.constants.ProductStatus.EXPIRED;
 import static site.goldenticket.domain.product.constants.ProductStatus.SOLD_OUT;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 public class ProductControllerTest extends ApiDocumentation {
 
     @Autowired
@@ -91,7 +86,7 @@ public class ProductControllerTest extends ApiDocumentation {
                         )
                 ))
                 .when()
-                .get(url, 1L)
+                .get(url, -1L)
                 .then().log().all()
                 .extract();
 

@@ -37,6 +37,8 @@ public abstract class ApiTest {
     @BeforeEach
     void init() {
         RestAssured.port = port;
+        System.setProperty("yanolja.url", "http://localhost:" + port);
+
         user = saveUser();
         accessToken = getAccessToken();
     }

@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -45,17 +44,14 @@ import static site.goldenticket.dummy.reservation.constants.ReservationStatus.RE
 @RequiredArgsConstructor
 public class ProductService {
 
-    @Value("${yanolja.url.base}")
-    private String baseUrl;
-    @Value("${yanolja.url.reservations}")
-    private String reservationsEndpoint;
-    @Value("${yanolja.url.reservation}")
-    private String reservationEndpoint;
+    private static final String RESERVATIONS_ENDPOINT = "/dummy/reservations/{yaUserId}";
+    private static final String RESERVATION_ENDPOINT = "/dummy/reservation/{reservationId}";
 
     private final RestTemplateService restTemplateService;
     private final RedisService redisService;
     private final ProductRepository productRepository;
     private final AlertService alertService;
+    private final ApiUrlProperties properties;
 
     // 1. 키워드 검색 및 지역 검색 메서드
     @Transactional(readOnly = true)
@@ -113,7 +109,7 @@ public class ProductService {
     // 2. 야놀자 예약 정보 조회 메서드
     @Transactional
     public List<ReservationResponse> getAllReservations(Long yaUserId) {
-        String getUrl = buildReservationUrl(reservationsEndpoint, yaUserId);
+        String getUrl = buildReservationUrl(RESERVATIONS_ENDPOINT, yaUserId);
 
         List<YanoljaProductResponse> yanoljaProductResponses = restTemplateService.getList(
             getUrl,
@@ -149,7 +145,7 @@ public class ProductService {
             throw new CustomException(PRODUCT_ALREADY_EXISTS);
         }
 
-        String getUrl = buildReservationUrl(reservationEndpoint, reservationId);
+        String getUrl = buildReservationUrl(RESERVATION_ENDPOINT, reservationId);
 
         ReservationDetailsResponse reservationDetailsResponse = restTemplateService.get(
             getUrl,
@@ -208,7 +204,7 @@ public class ProductService {
 
     private String buildReservationUrl(String endpoint, Long pathVariable) {
         return UriComponentsBuilder
-            .fromUriString(baseUrl)
+            .fromUriString(properties.getYanoljaUrl())
             .path(endpoint)
             .buildAndExpand(pathVariable)
             .encode(StandardCharsets.UTF_8)

@@ -1,6 +1,3 @@
-server:
-  port: 8888
-
 spring:
   datasource:
     url: jdbc:h2:mem:test;MODE=MYSQL
@@ -10,17 +7,32 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
+    #username: ${MAIL_USER_NAME}
+    #password: ${MAIL_PASSWORD}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+
+  h2:
+    console:
+      enabled: true
+
+  jpa:
+    database-platform: H2
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
 
 jwt:
   secret: VTNCeWFXNW5JRk5sWTNWeWFYUjVJRWR2YkdSbGJpQlVhV05yWlhR
   grant-type: Bearer
   token-validate-in-seconds: 3600
-
-yanolja:
-  url:
-    base: http://localhost:8888
-    reservations: /test/dummy/reservations/{yaUserId}
-    reservation: /test/dummy/reservation/{reservationId}
