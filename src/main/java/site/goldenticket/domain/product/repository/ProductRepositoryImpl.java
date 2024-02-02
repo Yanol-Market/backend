@@ -83,7 +83,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             content.remove(pageable.getPageSize());
         }
 
-        return new CustomSlice<>(content, pageable, hasNext, totalCount);
+        return new CustomSlice<>(content, hasNext, totalCount);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             content.remove(pageable.getPageSize());
         }
 
-        return new CustomSlice<>(content, pageable, hasNext, totalCount);
+        return new CustomSlice<>(content, hasNext, totalCount);
     }
 
     private BooleanExpression buildRegionCondition(QProduct product, AreaCode areaCode) {

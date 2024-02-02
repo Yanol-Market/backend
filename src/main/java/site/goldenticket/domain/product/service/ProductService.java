@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,13 +47,13 @@ public class ProductService {
 
     private final RestTemplateService restTemplateService;
     private final RedisService redisService;
-    private final ProductRepository productRepository;
     private final AlertService alertService;
+    private final ProductRepository productRepository;
     private final ApiUrlProperties properties;
 
     // 1. 키워드 검색 및 지역 검색 메서드
     @Transactional(readOnly = true)
-    public Slice<SearchProductResponse> getProductsBySearch(
+    public CustomSlice<SearchProductResponse> getProductsBySearch(
         AreaCode areaCode, String keyword, LocalDate checkInDate, LocalDate checkOutDate,
         PriceRange priceRange,
         LocalDate cursorCheckInDate, Long cursorId, Pageable pageable,
@@ -66,24 +64,22 @@ public class ProductService {
         boolean isAuthenticated = (userId != null);
 
         CustomSlice<Product> productSlice = productRepository.getProductsBySearch(
-            areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId,
-            pageable, userId
+            areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable, userId
         );
 
         SearchProductResponse searchProductResponse = SearchProductResponse.fromEntity(
-            areaCode, keyword, checkInDate, checkOutDate, priceRange,
-            productSlice.getTotalElements(), productSlice, isAuthenticated
+            areaCode, keyword, checkInDate, checkOutDate, priceRange, productSlice, isAuthenticated
         );
 
-        return new SliceImpl<>(
-            Collections.singletonList(searchProductResponse),
-            pageable,
-            productSlice.hasNext()
+        return new CustomSlice<>(
+                Collections.singletonList(searchProductResponse),
+                productSlice.hasNext(),
+                productSlice.getTotalElements()
         );
     }
 
     @Transactional(readOnly = true)
-    public Slice<RegionProductResponse> getProductsByAreaCode(
+    public CustomSlice<RegionProductResponse> getProductsByAreaCode(
         AreaCode areaCode, LocalDate cursorCheckInDate, Long cursorId, Pageable pageable,
         PrincipalDetails principalDetails
     ) {
@@ -96,13 +92,13 @@ public class ProductService {
         );
 
         RegionProductResponse regionProductResponse = RegionProductResponse.fromEntity(
-            productSlice.getTotalElements(), productSlice, isAuthenticated
+             productSlice, isAuthenticated
         );
 
-        return new SliceImpl<>(
-            Collections.singletonList(regionProductResponse),
-            pageable,
-            productSlice.hasNext()
+        return new CustomSlice<>(
+                Collections.singletonList(regionProductResponse),
+                productSlice.hasNext(),
+                productSlice.getTotalElements()
         );
     }
 

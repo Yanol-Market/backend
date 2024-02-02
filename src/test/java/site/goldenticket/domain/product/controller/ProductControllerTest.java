@@ -93,29 +93,6 @@ public class ProductControllerTest extends ApiDocumentation {
                                 fieldWithPath("status").type(STRING).description("응답 상태"),
                                 fieldWithPath("message").type(STRING).description("응답 메시지"),
                                 fieldWithPath("data.content").type(LIST).description("컨텐츠 리스트"),
-                                fieldWithPath("data.pageable").type(OBJECT).description("페이징 정보"),
-                                fieldWithPath("data.first").type(BOOLEAN).description("첫 번째 페이지 여부"),
-                                fieldWithPath("data.last").type(BOOLEAN).description("마지막 페이지 여부"),
-                                fieldWithPath("data.size").type(NUMBER).description("페이지 크기"),
-                                fieldWithPath("data.number").type(NUMBER).description("페이지 번호"),
-                                fieldWithPath("data.numberOfElements").type(NUMBER).description("현재 페이지의 요소 수"),
-                                fieldWithPath("data.empty").type(BOOLEAN).description("데이터가 비어 있는지 여부"),
-
-                                // pageable
-                                fieldWithPath("data.pageable.pageNumber").type(NUMBER).description("페이지 번호"),
-                                fieldWithPath("data.pageable.pageSize").type(NUMBER).description("페이지 크기"),
-                                fieldWithPath("data.pageable.sort").type(OBJECT).description("정렬 정보"),
-                                fieldWithPath("data.pageable.sort.empty").type(BOOLEAN).description("정렬 정보가 비어 있는지 여부"),
-                                fieldWithPath("data.pageable.sort.sorted").type(BOOLEAN).description("정렬 정보가 정렬되어 있는지 여부"),
-                                fieldWithPath("data.pageable.sort.unsorted").type(BOOLEAN).description("정렬 정보가 정렬되어 있지 않은지 여부"),
-                                fieldWithPath("data.pageable.offset").type(NUMBER).description("오프셋"),
-                                fieldWithPath("data.pageable.paged").type(BOOLEAN).description("페이징 여부"),
-                                fieldWithPath("data.pageable.unpaged").type(BOOLEAN).description("페이징되지 않은 경우 여부"),
-
-                                // sort fields
-                                fieldWithPath("data.sort.empty").type(BOOLEAN).description("정렬 정보가 비어 있는지 여부"),
-                                fieldWithPath("data.sort.sorted").type(BOOLEAN).description("정렬 정보가 정렬되어 있는지 여부"),
-                                fieldWithPath("data.sort.unsorted").type(BOOLEAN).description("정렬 정보가 정렬되어 있지 않은지 여부"),
 
                                 // content fields
                                 fieldWithPath("data.content[0].areaName").type(STRING).description("지역명"),
@@ -123,7 +100,6 @@ public class ProductControllerTest extends ApiDocumentation {
                                 fieldWithPath("data.content[0].checkInDate").type(STRING).description("체크인 날짜"),
                                 fieldWithPath("data.content[0].checkOutDate").type(STRING).description("체크아웃 날짜"),
                                 fieldWithPath("data.content[0].priceRange").type(STRING).description("가격대"),
-                                fieldWithPath("data.content[0].totalCount").type(NUMBER).description("총 개수"),
 
                                 // productResponseList
                                 fieldWithPath("data.content[0].wishedProductResponseList").type(LIST).description("상품 응답 리스트"),
@@ -142,7 +118,10 @@ public class ProductControllerTest extends ApiDocumentation {
                                 fieldWithPath("data.content[0].wishedProductResponseList[0].originPriceRatio").type(NUMBER).description("구매가 대비 할인율"),
                                 fieldWithPath("data.content[0].wishedProductResponseList[0].marketPriceRatio").type(NUMBER).description("야놀자 판매가 대비 할인율"),
                                 fieldWithPath("data.content[0].wishedProductResponseList[0].productStatus").type(STRING).description("상품 상태"),
-                                fieldWithPath("data.content[0].wishedProductResponseList[0].isWished").type(BOOLEAN).description("찜 여부")
+                                fieldWithPath("data.content[0].wishedProductResponseList[0].isWished").type(BOOLEAN).description("찜 여부"),
+
+                                fieldWithPath("data.totalElements").type(NUMBER).description("총 요소 수"),
+                                fieldWithPath("data.last").type(BOOLEAN).description("마지막 페이지 여부")
                         )
                 ))
                 .when()
