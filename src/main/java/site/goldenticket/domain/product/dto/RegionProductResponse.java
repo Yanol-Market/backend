@@ -1,16 +1,15 @@
 package site.goldenticket.domain.product.dto;
 
-import org.springframework.data.domain.Slice;
 import site.goldenticket.domain.product.model.Product;
+import site.goldenticket.domain.product.repository.CustomSlice;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record RegionProductResponse(
-        long totalCount,
         List<WishedProductResponse> wishedProductResponseList
 ) {
-    public static RegionProductResponse fromEntity(long totalCount, Slice<Product> productSlice, boolean isAuthenticated) {
+    public static RegionProductResponse fromEntity(CustomSlice<Product> productSlice, boolean isAuthenticated) {
 
         List<WishedProductResponse> wishedProductResponseList = productSlice.getContent().stream()
                 .map(
@@ -19,7 +18,6 @@ public record RegionProductResponse(
                 .collect(Collectors.toList());
 
         return new RegionProductResponse(
-                totalCount,
                 wishedProductResponseList
         );
     }

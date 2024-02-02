@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import site.goldenticket.domain.user.entity.User;
 
 public record JoinRequest(
-        @NotEmpty(message = "비밀번호는 필수 입력 항목입니다.")
+        @NotEmpty(message = "이름은 필수 입력 항목입니다.")
         @Size(min = 2, message = "이름은 두 글자 이상의 한글이어야 합니다.")
         String name,
         @NotEmpty(message = "닉네임은 필수 입력 항목입니다.")
