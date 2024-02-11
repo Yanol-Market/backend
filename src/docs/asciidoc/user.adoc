@@ -62,3 +62,15 @@ include::{snippets}/user/update/password/success/http-request.adoc[]
 === HTTP request
 
 include::{snippets}/user/update/password/success/http-response.adoc[]
+
+== 사용자 계좌 등록
+
+=== HTTP request fields
+include::{snippets}/user/account/register/success/request-fields.adoc[]
+
+=== HTTP request
+include::{snippets}/user/account/register/success/http-request.adoc[]
+
+=== HTTP request
+
+include::{snippets}/user/account/register/success/http-response.adoc[]

@@ -244,12 +244,23 @@ class UserControllerTest extends ApiDocumentation {
         RegisterAccountRequest request = createRegisterAccountRequest();
         String url = "/users/account";
 
+        RestDocumentationFilter document = createDocument(
+                "user/account/register/success",
+                requestFields(
+                        fieldWithPath("bankName").type(STRING)
+                                .description("은행명"),
+                        fieldWithPath("accountNumber").type(STRING)
+                                .description("계좌번호")
+                )
+        );
+
         // when
         ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
+                .given(spec).log().all()
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(request)
+                .filter(document)
                 .when()
                 .patch(url)
                 .then().log().all()
