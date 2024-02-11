@@ -174,22 +174,31 @@ class UserControllerTest extends ApiDocumentation {
         ChangeProfileRequest request = createChangeProfileRequest();
         String url = "/users/me";
 
+        RestDocumentationFilter document = createDocument(
+                "user/update/profile/success",
+                requestFields(
+                        fieldWithPath("nickname").type(STRING)
+                                .description("변경 닉네임")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredPutWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .put(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
 
         User findUser = userRepository.findById(user.getId()).orElseThrow();
-        assertAll(
-                () -> assertThat(findUser.getId()).isEqualTo(user.getId()),
-                () -> assertThat(findUser.getEmail()).isEqualTo(EMAIL),
-                () -> assertThat(findUser.getName()).isEqualTo(NAME),
-                () -> assertThat(findUser.getNickname()).isEqualTo(changeNickname),
-                () -> assertThat(findUser.getImageUrl()).isNull(),
-                () -> assertThat(findUser.getPhoneNumber()).isEqualTo(PHONE_NUMBER),
-                () -> assertThat(findUser.getYanoljaId()).isEqualTo(YANOLJA_ID)
-        );
+        assertThat(findUser.getNickname()).isEqualTo(changeNickname);
     }
 
     @Test

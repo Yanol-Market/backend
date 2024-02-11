@@ -38,3 +38,15 @@ include::{snippets}/user/delete/success/http-request.adoc[]
 === HTTP request
 
 include::{snippets}/user/delete/success/http-response.adoc[]
+
+== 사용자 프로필 수정
+
+=== HTTP request fields
+include::{snippets}/user/update/profile/success/request-fields.adoc[]
+
+=== HTTP request
+include::{snippets}/user/update/profile/success/http-request.adoc[]
+
+=== HTTP request
+
+include::{snippets}/user/update/profile/success/http-response.adoc[]
