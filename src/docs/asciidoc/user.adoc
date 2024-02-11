@@ -74,3 +74,16 @@ include::{snippets}/user/account/register/success/http-request.adoc[]
 === HTTP request
 
 include::{snippets}/user/account/register/success/http-response.adoc[]
+
+== 사용자 계좌 조회
+
+=== HTTP request
+include::{snippets}/user/account/find/success/http-request.adoc[]
+
+=== HTTP response fields
+
+include::{snippets}/user/account/find/success/response-fields.adoc[]
+
+=== HTTP request
+
+include::{snippets}/user/account/find/success/http-response.adoc[]

@@ -278,10 +278,25 @@ class UserControllerTest extends ApiDocumentation {
         userRepository.save(user);
         String url = "/users/account";
 
+        RestDocumentationFilter document = createDocument(
+                "user/account/find/success",
+                responseFields(
+                        fieldWithPath("status").ignored(),
+                        fieldWithPath("message").ignored(),
+                        fieldWithPath("data.name").type(STRING)
+                                .description("예금주명"),
+                        fieldWithPath("data.bankName").type(STRING)
+                                .description("은행명"),
+                        fieldWithPath("data.accountNumber").type(STRING)
+                                .description("계좌번호")
+                )
+        );
+
         // when
         ExtractableResponse<Response> result = RestAssured
-                .given().log().all()
+                .given(spec).log().all()
                 .header("Authorization", "Bearer " + accessToken)
+                .filter(document)
                 .when()
                 .get(url)
                 .then().log().all()
