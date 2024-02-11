@@ -87,8 +87,37 @@ class UserControllerTest extends ApiDocumentation {
         // given
         String url = "/users/me";
 
+        RestDocumentationFilter document = createDocument(
+                "user/me/success",
+                responseFields(
+                        fieldWithPath("status").ignored(),
+                        fieldWithPath("message").ignored(),
+                        fieldWithPath("data.id").type(NUMBER)
+                                .description("사용자 식별값"),
+                        fieldWithPath("data.email").type(STRING)
+                                .description("사용자 이메일"),
+                        fieldWithPath("data.name").type(STRING)
+                                .description("사용자 이름"),
+                        fieldWithPath("data.nickname").type(STRING)
+                                .description("사용자 닉네임"),
+                        fieldWithPath("data.imageUrl").type(STRING)
+                                .description("이미지 링크").optional(),
+                        fieldWithPath("data.phoneNumber").type(STRING)
+                                .description("사용자 휴대폰번호"),
+                        fieldWithPath("data.yanoljaId").type(NUMBER)
+                                .description("야놀자 계정 식별값")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredGetWithToken(url, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -186,7 +215,13 @@ class UserControllerTest extends ApiDocumentation {
         String url = "/users/account";
 
         // when
-        ExtractableResponse<Response> result = restAssuredGetWithToken(url, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());

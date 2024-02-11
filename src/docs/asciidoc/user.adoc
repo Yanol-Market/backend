@@ -13,3 +13,16 @@ include::{snippets}/user/join/success/response-fields.adoc[]
 === HTTP request
 
 include::{snippets}/user/join/success/http-response.adoc[]
+
+== 사용자 정보 조회
+
+=== HTTP request
+include::{snippets}/user/me/success/http-request.adoc[]
+
+=== HTTP response fields
+
+include::{snippets}/user/me/success/response-fields.adoc[]
+
+=== HTTP request
+
+include::{snippets}/user/me/success/http-response.adoc[]
