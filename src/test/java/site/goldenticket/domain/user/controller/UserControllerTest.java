@@ -141,8 +141,25 @@ class UserControllerTest extends ApiDocumentation {
         RemoveUserRequest request = createRemoveUserRequest();
         String url = "/users";
 
+        RestDocumentationFilter document = createDocument(
+                "user/delete/success",
+                requestFields(
+                        fieldWithPath("reason").type(STRING)
+                                .description("삭제 이유")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredDeleteWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());

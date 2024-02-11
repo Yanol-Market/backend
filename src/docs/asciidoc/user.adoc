@@ -26,3 +26,15 @@ include::{snippets}/user/me/success/response-fields.adoc[]
 === HTTP request
 
 include::{snippets}/user/me/success/http-response.adoc[]
+
+== 사용자 삭제
+
+=== HTTP request fields
+include::{snippets}/user/delete/success/request-fields.adoc[]
+
+=== HTTP request
+include::{snippets}/user/delete/success/http-request.adoc[]
+
+=== HTTP request
+
+include::{snippets}/user/delete/success/http-response.adoc[]
