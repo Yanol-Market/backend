@@ -208,8 +208,27 @@ class UserControllerTest extends ApiDocumentation {
         ChangePasswordRequest request = createChangePasswordRequest();
         String url = "/users/password";
 
+        RestDocumentationFilter document = createDocument(
+                "user/update/password/success",
+                requestFields(
+                        fieldWithPath("originPassword").type(STRING)
+                                .description("기존 비밀번호"),
+                        fieldWithPath("changePassword").type(STRING)
+                                .description("변경할 비밀번호")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredPatchWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .patch(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -226,7 +245,15 @@ class UserControllerTest extends ApiDocumentation {
         String url = "/users/account";
 
         // when
-        ExtractableResponse<Response> result = restAssuredPatchWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .patch(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
