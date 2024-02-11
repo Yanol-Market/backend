@@ -21,7 +21,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static site.goldenticket.common.utils.RestAssuredUtils.*;
 import static site.goldenticket.common.utils.UserUtils.*;
 
 @DisplayName("UserController 검증")
@@ -321,8 +320,19 @@ class UserControllerTest extends ApiDocumentation {
         userRepository.save(user);
         String url = "/users/account";
 
+        RestDocumentationFilter document = createDocument(
+                "user/account/delete/success"
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredDeleteWithToken(url, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());

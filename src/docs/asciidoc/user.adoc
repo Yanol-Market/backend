@@ -7,11 +7,9 @@ include::{snippets}/user/join/success/request-fields.adoc[]
 include::{snippets}/user/join/success/http-request.adoc[]
 
 === HTTP response fields
-
 include::{snippets}/user/join/success/response-fields.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/join/success/http-response.adoc[]
 
 == 사용자 정보 조회
@@ -20,11 +18,9 @@ include::{snippets}/user/join/success/http-response.adoc[]
 include::{snippets}/user/me/success/http-request.adoc[]
 
 === HTTP response fields
-
 include::{snippets}/user/me/success/response-fields.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/me/success/http-response.adoc[]
 
 == 사용자 삭제
@@ -36,7 +32,6 @@ include::{snippets}/user/delete/success/request-fields.adoc[]
 include::{snippets}/user/delete/success/http-request.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/delete/success/http-response.adoc[]
 
 == 사용자 프로필 수정
@@ -48,7 +43,6 @@ include::{snippets}/user/update/profile/success/request-fields.adoc[]
 include::{snippets}/user/update/profile/success/http-request.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/update/profile/success/http-response.adoc[]
 
 == 사용자 비밀번호 수정
@@ -60,7 +54,6 @@ include::{snippets}/user/update/password/success/request-fields.adoc[]
 include::{snippets}/user/update/password/success/http-request.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/update/password/success/http-response.adoc[]
 
 == 사용자 계좌 등록
@@ -72,7 +65,6 @@ include::{snippets}/user/account/register/success/request-fields.adoc[]
 include::{snippets}/user/account/register/success/http-request.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/account/register/success/http-response.adoc[]
 
 == 사용자 계좌 조회
@@ -81,9 +73,15 @@ include::{snippets}/user/account/register/success/http-response.adoc[]
 include::{snippets}/user/account/find/success/http-request.adoc[]
 
 === HTTP response fields
-
 include::{snippets}/user/account/find/success/response-fields.adoc[]
 
 === HTTP request
-
 include::{snippets}/user/account/find/success/http-response.adoc[]
+
+== 사용자 계좌 삭제
+
+=== HTTP request
+include::{snippets}/user/account/delete/success/http-request.adoc[]
+
+=== HTTP request
+include::{snippets}/user/account/delete/success/http-response.adoc[]
