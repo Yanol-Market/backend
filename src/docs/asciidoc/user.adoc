@@ -96,3 +96,14 @@ include::{snippets}/user/region/register/success/http-request.adoc[]
 
 === HTTP request
 include::{snippets}/user/region/register/success/http-response.adoc[]
+
+== 관심지역 조회
+
+=== HTTP request
+include::{snippets}/user/region/find/success/http-request.adoc[]
+
+=== HTTP response fields
+include::{snippets}/user/region/find/success/response-fields.adoc[]
+
+=== HTTP request
+include::{snippets}/user/region/find/success/http-response.adoc[]
