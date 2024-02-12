@@ -42,6 +42,7 @@ public class SecurityConfiguration {
     private static final String[] PERMIT_ALL_URLS = new String[]{
             "/h2-console/**",
             "/dummy/**",
+            "/test/**",
             "/payments/**",
             "/home",
             "/chats/test/**"

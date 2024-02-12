@@ -83,7 +83,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             content.remove(pageable.getPageSize());
         }
 
-        return new CustomSlice<>(content, pageable, hasNext, totalCount);
+        return new CustomSlice<>(content, hasNext, totalCount);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
             content.remove(pageable.getPageSize());
         }
 
-        return new CustomSlice<>(content, pageable, hasNext, totalCount);
+        return new CustomSlice<>(content, hasNext, totalCount);
     }
 
     private BooleanExpression buildRegionCondition(QProduct product, AreaCode areaCode) {
@@ -145,9 +145,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     private BooleanExpression buildCheckInCheckOutCondition(QProduct product, LocalDate checkInDate, LocalDate checkOutDate) {
         return product.checkInDate.between(checkInDate, checkOutDate)
-                .and(product.checkOutDate.between(checkInDate, checkOutDate))
-                .or(product.checkInDate.eq(checkInDate))
-                .or(product.checkOutDate.eq(checkOutDate));
+                .and(product.checkOutDate.between(checkInDate, checkOutDate));
     }
 
     private BooleanExpression buildPriceRangeCondition(QProduct product, PriceRange priceRange) {

@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -19,17 +18,18 @@ import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.PriceRange;
 import site.goldenticket.domain.product.constants.ProductStatus;
 import site.goldenticket.domain.product.dto.*;
+import site.goldenticket.domain.product.repository.CustomSlice;
 import site.goldenticket.domain.product.search.service.SearchService;
 import site.goldenticket.domain.product.service.ProductOrderService;
 import site.goldenticket.domain.product.service.ProductService;
 import site.goldenticket.domain.security.PrincipalDetails;
-import site.goldenticket.dummy.reservation.dto.YanoljaProductResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static site.goldenticket.common.redis.constants.RedisConstants.*;
+import static site.goldenticket.common.redis.constants.RedisConstants.AREA_RANKING_KEY;
+import static site.goldenticket.common.redis.constants.RedisConstants.KEYWORD_RANKING_KEY;
 
 @RestController
 @RequestMapping("/products")
@@ -41,7 +41,7 @@ public class ProductController {
     private final ProductOrderService productOrderService;
 
     @GetMapping
-    public CompletableFuture<ResponseEntity<CommonResponse<Slice<SearchProductResponse>>>> getProductsBySearch(
+    public CompletableFuture<ResponseEntity<CommonResponse<CustomSlice<SearchProductResponse>>>> getProductsBySearch(
             @RequestParam AreaCode areaCode,
             @RequestParam String keyword,
             @RequestParam LocalDate checkInDate,
@@ -57,7 +57,7 @@ public class ProductController {
             ) Pageable pageable,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        CompletableFuture<Slice<SearchProductResponse>> searchProductFuture = CompletableFuture.supplyAsync(() ->
+        CompletableFuture<CustomSlice<SearchProductResponse>> searchProductFuture = CompletableFuture.supplyAsync(() ->
                 productService.getProductsBySearch(areaCode, keyword, checkInDate, checkOutDate, priceRange, cursorCheckInDate, cursorId, pageable, principalDetails)
         );
 
@@ -74,7 +74,7 @@ public class ProductController {
     }
 
     @GetMapping("/region")
-    public CompletableFuture<ResponseEntity<CommonResponse<Slice<RegionProductResponse>>>> getProductsByAreaCode(
+    public CompletableFuture<ResponseEntity<CommonResponse<CustomSlice<RegionProductResponse>>>> getProductsByAreaCode(
             @RequestParam AreaCode areaCode,
             @RequestParam(required = false) LocalDate cursorCheckInDate,
             @RequestParam(required = false) Long cursorId,
@@ -86,7 +86,7 @@ public class ProductController {
             ) Pageable pageable,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        CompletableFuture<Slice<RegionProductResponse>> regionProductFuture = CompletableFuture.supplyAsync(() ->
+        CompletableFuture<CustomSlice<RegionProductResponse>> regionProductFuture = CompletableFuture.supplyAsync(() ->
                 productService.getProductsByAreaCode(areaCode, cursorCheckInDate, cursorId, pageable, principalDetails)
         );
 
@@ -125,7 +125,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
+    public ResponseEntity<CommonResponse<Long>> updateProduct(
             @PathVariable Long productId,
             @RequestBody @Validated ProductRequest productRequest
     ) {

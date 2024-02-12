@@ -71,3 +71,7 @@ Golden-Ticket API adheres as closely as possible to standard HTTP and REST conve
 = 사용자 기능
 
 include::user.adoc[]
+
+= 상품 기능
+
+include::product.adoc[]

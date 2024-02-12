@@ -12,6 +12,7 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+
   h2:
     console:
       enabled: true
@@ -35,9 +36,3 @@ jwt:
   secret: VTNCeWFXNW5JRk5sWTNWeWFYUjVJRWR2YkdSbGJpQlVhV05yWlhR
   grant-type: Bearer
   token-validate-in-seconds: 3600
-
-yanolja:
-  url:
-    base: http://localhost:8080
-    reservations: /dummy/reservations/{yaUserId}
-    reservation: /dummy/reservation/{reservationId}

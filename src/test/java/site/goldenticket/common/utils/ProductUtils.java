@@ -2,6 +2,7 @@ package site.goldenticket.common.utils;
 
 import site.goldenticket.domain.product.constants.AreaCode;
 import site.goldenticket.domain.product.constants.ProductStatus;
+import site.goldenticket.domain.product.dto.ProductRequest;
 import site.goldenticket.domain.product.model.Product;
 import site.goldenticket.dummy.reservation.constants.ReservationType;
 
@@ -38,5 +39,9 @@ public final class ProductUtils {
                 .userId(1L)
                 .sellerViewCheck(false)
                 .build();
+    }
+
+    public static ProductRequest createProductRequest() {
+        return new ProductRequest(10000, "판매자 한마디");
     }
 }

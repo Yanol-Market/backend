@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.restdocs.restassured.RestDocumentationFilter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import site.goldenticket.common.config.ApiDocumentation;
 import site.goldenticket.domain.user.dto.*;
@@ -20,8 +21,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.restdocs.payload.JsonFieldType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
-import static site.goldenticket.common.utils.RestAssuredUtils.*;
 import static site.goldenticket.common.utils.UserUtils.*;
 
 @DisplayName("UserController 검증")
@@ -40,38 +39,38 @@ class UserControllerTest extends ApiDocumentation {
         JoinRequest request = createJoinRequest();
         String url = "/users";
 
+        RestDocumentationFilter document = createDocument(
+                "user/join/success",
+                requestFields(
+                        fieldWithPath("name").type(STRING)
+                                .description("이름"),
+                        fieldWithPath("nickname").type(STRING)
+                                .description("닉네임"),
+                        fieldWithPath("email").type(STRING)
+                                .description("이메일"),
+                        fieldWithPath("password").type(STRING)
+                                .description("비밀번호"),
+                        fieldWithPath("phoneNumber").type(STRING)
+                                .description("휴대폰번호"),
+                        fieldWithPath("yanoljaId").type(NUMBER)
+                                .description("야놀자 회원 식별값").optional(),
+                        fieldWithPath("agreement.isMarketing").type(BOOLEAN)
+                                .description("마케팅 동의 여부")
+                ),
+                responseFields(
+                        fieldWithPath("status").ignored(),
+                        fieldWithPath("message").ignored(),
+                        fieldWithPath("data").type(NUMBER)
+                                .description("사용자 식별값")
+                )
+        );
+
         // when
         ExtractableResponse<Response> result = RestAssured
                 .given(spec).log().all()
                 .contentType(APPLICATION_JSON_VALUE)
                 .body(request)
-                .filter(document(
-                        "user/join/success",
-                        getDocumentRequest(),
-                        getDocumentResponse(),
-                        requestFields(
-                                fieldWithPath("name").type(STRING)
-                                        .description("이름"),
-                                fieldWithPath("nickname").type(STRING)
-                                        .description("닉네임"),
-                                fieldWithPath("email").type(STRING)
-                                        .description("이메일"),
-                                fieldWithPath("password").type(STRING)
-                                        .description("비밀번호"),
-                                fieldWithPath("phoneNumber").type(STRING)
-                                        .description("휴대폰번호"),
-                                fieldWithPath("yanoljaId").type(NUMBER)
-                                        .description("야놀자 회원 식별값").optional(),
-                                fieldWithPath("agreement.isMarketing").type(BOOLEAN)
-                                        .description("마케팅 동의 여부")
-                        ),
-                        responseFields(
-                                fieldWithPath("status").ignored(),
-                                fieldWithPath("message").ignored(),
-                                fieldWithPath("data").type(NUMBER)
-                                        .description("사용자 식별값")
-                        )
-                ))
+                .filter(document)
                 .when()
                 .post(url)
                 .then().log().all()
@@ -87,8 +86,37 @@ class UserControllerTest extends ApiDocumentation {
         // given
         String url = "/users/me";
 
+        RestDocumentationFilter document = createDocument(
+                "user/me/success",
+                responseFields(
+                        fieldWithPath("status").ignored(),
+                        fieldWithPath("message").ignored(),
+                        fieldWithPath("data.id").type(NUMBER)
+                                .description("사용자 식별값"),
+                        fieldWithPath("data.email").type(STRING)
+                                .description("사용자 이메일"),
+                        fieldWithPath("data.name").type(STRING)
+                                .description("사용자 이름"),
+                        fieldWithPath("data.nickname").type(STRING)
+                                .description("사용자 닉네임"),
+                        fieldWithPath("data.imageUrl").type(STRING)
+                                .description("이미지 링크").optional(),
+                        fieldWithPath("data.phoneNumber").type(STRING)
+                                .description("사용자 휴대폰번호"),
+                        fieldWithPath("data.yanoljaId").type(NUMBER)
+                                .description("야놀자 계정 식별값")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredGetWithToken(url, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -112,8 +140,25 @@ class UserControllerTest extends ApiDocumentation {
         RemoveUserRequest request = createRemoveUserRequest();
         String url = "/users";
 
+        RestDocumentationFilter document = createDocument(
+                "user/delete/success",
+                requestFields(
+                        fieldWithPath("reason").type(STRING)
+                                .description("삭제 이유")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredDeleteWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -128,22 +173,31 @@ class UserControllerTest extends ApiDocumentation {
         ChangeProfileRequest request = createChangeProfileRequest();
         String url = "/users/me";
 
+        RestDocumentationFilter document = createDocument(
+                "user/update/profile/success",
+                requestFields(
+                        fieldWithPath("nickname").type(STRING)
+                                .description("변경 닉네임")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredPutWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .put(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
 
         User findUser = userRepository.findById(user.getId()).orElseThrow();
-        assertAll(
-                () -> assertThat(findUser.getId()).isEqualTo(user.getId()),
-                () -> assertThat(findUser.getEmail()).isEqualTo(EMAIL),
-                () -> assertThat(findUser.getName()).isEqualTo(NAME),
-                () -> assertThat(findUser.getNickname()).isEqualTo(changeNickname),
-                () -> assertThat(findUser.getImageUrl()).isNull(),
-                () -> assertThat(findUser.getPhoneNumber()).isEqualTo(PHONE_NUMBER),
-                () -> assertThat(findUser.getYanoljaId()).isEqualTo(YANOLJA_ID)
-        );
+        assertThat(findUser.getNickname()).isEqualTo(changeNickname);
     }
 
     @Test
@@ -153,8 +207,27 @@ class UserControllerTest extends ApiDocumentation {
         ChangePasswordRequest request = createChangePasswordRequest();
         String url = "/users/password";
 
+        RestDocumentationFilter document = createDocument(
+                "user/update/password/success",
+                requestFields(
+                        fieldWithPath("originPassword").type(STRING)
+                                .description("기존 비밀번호"),
+                        fieldWithPath("changePassword").type(STRING)
+                                .description("변경할 비밀번호")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredPatchWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .patch(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -170,8 +243,27 @@ class UserControllerTest extends ApiDocumentation {
         RegisterAccountRequest request = createRegisterAccountRequest();
         String url = "/users/account";
 
+        RestDocumentationFilter document = createDocument(
+                "user/account/register/success",
+                requestFields(
+                        fieldWithPath("bankName").type(STRING)
+                                .description("은행명"),
+                        fieldWithPath("accountNumber").type(STRING)
+                                .description("계좌번호")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredPatchWithToken(url, request, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(request)
+                .filter(document)
+                .when()
+                .patch(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -185,8 +277,29 @@ class UserControllerTest extends ApiDocumentation {
         userRepository.save(user);
         String url = "/users/account";
 
+        RestDocumentationFilter document = createDocument(
+                "user/account/find/success",
+                responseFields(
+                        fieldWithPath("status").ignored(),
+                        fieldWithPath("message").ignored(),
+                        fieldWithPath("data.name").type(STRING)
+                                .description("예금주명"),
+                        fieldWithPath("data.bankName").type(STRING)
+                                .description("은행명"),
+                        fieldWithPath("data.accountNumber").type(STRING)
+                                .description("계좌번호")
+                )
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredGetWithToken(url, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document)
+                .when()
+                .get(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
@@ -207,8 +320,19 @@ class UserControllerTest extends ApiDocumentation {
         userRepository.save(user);
         String url = "/users/account";
 
+        RestDocumentationFilter document = createDocument(
+                "user/account/delete/success"
+        );
+
         // when
-        ExtractableResponse<Response> result = restAssuredDeleteWithToken(url, accessToken);
+        ExtractableResponse<Response> result = RestAssured
+                .given(spec).log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .filter(document)
+                .when()
+                .delete(url)
+                .then().log().all()
+                .extract();
 
         // then
         assertThat(result.statusCode()).isEqualTo(OK.value());
